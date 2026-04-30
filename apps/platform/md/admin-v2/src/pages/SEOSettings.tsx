@@ -25,7 +25,7 @@ import {
   GlobalOutlined,
   ShareAltOutlined,
   RobotOutlined,
-  SitemapOutlined,
+  ApartmentOutlined,
 } from '@ant-design/icons';
 import api from '../api/index';
 
@@ -207,7 +207,7 @@ const SEOSettings: React.FC = () => {
       key: 'sitemap',
       label: (
         <span>
-          <SitemapOutlined /> Sitemap
+          <ApartmentOutlined /> Sitemap
         </span>
       ),
       children: (
