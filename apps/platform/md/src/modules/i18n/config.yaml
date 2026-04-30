@@ -1,0 +1,41 @@
+# i18n 国际化模块配置
+
+module:
+  id: i18n
+  name: Internationalization
+  version: 1.0.0
+
+# 支持的语言
+languages:
+  - code: zh
+    name: 中文
+    native_name: 中文
+  - code: en
+    name: English
+    native_name: English
+  - code: ja
+    name: Japanese
+    native_name: 日本語
+  - code: ko
+    name: Korean
+    native_name: 한국어
+  - code: de
+    name: German
+    native_name: Deutsch
+  - code: ru
+    name: Russian
+    native_name: Русский
+
+# 默认语言
+default_language: en
+
+# 语言检测优先级
+detection_order:
+  - query_param    # URL 参数 ?lang=zh
+  - cookie         # Cookie locale
+  - header         # Accept-Language
+  - browser        # 浏览器语言
+  - default         # 默认语言
+
+# 翻译文件路径
+locale_path: locales

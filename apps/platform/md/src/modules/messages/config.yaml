@@ -1,0 +1,14 @@
+id: messages
+name: 消息系统模块
+version: 1.0.0
+description: 提供系统通知、用户消息功能
+dependencies: [auth]
+
+config:
+  max_message_length: 5000
+  max_attachment_size_mb: 10
+  retention_days: 90
+
+routes:
+  prefix: /api/messages
+  tags: [消息]

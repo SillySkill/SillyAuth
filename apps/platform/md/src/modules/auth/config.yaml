@@ -1,0 +1,14 @@
+id: auth
+name: 用户认证模块
+version: 1.0.0
+description: 提供用户注册、登录、认证功能
+dependencies: []
+
+config:
+  jwt_expiry_days: 7
+  max_login_attempts: 5
+  password_min_length: 8
+
+routes:
+  prefix: /api/auth
+  tags: [认证]

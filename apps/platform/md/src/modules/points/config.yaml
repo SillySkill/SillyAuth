@@ -1,0 +1,11 @@
+id: points
+name: 积分商城模块
+version: 1.0.0
+description: 提供积分获取、兑换、积分商城功能
+dependencies: [auth]
+
+config:
+  points_name: 傻福币
+  exchange_rate: 100  # 1元 = 100积分
+  sign_in_points: 10
+  daily_limit: 1000

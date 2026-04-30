@@ -1,0 +1,151 @@
+{
+  "@@locale": "en",
+  "appName": "SillyAuth",
+  "addAccount": "Add Account",
+  "scanQrcode": "Scan QR Code",
+  "manualInput": "Manual Input",
+  "accountName": "Account Name",
+  "secretKey": "Secret Key",
+  "issuer": "Issuer",
+  "delete": "Delete",
+  "edit": "Edit",
+  "cancel": "Cancel",
+  "save": "Save",
+  "copied": "Copied",
+  "settings": "Settings",
+  "appLock": "App Lock",
+  "biometric": "Biometric",
+  "theme": "Theme",
+  "light": "Light",
+  "dark": "Dark",
+  "system": "System",
+  "about": "About",
+  "version": "Version",
+  "noAccounts": "No accounts",
+  "deleteConfirm": "Delete this account?",
+  "invalidQrcode": "Invalid QR Code",
+  "invalidSecret": "Invalid Secret",
+  "search": "Search",
+  "searchAccounts": "Search accounts...",
+  "noSearchResults": "No results found",
+  "noSearchResultsHint": "Try a different search term",
+  "importAccount": "Import Account",
+  "security": "Security",
+  "appearance": "Appearance",
+  "language": "Language",
+  "info": "Info",
+  "appLockSubtitle": "Require authentication to open the app",
+  "biometricSubtitle": "Use fingerprint or face to unlock",
+  "biometricUnavailable": "Biometric authentication not available on this device",
+  "themeLight": "Always use light theme",
+  "themeDark": "Always use dark theme",
+  "themeSystem": "Follow device settings",
+  "retry": "Retry",
+  "deleteAccount": "Delete Account",
+  "confirmDelete": "Are you sure you want to delete {accountName}?",
+  "@confirmDelete": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "codeCopied": "Code copied to clipboard",
+  "accountAdded": "Account \"{accountName}\" added successfully",
+  "@accountAdded": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "errorAddingAccount": "Error adding account",
+  "secretRequired": "Secret key is required",
+  "secretInvalid": "Invalid Base32 format. Use A-Z and 2-7 only",
+  "secretTooShort": "Secret key should be at least 16 characters",
+  "accountNameRequired": "Account name is required",
+  "addingAccount": "Adding Account...",
+  "enterAccountDetails": "Enter Account Details",
+  "enterAccountInfo": "Manually enter your account information",
+  "accountNameHint": "e.g., user@example.com",
+  "accountNameHelper": "The account identifier (usually your email)",
+  "issuerHint": "e.g., Google, GitHub, Amazon",
+  "issuerHelper": "The service or organization (optional)",
+  "secretHint": "e.g., JBSWY3DPEHPK3PXP",
+  "secretHelper": "Base32 encoded secret from your provider",
+  "showSecret": "Show secret",
+  "hideSecret": "Hide secret",
+  "base32Hint": "The secret key must be in Base32 format (A-Z and 2-7). Spaces are automatically removed.",
+  "scanQrcodeInstructions": "Point the camera at a TOTP QR code",
+  "onlyTotpSupported": "Only TOTP QR codes are supported",
+  "invalidQrcodeFormat": "Invalid QR code",
+  "cameraPermissionRequired": "Camera Permission Required",
+  "cameraPermissionDesc": "To scan QR codes, please grant camera permission.",
+  "grantPermission": "Grant Permission",
+  "openSettings": "Open Settings",
+  "cameraError": "Camera Error",
+  "toggleFlashlight": "Toggle Flashlight",
+  "switchCamera": "Switch Camera",
+  "refreshCode": "Refresh code",
+  "noAccountsYet": "No accounts yet",
+  "tapPlusToAdd": "Tap the + button to add your first account",
+  "editAccount": "Edit Account",
+  "accountUpdated": "Account \"{accountName}\" updated successfully",
+  "@accountUpdated": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "errorUpdatingAccount": "Error updating account",
+  "savingAccount": "Saving Account...",
+  "editAccountComingSoon": "Edit account coming soon",
+  "biometricFailed": "Biometric authentication failed",
+  "english": "English",
+  "chinese": "Chinese",
+  "crossPlatformAuthenticator": "Cross-platform authenticator for two-factor authentication",
+  "copyright": "2024 SillyAuth. All rights reserved.",
+  "importFromFile": "Import from File",
+  "importAccounts": "Import Accounts",
+  "importDescription": "Import accounts from a Google Authenticator export file",
+  "selectFile": "Select File",
+  "importSuccess": "{count} account(s) imported successfully",
+  "@importSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importPartial": "{count} account(s) imported, {invalidCount} invalid entry(ies) skipped",
+  "@importPartial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "invalidCount": {
+        "type": "int"
+      }
+    }
+  },
+  "importFailed": "Failed to import accounts",
+  "noAccountsImported": "No valid accounts found in file",
+  "duplicatesSkipped": "{count} duplicate(s) skipped",
+  "@duplicatesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "invalidEntriesSkipped": "{count} invalid entry(ies) skipped",
+  "@invalidEntriesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importingAccounts": "Importing accounts..."
+}

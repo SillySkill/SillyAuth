@@ -1,0 +1,151 @@
+{
+  "@@locale": "zh",
+  "appName": "傻小码",
+  "addAccount": "添加账户",
+  "scanQrcode": "扫描二维码",
+  "manualInput": "手动输入",
+  "accountName": "账户名称",
+  "secretKey": "密钥",
+  "issuer": "发行方",
+  "delete": "删除",
+  "edit": "编辑",
+  "cancel": "取消",
+  "save": "保存",
+  "copied": "已复制",
+  "settings": "设置",
+  "appLock": "应用锁",
+  "biometric": "生物识别",
+  "theme": "主题",
+  "light": "浅色",
+  "dark": "深色",
+  "system": "跟随系统",
+  "about": "关于",
+  "version": "版本",
+  "noAccounts": "暂无账户",
+  "deleteConfirm": "确定删除此账户？",
+  "invalidQrcode": "无效二维码",
+  "invalidSecret": "无效密钥",
+  "search": "搜索",
+  "searchAccounts": "搜索账户...",
+  "noSearchResults": "未找到结果",
+  "noSearchResultsHint": "请尝试其他搜索词",
+  "importAccount": "导入账户",
+  "security": "安全",
+  "appearance": "外观",
+  "language": "语言",
+  "info": "信息",
+  "appLockSubtitle": "打开应用时需要验证",
+  "biometricSubtitle": "使用指纹或面容解锁",
+  "biometricUnavailable": "此设备不支持生物识别",
+  "themeLight": "始终使用浅色主题",
+  "themeDark": "始终使用深色主题",
+  "themeSystem": "跟随系统设置",
+  "retry": "重试",
+  "deleteAccount": "删除账户",
+  "confirmDelete": "确定删除 {accountName}？",
+  "@confirmDelete": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "codeCopied": "验证码已复制到剪贴板",
+  "accountAdded": "账户 \"{accountName}\" 添加成功",
+  "@accountAdded": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "errorAddingAccount": "添加账户时出错",
+  "secretRequired": "密钥不能为空",
+  "secretInvalid": "无效的Base32格式，只能使用A-Z和2-7",
+  "secretTooShort": "密钥至少需要16个字符",
+  "accountNameRequired": "账户名称不能为空",
+  "addingAccount": "正在添加账户...",
+  "enterAccountDetails": "输入账户详情",
+  "enterAccountInfo": "手动输入您的账户信息",
+  "accountNameHint": "例如：user@example.com",
+  "accountNameHelper": "账户标识符（通常是您的邮箱）",
+  "issuerHint": "例如：Google、GitHub、Amazon",
+  "issuerHelper": "服务或组织（可选）",
+  "secretHint": "例如：JBSWY3DPEHPK3PXP",
+  "secretHelper": "提供商提供的Base32编码密钥",
+  "showSecret": "显示密钥",
+  "hideSecret": "隐藏密钥",
+  "base32Hint": "密钥必须是Base32格式（A-Z和2-7）。空格会自动移除。",
+  "scanQrcodeInstructions": "将摄像头对准TOTP二维码",
+  "onlyTotpSupported": "仅支持TOTP二维码",
+  "invalidQrcodeFormat": "无效的二维码",
+  "cameraPermissionRequired": "需要相机权限",
+  "cameraPermissionDesc": "要扫描二维码，请授予相机权限。",
+  "grantPermission": "授予权限",
+  "openSettings": "打开设置",
+  "cameraError": "相机错误",
+  "toggleFlashlight": "切换闪光灯",
+  "switchCamera": "切换相机",
+  "refreshCode": "刷新验证码",
+  "noAccountsYet": "暂无账户",
+  "tapPlusToAdd": "点击 + 按钮添加您的第一个账户",
+  "editAccount": "编辑账户",
+  "accountUpdated": "账户 \"{accountName}\" 更新成功",
+  "@accountUpdated": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "errorUpdatingAccount": "更新账户时出错",
+  "savingAccount": "正在保存账户...",
+  "editAccountComingSoon": "编辑账户功能即将推出",
+  "biometricFailed": "生物识别验证失败",
+  "english": "英语",
+  "chinese": "中文",
+  "crossPlatformAuthenticator": "跨平台双因素认证器",
+  "copyright": "2024 SillyAuth。保留所有权利。",
+  "importFromFile": "从文件导入",
+  "importAccounts": "导入账户",
+  "importDescription": "从Google Authenticator导出文件导入账户",
+  "selectFile": "选择文件",
+  "importSuccess": "成功导入 {count} 个账户",
+  "@importSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importPartial": "导入 {count} 个账户，跳过 {invalidCount} 个无效条目",
+  "@importPartial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "invalidCount": {
+        "type": "int"
+      }
+    }
+  },
+  "importFailed": "导入账户失败",
+  "noAccountsImported": "文件中未找到有效账户",
+  "duplicatesSkipped": "跳过 {count} 个重复项",
+  "@duplicatesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "invalidEntriesSkipped": "跳过 {count} 个无效条目",
+  "@invalidEntriesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importingAccounts": "正在导入账户..."
+}

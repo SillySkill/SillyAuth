@@ -1,0 +1,12 @@
+id: arena
+name: 虾拳馆 PK 模块
+version: 1.0.0
+description: 提供虾拳馆 PK 竞技功能
+dependencies: [auth]
+
+config:
+  max_room_participants: 4
+  battle_timeout_seconds: 300
+  ranking_update_interval: 3600
+  elo_k_factor: 32
+  initial_elo_rating: 1000

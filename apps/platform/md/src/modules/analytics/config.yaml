@@ -1,0 +1,9 @@
+id: analytics
+name: 数据分析模块
+version: "1.0.0"
+description: 提供访问统计、页面浏览量、用户行为分析等功能
+dependencies: []
+config:
+  default_days: 7
+  max_trend_days: 365
+  default_top_pages_limit: 10

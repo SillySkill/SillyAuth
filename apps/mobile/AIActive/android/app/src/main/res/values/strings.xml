@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AI活动秀</string>
+
+    <!-- 通用 -->
+    <string name="back">返回</string>
+    <string name="confirm">确认</string>
+    <string name="cancel">取消</string>
+    <string name="submit">提交</string>
+    <string name="retry">重试</string>
+    <string name="loading">加载中...</string>
+    <string name="error">错误</string>
+    <string name="success">成功</string>
+    <string name="offline_mode">离线模式</string>
+    <string name="skip">跳过</string>
+
+    <!-- 登录 -->
+    <string name="login_title">欢迎登录</string>
+    <string name="username">用户名</string>
+    <string name="password">密码</string>
+    <string name="login">登录</string>
+    <string name="guest_mode">游客模式</string>
+
+    <!-- 模块选择 -->
+    <string name="ai_show">AI百变秀</string>
+    <string name="quiz">知识问答</string>
+    <string name="lottery">幸运抽奖</string>
+    <string name="inner_show">内场秀</string>
+    <string name="settings">系统设置</string>
+
+    <!-- AI百变秀 -->
+    <string name="select_style">选择风格</string>
+    <string name="start_generate">拍照变一下</string>
+    <string name="camera">拍照</string>
+    <string name="upload">上传</string>
+    <string name="generating">生成中...</string>
+    <string name="generation_complete">生成完成</string>
+    <string name="generation_failed">生成失败</string>
+
+    <!-- 身份验证 -->
+    <string name="invite_code_mode">邀请码模式</string>
+    <string name="payment_mode">支付模式</string>
+    <string name="employee_mode">员工模式</string>
+    <string name="enter_invite_code">请输入邀请码</string>
+
+    <!-- 知识问答 -->
+    <string name="question">题目</string>
+    <string name="choice_question">选择题</string>
+    <string name="judgement_question">判断题</string>
+    <string name="correct">正确</string>
+    <string name="wrong">错误</string>
+    <string name="next_question">下一题</string>
+    <string name="submit_answer">提交答案</string>
+    <string name="quiz_complete">答题完成</string>
+
+    <!-- 幸运抽奖 -->
+    <string name="select_program">选择抽奖程序</string>
+    <string name="start_lottery">开始抽奖</string>
+    <string name="stop_lottery">停止</string>
+    <string name="winner">中奖者</string>
+    <string name="winner_list">中奖名单</string>
+    <string name="congratulations">恭喜</string>
+    <string name="reset_lottery">重置抽奖</string>
+
+    <!-- 内场秀 -->
+    <string name="inner_show_title">内场大屏展示</string>
+
+    <!-- 设置 -->
+    <string name="general_settings">通用设置</string>
+    <string name="ai_show_settings">AI百变秀设置</string>
+    <string name="quiz_settings">知识问答设置</string>
+    <string name="lottery_settings">幸运抽奖设置</string>
+    <string name="inner_settings">内场秀设置</string>
+    <string name="digital_human_settings">数字人设置</string>
+    <string name="voice_settings">语音设置</string>
+
+    <!-- 数字人设置 -->
+    <string-array name="digital_human_position_labels">
+        <item>顶部</item>
+        <item>中部</item>
+        <item>底部</item>
+        <item>右下角</item>
+    </string-array>
+    <string-array name="digital_human_position_values">
+        <item>top</item>
+        <item>middle</item>
+        <item>bottom</item>
+        <item>bottom_right</item>
+    </string-array>
+
+    <string-array name="digital_human_scale_type_labels">
+        <item>适应中心</item>
+        <item>居中裁剪</item>
+        <item>居中显示</item>
+    </string-array>
+    <string-array name="digital_human_scale_type_values">
+        <item>fit_center</item>
+        <item>center_crop</item>
+        <item>center</item>
+    </string-array>
+
+    <!-- 语音设置 -->
+    <string-array name="tts_voice_type_labels">
+        <item>智瑜（女声，温柔）</item>
+        <item>智云（男声，沉稳）</item>
+        <item>智莉（女声，亲切）</item>
+        <item>智言（男声，专业）</item>
+    </string-array>
+    <string-array name="tts_voice_type_values">
+        <item>1001</item>
+        <item>1002</item>
+        <item>1003</item>
+        <item>1004</item>
+    </string-array>
+
+    <string-array name="asr_engine_model_labels">
+        <item>16k中文（通用）</item>
+        <item>8k中文（电话）</item>
+        <item>16k英文</item>
+    </string-array>
+    <string-array name="asr_engine_model_values">
+        <item>16k_zh</item>
+        <item>8k_zh</item>
+        <item>16k_en</item>
+    </string-array>
+
+    <!-- 内场秀控制器 -->
+    <string name="inner_controller">内场秀控制器</string>
+    <string name="inner_show_settings">内场秀设置</string>
+
+    <!-- 服务器设置 -->
+    <string name="server_settings">服务器设置</string>
+    <string name="server_password">服务器密码</string>
+    <string name="server_port">服务器端口</string>
+    <string name="server_status">服务器状态</string>
+    <string name="server_running">运行中 | 端口: %1$d | 连接数: %2$d</string>
+    <string name="server_stopped">未运行</string>
+    <string name="save_server_settings">保存服务器设置</string>
+    <string name="server_settings_saved">服务器设置已保存</string>
+    <string name="restart_server">重启服务器</string>
+    <string name="restart_server_hint">服务器正在运行，需要重启才能应用新设置</string>
+
+    <!-- 控制器设置 -->
+    <string name="controller_settings">控制器设置</string>
+    <string name="controller_host">服务器地址</string>
+    <string name="controller_password">服务器密码</string>
+    <string name="save_controller_settings">保存控制器设置</string>
+    <string name="controller_settings_saved">控制器设置已保存</string>
+    <string name="test_connection">测试连接</string>
+    <string name="connection_test_hint">请先保存控制器设置</string>
+    <string name="connection_testing">连接测试功能开发中</string>
+
+    <!-- 子模块设置 -->
+    <string name="module_settings">子模块设置</string>
+    <string name="warmup_show">暖场秀</string>
+    <string name="hosting_show">主持秀</string>
+    <string name="teabreak_show">茶歇秀</string>
+    <string name="accept_broadcast">接受广播</string>
+    <string name="broadcast_muted">广播静音</string>
+    <string name="voice_enabled">语音启用</string>
+
+    <!-- 媒体资源管理 -->
+    <string name="media_management">媒体资源管理</string>
+    <string name="upload_media">上传媒体</string>
+    <string name="upload_new_media">上传新媒体</string>
+    <string name="uploading">正在上传...</string>
+    <string name="upload_success">上传成功</string>
+    <string name="upload_failed">上传失败</string>
+    <string name="media_name">媒体名称</string>
+    <string name="select_module">选择模块</string>
+    <string name="select_type">选择类型</string>
+    <string name="select_file">选择文件</string>
+    <string name="no_file_selected">未选择文件</string>
+    <string name="file_type_video">视频</string>
+    <string name="file_type_audio">音频</string>
+    <string name="file_type_image">图片</string>
+    <string name="file_type_background">背景</string>
+    <string name="preview_media">预览</string>
+    <string name="delete_media">删除</string>
+    <string name="enable_media">启用</string>
+    <string name="disable_media">禁用</string>
+    <string name="set_as_background">设为背景</string>
+    <string name="confirm_delete">确认删除</string>
+    <string name="confirm_delete_message">确定要删除这个媒体吗？</string>
+    <string name="delete_success">删除成功</string>
+    <string name="delete_failed">删除失败</string>
+    <string name="media_enabled">媒体已启用</string>
+    <string name="media_disabled">媒体已禁用</string>
+    <string name="background_set">背景已设置</string>
+    <string name="filter_all">全部</string>
+    <string name="filter_warmup">暖场秀</string>
+    <string name="filter_hosting">主持秀</string>
+    <string name="filter_teabreak">茶歇秀</string>
+    <string name="no_media_found">未找到媒体</string>
+
+    <!-- 权限管理 -->
+    <string name="permission_management">权限管理</string>
+    <string name="add_user">添加用户</string>
+    <string name="edit_user">编辑用户</string>
+    <string name="delete_user">删除用户</string>
+    <string name="user_permissions">用户权限</string>
+    <string name="display_name">显示名称</string>
+    <string name="role">角色</string>
+    <string name="enabled">已启用</string>
+    <string name="disabled">已禁用</string>
+    <string name="status">状态</string>
+    <string name="actions">操作</string>
+    <string name="user_created">用户已创建</string>
+    <string name="user_updated">用户已更新</string>
+    <string name="user_deleted">用户已删除</string>
+    <string name="cannot_edit_admin">不能编辑admin用户</string>
+    <string name="cannot_delete_admin">不能删除admin用户</string>
+    <string name="confirm_delete_user">确认删除用户</string>
+    <string name="confirm_delete_user_message">确定要删除用户 %1$s 吗？</string>
+    <string name="enter_username">请输入用户名</string>
+    <string name="enter_display_name">请输入显示名称</string>
+    <string name="select_role">请选择角色</string>
+    <string name="username_exists">用户名已存在</string>
+    <string name="permission_list">权限列表</string>
+
+    <!-- 角色 -->
+    <string name="role_admin">管理员</string>
+    <string name="role_operator">操作员</string>
+    <string name="role_observer">观察者</string>
+    <string name="role_description">角色</string>
+
+    <!-- 权限 -->
+    <string name="perm_play_control">播放控制</string>
+    <string name="perm_media_manage">媒体管理</string>
+    <string name="perm_settings">系统设置</string>
+    <string name="perm_user_manage">用户管理</string>
+    <string name="perm_log_view">日志查看</string>
+    <string name="perm_server_control">服务器控制</string>
+
+    <!-- 操作日志 -->
+    <string name="operation_logs">操作日志</string>
+    <string name="log_entry">日志条目</string>
+    <string name="time">时间</string>
+    <string name="user">用户</string>
+    <string name="action">操作</string>
+    <string name="details">详情</string>
+    <string name="level">级别</string>
+    <string name="filter_by_user">按用户过滤</string>
+    <string name="filter_by_action">按操作过滤</string>
+    <string name="filter_by_time">按时间过滤</string>
+    <string name="clear_filter">清除过滤</string>
+    <string name="clear_logs">清空日志</string>
+    <string name="confirm_clear_logs">确认清空</string>
+    <string name="confirm_clear_logs_message">确定要清空所有日志吗？此操作不可恢复。</string>
+    <string name="logs_cleared">日志已清空</string>
+    <string name="all_users">全部</string>
+    <string name="all_actions">全部</string>
+    <string name="all_time_ranges">全部</string>
+    <string name="last_1_hour">最近1小时</string>
+    <string name="last_24_hours">最近24小时</string>
+    <string name="last_7_days">最近7天</string>
+    <string name="last_30_days">最近30天</string>
+    <string name="no_logs_found">未找到日志</string>
+
+    <!-- 日志级别 -->
+    <string name="log_level_debug">调试</string>
+    <string name="log_level_info">信息</string>
+    <string name="log_level_warning">警告</string>
+    <string name="log_level_error">错误</string>
+
+    <!-- 日志操作 -->
+    <string name="action_login">登录</string>
+    <string name="action_logout">登出</string>
+    <string name="action_play">播放</string>
+    <string name="action_pause">暂停</string>
+    <string name="action_stop">停止</string>
+    <string name="action_jump">跳转</string>
+    <string name="action_media_upload">上传媒体</string>
+    <string name="action_media_enable">启用媒体</string>
+    <string name="action_media_disable">禁用媒体</string>
+    <string name="action_settings_change">修改设置</string>
+    <string name="action_server_start">启动服务器</string>
+    <string name="action_server_stop">停止服务器</string>
+    <string name="action_client_connect">客户端连接</string>
+    <string name="action_client_disconnect">客户端断开</string>
+
+    <!-- 验证提示 -->
+    <string name="please_enter_password">请输入服务器密码</string>
+    <string name="please_enter_port">请输入服务器端口</string>
+    <string name="port_range_hint">端口范围：1024-65535</string>
+    <string name="port_format_error">端口格式错误</string>
+    <string name="please_enter_host">请输入服务器地址</string>
+    <string name="please_enter_media_name">请输入媒体名称</string>
+    <string name="please_select_module">请选择模块</string>
+    <string name="please_select_type">请选择类型</string>
+    <string name="please_select_file">请选择文件</string>
+    <string name="address_format_error">地址格式错误</string>
+
+    <!-- 系统提示 -->
+    <string name="operation_developing">功能开发中</string>
+    <string name="operation_success">操作成功</string>
+    <string name="operation_failed">操作失败</string>
+
+    <!-- 生成质量选项 -->
+    <string-array name="generation_quality_entries">
+        <item>标清 (720P)</item>
+        <item>高清 (1080P)</item>
+        <item>超清 (2K)</item>
+        <item>4K超清</item>
+    </string-array>
+    <string-array name="generation_quality_values">
+        <item>720p</item>
+        <item>1080p</item>
+        <item>2k</item>
+        <item>4k</item>
+    </string-array>
+</resources>

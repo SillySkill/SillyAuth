@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "released_at": "2026-02-06T00:00:00Z",
+    "min_compatible_version": "v1.0.0"
+  },
+  "api_keys": {
+    "tencent_tts": {
+      "secret_id": "YOUR_TENCENT_TTS_SECRET_ID",
+      "secret_key": "YOUR_TENCENT_TTS_SECRET_KEY",
+      "license_key": "YOUR_TENCENT_TTS_LICENSE_KEY",
+      "license_pk": "YOUR_TENCENT_TTS_LICENSE_PK"
+    },
+    "tencent_asr": {
+      "secret_id": "YOUR_TENCENT_ASR_SECRET_ID",
+      "secret_key": "YOUR_TENCENT_ASR_SECRET_KEY"
+    },
+    "minimax": {
+      "api_key": "REDACTED_MINIMAX_API_KEY_2",
+      "group_id": "REDACTED_MINIMAX_GROUP_ID_2"
+    },
+    "volcengine": {
+      "access_key": "YOUR_VOLCENGINE_ACCESS_KEY",
+      "secret_key": "YOUR_VOLCENGINE_SECRET_KEY"
+    },
+    "aliyun_oss": {
+      "access_key": "YOUR_ALIYUN_ACCESS_KEY",
+      "access_secret": "YOUR_ALIYUN_ACCESS_SECRET"
+    }
+  },
+  "admin": {
+    "password": "123456"
+  },
+  "llm": {
+    "api_key": "YOUR_LLM_API_KEY",
+    "model_id": "YOUR_LLM_MODEL_ID"
+  },
+  "services": {
+    "api_base": "https://www.jcoding.chat/application/com.jcoding.aiactivity/api",
+    "upload_proxy": "https://www.jcoding.chat/upload/api",
+    "config_sync_interval": 86400
+  }
+}

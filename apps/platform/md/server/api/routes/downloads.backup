@@ -1,0 +1,633 @@
+"""
+Downloads API Routes
+资源下载 API 路由
+
+提供开发工具资源的查询、下载记录等功能
+"""
+from fastapi import APIRouter, HTTPException, Query
+from typing import List, Optional
+from pydantic import BaseModel
+from datetime import datetime
+import json
+
+router = APIRouter(prefix="/api/content/downloads", tags=["资源下载"])
+
+# 数据库配置（将在 main.py 中设置）
+DB_CONFIG = None
+
+
+def set_db_config(config):
+    """设置数据库配置"""
+    global DB_CONFIG
+    DB_CONFIG = config
+
+
+# ============================================
+# Schema Definitions
+# ============================================
+
+class DownloadListItem(BaseModel):
+    """下载资源列表项"""
+    id: int
+    download_key: str
+    slug: str
+    title: str
+    title_zh_CN: str
+    title_en: Optional[str] = None
+    description: str
+    description_zh_CN: str
+    description_en: Optional[str] = None
+    category: str
+    subcategory: Optional[str] = None
+    version: str
+    platform: str
+    file_name: str
+    file_url: str
+    file_size: Optional[int] = None
+    file_type: Optional[str] = None
+    file_checksum: Optional[str] = None
+    mirror_url_1: Optional[str] = None
+    mirror_url_2: Optional[str] = None
+    mirror_url_3: Optional[str] = None
+    mirror_url_names: dict = {}
+    github_url: Optional[str] = None
+    official_url: Optional[str] = None
+    documentation_url: Optional[str] = None
+    thumbnail: Optional[str] = None
+    screenshots: List[str] = []
+    download_count: int = 0
+    view_count: int = 0
+    like_count: int = 0
+    featured: bool = False
+    is_pinned: bool = False
+    is_official: bool = False
+    is_published: bool = False
+    license_type: Optional[str] = None
+    license_url: Optional[str] = None
+    created_at: str
+    updated_at: str
+
+
+class DownloadVersion(BaseModel):
+    """资源版本"""
+    id: int
+    version: str
+    version_code: int
+    file_name: str
+    file_url: str
+    file_size: Optional[int] = None
+    file_checksum: Optional[str] = None
+    changelog: List[dict] = []
+    release_date: Optional[str] = None
+    is_latest: bool = False
+    is_stable: bool = True
+
+
+class DownloadDetail(BaseModel):
+    """资源详情"""
+    id: int
+    download_key: str
+    slug: str
+    title: str
+    title_zh_CN: str
+    title_en: Optional[str] = None
+    description: str
+    description_zh_CN: str
+    description_en: Optional[str] = None
+    category: str
+    subcategory: Optional[str] = None
+    version: str
+    platform: str
+    file_name: str
+    file_url: str
+    file_size: Optional[int] = None
+    file_type: Optional[str] = None
+    file_checksum: Optional[str] = None
+    mirror_url_1: Optional[str] = None
+    mirror_url_2: Optional[str] = None
+    mirror_url_3: Optional[str] = None
+    mirror_url_names: dict = {}
+    github_url: Optional[str] = None
+    official_url: Optional[str] = None
+    documentation_url: Optional[str] = None
+    thumbnail: Optional[str] = None
+    screenshots: List[str] = []
+    download_count: int = 0
+    view_count: int = 0
+    like_count: int = 0
+    featured: bool = False
+    is_pinned: bool = False
+    is_official: bool = False
+    is_published: bool = False
+    license_type: Optional[str] = None
+    license_url: Optional[str] = None
+    versions: List[DownloadVersion] = []
+    created_at: str
+    updated_at: str
+
+
+class DownloadListResponse(BaseModel):
+    """资源列表响应"""
+    success: bool
+    data: dict
+
+
+class DownloadResponse(BaseModel):
+    """资源详情响应"""
+    success: bool
+    data: dict
+
+
+# ============================================
+# Helper Functions
+# ============================================
+
+def get_db_connection():
+    """获取数据库连接"""
+    from ..database import get_db
+    return get_db(DB_CONFIG)
+
+
+# ============================================
+# Public API Endpoints
+# ============================================
+
+@router.get("/", response_model=DownloadListResponse)
+async def list_downloads(
+    category: Optional[str] = Query(None, description="资源分类"),
+    subcategory: Optional[str] = Query(None, description="子分类"),
+    platform: Optional[str] = Query(None, description="平台"),
+    featured: Optional[bool] = Query(None, description="是否精选"),
+    is_published: bool = Query(True, description="是否已发布"),
+    page: int = Query(1, ge=1, description="页码"),
+    page_size: int = Query(20, ge=1, le=100, description="每页数量"),
+    search: Optional[str] = Query(None, description="搜索关键词"),
+    sort_by: str = Query("position", description="排序字段: position, download_count, created_at"),
+    sort_order: str = Query("asc", description="排序方向: asc, desc"),
+    lang: str = Query("zh-CN", description="语言")
+):
+    """
+    获取资源下载列表
+
+    支持按分类、平台、精选状态筛选，支持关键词搜索和排序
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # 构建查询条件
+                conditions = ["is_published = %s"]
+                params = [is_published]
+
+                if category:
+                    conditions.append("category = %s")
+                    params.append(category)
+
+                if subcategory:
+                    conditions.append("subcategory = %s")
+                    params.append(subcategory)
+
+                if platform and platform != "all":
+                    conditions.append("(platform = %s OR platform = 'all')")
+                    params.append(platform)
+
+                if featured is not None:
+                    conditions.append("featured = %s")
+                    params.append(featured)
+
+                if search:
+                    conditions.append("(title_zh_CN ILIKE %s OR title_en ILIKE %s OR description_zh_CN ILIKE %s OR description_en ILIKE %s)")
+                    search_pattern = f"%{search}%"
+                    params.extend([search_pattern, search_pattern, search_pattern, search_pattern])
+
+                # 查询总数
+                count_query = f"SELECT COUNT(*) as total FROM downloads WHERE {' AND '.join(conditions)}"
+                cur.execute(count_query, params)
+                total = cur.fetchone()['total']
+
+                # 排序
+                valid_sort_fields = ['position', 'download_count', 'created_at', 'view_count']
+                sort_field = sort_by if sort_by in valid_sort_fields else 'position'
+                sort_dir = "DESC" if sort_order == "desc" else "ASC"
+
+                # 查询列表
+                offset = (page - 1) * page_size
+                list_query = f"""
+                    SELECT
+                        id, download_key, slug,
+                        title_zh_CN, title_en,
+                        description_zh_CN, description_en,
+                        category, subcategory, version, platform,
+                        file_name, file_url, file_size, file_type, file_checksum,
+                        mirror_url_1, mirror_url_2, mirror_url_3, mirror_url_names,
+                        github_url, official_url, documentation_url,
+                        thumbnail, screenshots,
+                        download_count, view_count, like_count,
+                        featured, is_pinned, is_official, is_published,
+                        license_type, license_url,
+                        created_at, updated_at
+                    FROM downloads
+                    WHERE {' AND '.join(conditions)}
+                    ORDER BY {sort_field} {sort_dir}
+                    LIMIT %s OFFSET %s
+                """
+                cur.execute(list_query, params + [page_size, offset])
+                rows = cur.fetchall()
+
+                # 格式化结果
+                results = []
+                for row in rows:
+                    # 解析镜像名称
+                    mirror_names = {}
+                    try:
+                        if row.get('mirror_url_names'):
+                            mirror_names = json.loads(row['mirror_url_names'])
+                    except:
+                        pass
+
+                    # 解析截图
+                    screenshots_list = []
+                    try:
+                        if row.get('screenshots'):
+                            screenshots_list = json.loads(row['screenshots'])
+                    except:
+                        pass
+
+                    # 根据语言选择标题和描述
+                    title = row['title_zh_CN'] if lang == "zh-CN" else (row['title_en'] or row['title_zh_CN'])
+                    description = row['description_zh_CN'] if lang == "zh-CN" else (row['description_en'] or row['description_zh_CN'])
+
+                    results.append({
+                        "id": row['id'],
+                        "download_key": row['download_key'],
+                        "slug": row['slug'],
+                        "title": title,
+                        "title_zh_CN": row['title_zh_CN'],
+                        "title_en": row['title_en'],
+                        "description": description,
+                        "description_zh_CN": row['description_zh_CN'],
+                        "description_en": row['description_en'],
+                        "category": row['category'],
+                        "subcategory": row['subcategory'],
+                        "version": row['version'],
+                        "platform": row['platform'],
+                        "file_name": row['file_name'],
+                        "file_url": row['file_url'],
+                        "file_size": row['file_size'],
+                        "file_type": row['file_type'],
+                        "file_checksum": row['file_checksum'],
+                        "mirror_url_1": row['mirror_url_1'],
+                        "mirror_url_2": row['mirror_url_2'],
+                        "mirror_url_3": row['mirror_url_3'],
+                        "mirror_url_names": mirror_names,
+                        "github_url": row['github_url'],
+                        "official_url": row['official_url'],
+                        "documentation_url": row['documentation_url'],
+                        "thumbnail": row['thumbnail'],
+                        "screenshots": screenshots_list,
+                        "download_count": row['download_count'],
+                        "view_count": row['view_count'],
+                        "like_count": row['like_count'],
+                        "featured": row['featured'],
+                        "is_pinned": row['is_pinned'],
+                        "is_official": row['is_official'],
+                        "is_published": row['is_published'],
+                        "license_type": row['license_type'],
+                        "license_url": row['license_url'],
+                        "created_at": row['created_at'].isoformat() if row.get('created_at') else None,
+                        "updated_at": row['updated_at'].isoformat() if row.get('updated_at') else None
+                    })
+
+                return {
+                    "success": True,
+                    "data": {
+                        "items": results,
+                        "total": total,
+                        "page": page,
+                        "page_size": page_size,
+                        "total_pages": (total + page_size - 1) // page_size
+                    }
+                }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/featured")
+async def get_featured_downloads(
+    limit: int = Query(6, ge=1, le=20, description="返回数量"),
+    lang: str = Query("zh-CN", description="语言")
+):
+    """
+    获取精选资源列表
+
+    用于首页推荐
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                query = """
+                    SELECT
+                        id, slug,
+                        title_zh_CN, title_en,
+                        description_zh_CN, description_en,
+                        category, version, platform, thumbnail,
+                        download_count
+                    FROM downloads
+                    WHERE featured = TRUE AND is_published = TRUE
+                    ORDER BY position ASC, download_count DESC
+                    LIMIT %s
+                """
+                cur.execute(query, (limit,))
+                rows = cur.fetchall()
+
+                results = []
+                for row in rows:
+                    title = row['title_zh_CN'] if lang == "zh-CN" else (row['title_en'] or row['title_zh_CN'])
+                    description = row['description_zh_CN'] if lang == "zh-CN" else (row['description_en'] or row['description_zh_CN'])
+
+                    results.append({
+                        "id": row['id'],
+                        "slug": row['slug'],
+                        "title": title,
+                        "description": description,
+                        "category": row['category'],
+                        "version": row['version'],
+                        "platform": row['platform'],
+                        "thumbnail": row['thumbnail'],
+                        "download_count": row['download_count']
+                    })
+
+                return {
+                    "success": True,
+                    "data": {
+                        "items": results,
+                        "total": len(results)
+                    }
+                }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/categories")
+async def get_download_categories():
+    """
+    获取资源分类统计
+
+    返回每个分类下的资源数量
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                query = """
+                    SELECT category, COUNT(*) as count
+                    FROM downloads
+                    WHERE is_published = TRUE
+                    GROUP BY category
+                """
+                cur.execute(query)
+                rows = cur.fetchall()
+
+                categories = {
+                    "wsl": {"name": "WSL", "icon": "🐧", "count": 0},
+                    "python": {"name": "Python", "icon": "🐍", "count": 0},
+                    "nodejs": {"name": "Node.js", "icon": "💚", "count": 0},
+                    "git": {"name": "Git", "icon": "📂", "count": 0},
+                    "github-desktop": {"name": "GitHub Desktop", "icon": "🐙", "count": 0},
+                    "vscode": {"name": "VS Code", "icon": "💻", "count": 0},
+                    "docker": {"name": "Docker", "icon": "🐳", "count": 0},
+                    "postgresql": {"name": "PostgreSQL", "icon": "🐘", "count": 0},
+                    "redis": {"name": "Redis", "icon": "🔴", "count": 0},
+                    "mongodb": {"name": "MongoDB", "icon": "🍃", "count": 0},
+                    "tools": {"name": "其他工具", "icon": "🛠️", "count": 0}
+                }
+
+                for row in rows:
+                    if row['category'] in categories:
+                        categories[row['category']]["count"] = row['count']
+
+                return {
+                    "success": True,
+                    "data": categories
+                }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{id_or_slug}", response_model=DownloadResponse)
+async def get_download_detail(
+    id_or_slug: str,
+    lang: str = Query("zh-CN", description="语言")
+):
+    """
+    获取资源详情
+
+    支持通过 ID 或 slug 查询
+    同时返回版本列表
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # 查询资源（支持 ID 或 slug）
+                if id_or_slug.isdigit():
+                    query = "SELECT * FROM downloads WHERE id = %s"
+                    cur.execute(query, (int(id_or_slug),))
+                else:
+                    query = "SELECT * FROM downloads WHERE slug = %s"
+                    cur.execute(query, (id_or_slug,))
+
+                download = cur.fetchone()
+
+                if not download:
+                    raise HTTPException(status_code=404, detail="资源不存在")
+
+                # 增加浏览次数
+                update_query = "UPDATE downloads SET view_count = view_count + 1 WHERE id = %s"
+                cur.execute(update_query, (download['id'],))
+                conn.commit()
+
+                # 获取版本列表
+                version_query = """
+                    SELECT
+                        id, version, version_code,
+                        file_name, file_url, file_size, file_checksum,
+                        changelog, release_date, is_latest, is_stable
+                    FROM download_versions
+                    WHERE download_id = %s
+                    ORDER BY version_code DESC
+                """
+                cur.execute(version_query, (download['id'],))
+                version_rows = cur.fetchall()
+
+                # 格式化版本数据
+                version_list = []
+                for version in version_rows:
+                    # 解析更新日志
+                    changelog_list = []
+                    try:
+                        if version.get('changelog'):
+                            changelog_list = json.loads(version['changelog'])
+                    except:
+                        pass
+
+                    version_list.append({
+                        "id": version['id'],
+                        "version": version['version'],
+                        "version_code": version['version_code'],
+                        "file_name": version['file_name'],
+                        "file_url": version['file_url'],
+                        "file_size": version['file_size'],
+                        "file_checksum": version['file_checksum'],
+                        "changelog": changelog_list,
+                        "release_date": version['release_date'].isoformat() if version.get('release_date') else None,
+                        "is_latest": version['is_latest'],
+                        "is_stable": version['is_stable']
+                    })
+
+                # 解析镜像名称
+                mirror_names = {}
+                try:
+                    if download.get('mirror_url_names'):
+                        mirror_names = json.loads(download['mirror_url_names'])
+                except:
+                    pass
+
+                # 解析截图
+                screenshots_list = []
+                try:
+                    if download.get('screenshots'):
+                        screenshots_list = json.loads(download['screenshots'])
+                except:
+                    pass
+
+                # 根据语言选择标题和描述
+                title = download['title_zh_CN'] if lang == "zh-CN" else (download.get('title_en') or download['title_zh_CN'])
+                description = download['description_zh_CN'] if lang == "zh-CN" else (download.get('description_en') or download['description_zh_CN'])
+
+                return {
+                    "success": True,
+                    "data": {
+                        "id": download['id'],
+                        "download_key": download['download_key'],
+                        "slug": download['slug'],
+                        "title": title,
+                        "title_zh_CN": download['title_zh_CN'],
+                        "title_en": download.get('title_en'),
+                        "description": description,
+                        "description_zh_CN": download['description_zh_CN'],
+                        "description_en": download.get('description_en'),
+                        "category": download['category'],
+                        "subcategory": download.get('subcategory'),
+                        "version": download['version'],
+                        "platform": download['platform'],
+                        "file_name": download['file_name'],
+                        "file_url": download['file_url'],
+                        "file_size": download['file_size'],
+                        "file_type": download.get('file_type'),
+                        "file_checksum": download.get('file_checksum'),
+                        "mirror_url_1": download.get('mirror_url_1'),
+                        "mirror_url_2": download.get('mirror_url_2'),
+                        "mirror_url_3": download.get('mirror_url_3'),
+                        "mirror_url_names": mirror_names,
+                        "github_url": download.get('github_url'),
+                        "official_url": download.get('official_url'),
+                        "documentation_url": download.get('documentation_url'),
+                        "thumbnail": download.get('thumbnail'),
+                        "screenshots": screenshots_list,
+                        "download_count": download['download_count'],
+                        "view_count": download['view_count'],
+                        "like_count": download['like_count'],
+                        "featured": download['featured'],
+                        "is_pinned": download.get('is_pinned', False),
+                        "is_official": download.get('is_official', False),
+                        "is_published": download['is_published'],
+                        "license_type": download.get('license_type'),
+                        "license_url": download.get('license_url'),
+                        "versions": version_list,
+                        "created_at": download['created_at'].isoformat() if download.get('created_at') else None,
+                        "updated_at": download['updated_at'].isoformat() if download.get('updated_at') else None
+                    }
+                }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{download_id}/record-download")
+async def record_download(
+    download_id: int,
+    user_id: Optional[int] = None
+):
+    """
+    记录资源下载
+
+    增加下载计数并记录下载历史
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # 检查资源是否存在
+                cur.execute("SELECT id, download_count FROM downloads WHERE id = %s", (download_id,))
+                download = cur.fetchone()
+
+                if not download:
+                    raise HTTPException(status_code=404, detail="资源不存在")
+
+                # 增加下载计数
+                cur.execute(
+                    "UPDATE downloads SET download_count = download_count + 1 WHERE id = %s",
+                    (download_id,)
+                )
+
+                # 记录下载历史
+                record_query = """
+                    INSERT INTO download_records (user_id, download_id, download_status)
+                    VALUES (%s, %s, 'completed')
+                """
+                cur.execute(record_query, (user_id, download_id))
+
+                conn.commit()
+
+                return {
+                    "success": True,
+                    "data": {
+                        "download_count": download['download_count'] + 1
+                    }
+                }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{download_id}/like")
+async def like_download(download_id: int):
+    """
+    点赞资源
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # 检查资源是否存在
+                cur.execute("SELECT id, like_count FROM downloads WHERE id = %s", (download_id,))
+                download = cur.fetchone()
+
+                if not download:
+                    raise HTTPException(status_code=404, detail="资源不存在")
+
+                # 增加点赞数
+                cur.execute(
+                    "UPDATE downloads SET like_count = like_count + 1 WHERE id = %s",
+                    (download_id,)
+                )
+                conn.commit()
+
+                return {
+                    "success": True,
+                    "data": {
+                        "like_count": download['like_count'] + 1
+                    }
+                }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

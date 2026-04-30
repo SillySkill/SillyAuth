@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 标题栏 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="16dp">
+
+            <Button
+                android:id="@+id/btn_back"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/homeAsUpIndicator"
+                android:minWidth="0dp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="内场秀设置"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/textPrimary"
+                android:gravity="center" />
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+
+        </LinearLayout>
+
+        <!-- 服务器设置 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="服务器设置"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/textPrimary"
+                android:layout_marginBottom="12dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="服务器密码"
+                android:layout_marginBottom="12dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_server_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="服务器端口 (1024-65535)"
+                android:layout_marginBottom="12dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_server_port"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/tv_server_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="未运行"
+                android:textSize="14sp"
+                android:textColor="@color/textSecondary"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btn_save_server"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="保存服务器设置"
+                android:background="@drawable/btn_primary" />
+
+        </LinearLayout>
+
+        <!-- 控制器设置 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="控制器设置"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/textPrimary"
+                android:layout_marginBottom="12dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="服务器地址 (例: 192.168.1.100:8888)"
+                android:layout_marginBottom="12dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_controller_host"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textUri" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="服务器密码"
+                android:layout_marginBottom="12dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_controller_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_save_controller"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="保存"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/btn_primary" />
+
+                <Button
+                    android:id="@+id/btn_test_connection"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="测试连接"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/btn_secondary" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- 暖场秀设置 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AI暖场秀"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/textPrimary"
+                android:layout_marginBottom="12dp" />
+
+            <Switch
+                android:id="@+id/sw_warmup_accept_broadcast"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="接受广播推送"
+                android:textSize="14sp" />
+
+            <Switch
+                android:id="@+id/sw_warmup_broadcast_muted"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="广播静音"
+                android:textSize="14sp" />
+
+            <Switch
+                android:id="@+id/sw_warmup_voice_enabled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="开启语音"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <!-- 主持秀设置 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AI主持秀"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/textPrimary"
+                android:layout_marginBottom="12dp" />
+
+            <Switch
+                android:id="@+id/sw_hosting_accept_broadcast"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="接受广播推送"
+                android:textSize="14sp" />
+
+            <Switch
+                android:id="@+id/sw_hosting_broadcast_muted"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="广播静音"
+                android:textSize="14sp" />
+
+            <Switch
+                android:id="@+id/sw_hosting_voice_enabled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="开启语音"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <!-- 茶歇秀设置 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AI茶歇秀"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/textPrimary"
+                android:layout_marginBottom="12dp" />
+
+            <Switch
+                android:id="@+id/sw_teabreak_accept_broadcast"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="接受广播推送"
+                android:textSize="14sp" />
+
+            <Switch
+                android:id="@+id/sw_teabreak_broadcast_muted"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="广播静音"
+                android:textSize="14sp" />
+
+            <Switch
+                android:id="@+id/sw_teabreak_voice_enabled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="开启语音"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <!-- 高级功能 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="高级功能"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/textPrimary"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btn_media_management"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="媒体资源管理"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/btn_outline_secondary" />
+
+            <Button
+                android:id="@+id/btn_permission_management"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="权限管理"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/btn_outline_secondary" />
+
+            <Button
+                android:id="@+id/btn_operation_logs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="操作日志"
+                android:background="@drawable/btn_outline_secondary" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

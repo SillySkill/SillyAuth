@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 全屏结果显示对话框 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#CC000000">
+
+    <!-- 生成的图片 - 全屏显示 -->
+    <ImageView
+        android:id="@+id/iv_fullscreen_result"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
+    <!-- 二维码容器 - 正上方居中显示 -->
+    <LinearLayout
+        android:id="@+id/qrcode_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_qrcode_container"
+        android:padding="12dp"
+        android:elevation="8dp">
+
+        <!-- 二维码图片 -->
+        <ImageView
+            android:id="@+id/iv_qrcode"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/white"
+            android:contentDescription="二维码" />
+
+        <!-- 提示信息 - 小文字在二维码下方 -->
+        <TextView
+            android:id="@+id/tv_qrcode_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="扫码下载图片"
+            android:textSize="10sp"
+            android:textColor="@color/primary_text"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="6dp"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <!-- 关闭按钮 -->
+    <Button
+        android:id="@+id/btn_close_fullscreen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="16dp"
+        android:text="✕"
+        android:textSize="24sp"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:textColor="@color/white" />
+
+</FrameLayout>

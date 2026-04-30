@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL测试</title>
+</head>
+<body>
+  <h1>文件代理URL测试</h1>
+
+  <div id="info"></div>
+
+  <h2>视频测试</h2>
+  <video id="video1" controls muted preload="auto" style="width: 100%; max-width: 800px;" poster="image/hero/slide1.svg">
+    <source src="/api/file/hero/lay-1080.mp4" type="video/mp4">
+    您的浏览器不支持视频播放。
+  </video>
+
+  <script>
+    // 获取基础URL
+    function getBaseUrl() {
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+      const port = window.location.port ? ':' + window.location.port : '';
+      return `${protocol}//${hostname}${port}`;
+    }
+
+    // 显示信息
+    const info = document.getElementById('info');
+    const videoSrc = '/api/file/hero/lay-1080.mp4';
+    info.innerHTML = `
+      <p><strong>当前页面URL:</strong> ${window.location.href}</p>
+      <p><strong>基础URL:</strong> ${getBaseUrl()}</p>
+      <p><strong>视频src:</strong> ${videoSrc}</p>
+      <p><strong>视频完整URL:</strong> ${getBaseUrl()}${videoSrc}</p>
+      <p><strong>OSS实际URL:</strong> https://jc-st.oss-cn-shanghai.aliyuncs.com/sillymd/hero/lay-1080.mp4</p>
+    `;
+
+    // 测试URL是否可访问
+    fetch(getBaseUrl() + videoSrc, { method: 'HEAD' })
+      .then(response => {
+        console.log('✅ 视频URL测试成功:', response.status, response.statusText);
+        info.innerHTML += `<p style="color: green;">✅ 视频URL可访问: ${response.status} ${response.statusText}</p>`;
+      })
+      .catch(error => {
+        console.error('❌ 视频URL测试失败:', error);
+        info.innerHTML += `<p style="color: red;">❌ 视频URL访问失败: ${error.message}</p>`;
+      });
+
+    // 监听视频事件
+    const video = document.getElementById('video1');
+    video.addEventListener('loadstart', () => console.log('视频开始加载'));
+    video.addEventListener('loadedmetadata', () => console.log('视频元数据加载完成'));
+    video.addEventListener('canplay', () => console.log('视频可以播放'));
+    video.addEventListener('error', (e) => console.error('视频加载错误:', e));
+  </script>
+</body>
+</html>

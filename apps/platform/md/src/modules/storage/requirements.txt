@@ -1,0 +1,2 @@
+# TOS Python SDK - 火山引擎对象存储 Python SDK
+tos-python-sdk>=2.7.0

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="register.title">注册 - 挺傻的网站</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/tech-blue.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="auth-page">
+    <!-- 背景动画 -->
+    <div class="auth-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+
+    <!-- 语言选择器 -->
+    <div class="auth-lang-selector">
+        <button class="lang-btn" id="langBtn">
+            <i class="fas fa-globe"></i>
+            <span>中文</span>
+        </button>
+        <div class="lang-dropdown">
+            <a href="#" data-lang="zh-CN">中文</a>
+            <a href="#" data-lang="en">English</a>
+            <a href="#" data-lang="ja">日本語</a>
+            <a href="#" data-lang="ko">한국어</a>
+        </div>
+    </div>
+
+    <!-- 注册容器 -->
+    <div class="auth-container">
+        <div class="auth-box wide">
+            <div class="auth-header">
+                <a href="index.html" class="logo">
+                    <img src="" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <i class="fas fa-cube" style="display:none;"></i>
+                    <span data-i18n="site.name">挺傻的网站</span>
+                </a>
+                <h1 data-i18n="register.heading">创建账户</h1>
+                <p data-i18n="register.subtitle">开始您的免费试用之旅</p>
+            </div>
+
+            <form class="auth-form" id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName" data-i18n="form.firstName">名</label>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="firstName" name="firstName" required 
+                                   placeholder="John"
+                                   data-i18n-placeholder="form.firstNamePlaceholder">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName" data-i18n="form.lastName">姓</label>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="lastName" name="lastName" required 
+                                   placeholder="Doe"
+                                   data-i18n-placeholder="form.lastNamePlaceholder">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" data-i18n="form.email">邮箱地址</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" required 
+                               placeholder="name@example.com"
+                               data-i18n-placeholder="form.emailPlaceholder">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" data-i18n="form.password">密码</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" required 
+                               placeholder="••••••••"
+                               data-i18n-placeholder="form.passwordPlaceholder">
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength" id="passwordStrength">
+                        <div class="strength-bar"></div>
+                        <span class="strength-text" data-i18n="form.passwordStrength">密码强度</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword" data-i18n="form.confirmPassword">确认密码</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required 
+                               placeholder="••••••••"
+                               data-i18n-placeholder="form.confirmPasswordPlaceholder">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label terms-label">
+                        <input type="checkbox" name="terms" required>
+                        <span data-i18n="form.agreeTerms">我同意</span>
+                        <a href="terms.html" data-i18n="form.termsOfService">服务条款</a>
+                        <span data-i18n="form.and">和</span>
+                        <a href="privacy.html" data-i18n="form.privacyPolicy">隐私政策</a>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full" data-i18n="register.button">
+                    <span>创建账户</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="auth-divider">
+                <span data-i18n="auth.orContinueWith">或使用以下方式</span>
+            </div>
+
+            <div class="social-login">
+                <button class="social-btn google">
+                    <i class="fab fa-google"></i>
+                    <span>Google</span>
+                </button>
+                <button class="social-btn github">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub</span>
+                </button>
+            </div>
+
+            <div class="auth-footer">
+                <p data-i18n="register.hasAccount">已有账户？</p>
+                <a href="login.html" class="auth-link" data-i18n="register.loginNow">立即登录</a>
+            </div>
+        </div>
+
+        <!-- 装饰元素 -->
+        <div class="auth-decoration">
+            <div class="tech-ring"></div>
+            <div class="tech-ring ring-2"></div>
+            <div class="floating-icons">
+                <i class="fas fa-rocket"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-gem"></i>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/mobile-menu.js"></script>
+    <script>
+        // 动态加载Logo
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoImg = document.querySelector('.logo-img');
+            if (logoImg && window.getFileProxyUrl) {
+                logoImg.src = window.getFileProxyUrl('silly/logo/logo.svg');
+            }
+        });
+    </script>
+</body>
+</html>

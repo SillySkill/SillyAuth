@@ -1,0 +1,20 @@
+id: goods
+name: 商品管理模块
+version: 1.0.0
+description: 提供商品发布、编辑、上下架管理功能
+dependencies: [auth, vendor, storage]
+
+config:
+  pagination:
+    default_page_size: 20
+    max_page_size: 100
+  upload:
+    max_file_size: 10485760  # 10MB
+    allowed_extensions: [jpg, jpeg, png, gif, webp]
+  review:
+    require_review: false
+    auto_approve_vendor_tier: premium
+
+routes:
+  prefix: /api/goods
+  tags: [商品管理]

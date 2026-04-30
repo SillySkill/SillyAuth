@@ -1,0 +1,11 @@
+id: store
+name: 多产品线商城模块
+version: "1.0.0"
+description: 提供多产品线商城购物车、订单管理和支付功能
+dependencies:
+  - auth
+config:
+  payment_enabled: true
+  wechat_enabled: false
+  alipay_enabled: false
+  order_expire_minutes: 30

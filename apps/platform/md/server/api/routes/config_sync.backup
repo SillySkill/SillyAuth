@@ -1,0 +1,317 @@
+"""
+配置同步API路由
+用于AI活动秀App的远程配置同步功能
+路径前缀: /api/config
+"""
+import os
+import json
+import hashlib
+import datetime
+from pathlib import Path
+from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse, JSONResponse
+from typing import Optional
+import shutil
+
+router = APIRouter()
+
+# 配置
+CONFIG_STORAGE_PATH = os.environ.get('CONFIG_STORAGE_PATH', '/var/www/config_storage')
+CONFIG_BACKUP_PATH = os.environ.get('CONFIG_BACKUP_PATH', '/var/www/config_backup')
+VERSION_DB_PATH = os.path.join(CONFIG_STORAGE_PATH, 'versions.json')
+
+# 确保目录存在
+os.makedirs(CONFIG_STORAGE_PATH, exist_ok=True)
+os.makedirs(CONFIG_BACKUP_PATH, exist_ok=True)
+
+
+def load_versions():
+    """加载版本数据库"""
+    if os.path.exists(VERSION_DB_PATH):
+        with open(VERSION_DB_PATH, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {'versions': {}, 'current': 'v1.0.0'}
+
+
+def save_versions(versions_db):
+    """保存版本数据库"""
+    with open(VERSION_DB_PATH, 'w', encoding='utf-8') as f:
+        json.dump(versions_db, f, indent=2, ensure_ascii=False)
+
+
+def get_file_hash(file_path, algorithm='md5'):
+    """计算文件哈希值"""
+    hash_func = hashlib.new(algorithm)
+    with open(file_path, 'rb') as f:
+        for chunk in iter(lambda: f.read(8192), b''):
+            hash_func.update(chunk)
+    return hash_func.hexdigest()
+
+
+def build_version_manifest(version, version_path):
+    """构建版本清单"""
+    manifest = {
+        'version': version,
+        'version_code': int(version.replace('v', '').replace('.', '').ljust(3, '0')),
+        'released_at': datetime.datetime.utcnow().isoformat() + 'Z',
+        'files': [],
+        'deleted_files': []
+    }
+
+    # 遍历版本目录，构建文件列表
+    for root, dirs, files in os.walk(version_path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            relative_path = os.path.relpath(file_path, version_path)
+
+            file_stat = os.stat(file_path)
+            file_info = {
+                'path': relative_path.replace('\\', '/'),
+                'size': file_stat.st_size,
+                'md5': get_file_hash(file_path),
+                'url': f'/api/config/file?version={version}&path={relative_path.replace(os.sep, "/")}',
+                'compressed': file.endswith('.gz') or file.endswith('.zip'),
+                'essential': relative_path.endswith('.json')
+            }
+            manifest['files'].append(file_info)
+
+    return manifest
+
+
+@router.get("/version")
+async def get_version(version: Optional[str] = "current"):
+    """
+    获取配置版本信息
+
+    GET /api/config/version?version=v1.0.1
+    """
+    try:
+        versions_db = load_versions()
+
+        if version == "current":
+            version = versions_db.get('current', 'v1.0.0')
+
+        if version not in versions_db['versions']:
+            raise HTTPException(status_code=404, detail=f'版本 {version} 不存在')
+
+        version_info = versions_db['versions'][version]
+        version_info['version'] = version
+
+        return {
+            'code': 200,
+            'message': 'success',
+            'data': version_info
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'服务器错误: {str(e)}')
+
+
+@router.get("/file")
+async def download_file(version: Optional[str] = "current", path: str = ""):
+    """
+    下载配置文件（支持断点续传）
+
+    GET /api/config/file?version=v1.0.1&path=config.json
+    """
+    try:
+        if not path:
+            raise HTTPException(status_code=400, detail='缺少文件路径参数')
+
+        versions_db = load_versions()
+
+        if version == "current":
+            version = versions_db.get('current', 'v1.0.0')
+
+        if version not in versions_db['versions']:
+            raise HTTPException(status_code=404, detail=f'版本 {version} 不存在')
+
+        # 构建完整文件路径
+        full_path = os.path.join(CONFIG_STORAGE_PATH, version, path)
+
+        if not os.path.exists(full_path):
+            raise HTTPException(status_code=404, detail=f'文件 {path} 不存在')
+
+        # 计算文件哈希
+        file_md5 = get_file_hash(full_path)
+        file_size = os.path.getsize(full_path)
+
+        # 返回文件
+        return FileResponse(
+            path=full_path,
+            media_type='application/octet-stream',
+            filename=os.path.basename(path),
+            headers={
+                'Content-MD5': file_md5,
+                'Accept-Ranges': 'bytes',
+                'ETag': f'"{version}-{path.replace("/", "-")}"'
+            }
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'服务器错误: {str(e)}')
+
+
+@router.post("/report")
+async def report_result(report: dict):
+    """
+    上报更新结果
+
+    POST /api/config/report
+    Body: {
+        "device_id": "unique_device_id",
+        "old_version": "v1.0.0",
+        "new_version": "v1.0.1",
+        "status": "success",
+        "downloaded_files": 15,
+        "failed_files": [],
+        "duration_ms": 15432
+    }
+    """
+    try:
+        # 验证必填字段
+        required_fields = ['device_id', 'old_version', 'new_version', 'status']
+        for field in required_fields:
+            if field not in report:
+                raise HTTPException(status_code=400, detail=f'缺少必填字段: {field}')
+
+        # 记录更新日志
+        log_entry = {
+            'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',
+            'device_id': report['device_id'],
+            'old_version': report['old_version'],
+            'new_version': report['new_version'],
+            'status': report['status'],
+            'downloaded_files': report.get('downloaded_files', 0),
+            'failed_files': report.get('failed_files', []),
+            'duration_ms': report.get('duration_ms', 0)
+        }
+
+        # 保存到日志文件
+        log_path = os.path.join(CONFIG_STORAGE_PATH, 'update_logs.jsonl')
+        with open(log_path, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(log_entry, ensure_ascii=False) + '\n')
+
+        return {
+            'code': 200,
+            'message': '上报成功'
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'服务器错误: {str(e)}')
+
+
+@router.post("/publish")
+async def publish_config(config: dict):
+    """
+    发布新版本配置（管理员接口）
+
+    POST /api/config/publish
+    Body: {
+        "version": "v1.0.1",
+        "release_notes": "修复题库配置错误",
+        "force_update": false,
+        "min_compatible_version": "v1.0.0"
+    }
+    """
+    try:
+        # 验证必填字段
+        if 'version' not in config:
+            raise HTTPException(status_code=400, detail='缺少版本号')
+
+        version = config['version']
+        if not version.startswith('v'):
+            raise HTTPException(status_code=400, detail='版本号必须以v开头')
+
+        # 创建版本目录
+        version_path = os.path.join(CONFIG_STORAGE_PATH, version)
+        if os.path.exists(version_path):
+            raise HTTPException(status_code=400, detail=f'版本 {version} 已存在')
+
+        os.makedirs(version_path, exist_ok=True)
+
+        # 如果提供了source_dir，复制文件
+        if 'source_dir' in config and os.path.exists(config['source_dir']):
+            source_dir = config['source_dir']
+            for item in os.listdir(source_dir):
+                src = os.path.join(source_dir, item)
+                dst = os.path.join(version_path, item)
+                if os.path.isdir(src):
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(src, dst)
+
+        # 构建版本清单
+        manifest = build_version_manifest(version, version_path)
+        manifest['release_notes'] = config.get('release_notes', '')
+        manifest['force_update'] = config.get('force_update', False)
+        manifest['min_compatible_version'] = config.get('min_compatible_version', version)
+
+        # 保存清单
+        manifest_path = os.path.join(version_path, 'manifest.json')
+        with open(manifest_path, 'w', encoding='utf-8') as f:
+            json.dump(manifest, f, indent=2, ensure_ascii=False)
+
+        # 更新版本数据库
+        versions_db = load_versions()
+        versions_db['versions'][version] = manifest
+        versions_db['current'] = version
+        save_versions(versions_db)
+
+        return {
+            'code': 200,
+            'message': '发布成功',
+            'data': manifest
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'服务器错误: {str(e)}')
+
+
+@router.get("/stats")
+async def get_stats():
+    """
+    获取更新统计信息（管理员接口）
+
+    GET /api/config/stats
+    """
+    try:
+        # 读取更新日志
+        log_path = os.path.join(CONFIG_STORAGE_PATH, 'update_logs.jsonl')
+        stats = {
+            'total_updates': 0,
+            'successful_updates': 0,
+            'failed_updates': 0,
+            'version_distribution': {},
+            'last_update': None
+        }
+
+        if os.path.exists(log_path):
+            with open(log_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip():
+                        log_entry = json.loads(line)
+                        stats['total_updates'] += 1
+
+                        if log_entry['status'] == 'success':
+                            stats['successful_updates'] += 1
+                        else:
+                            stats['failed_updates'] += 1
+
+                        # 版本分布
+                        new_version = log_entry.get('new_version', 'unknown')
+                        stats['version_distribution'][new_version] = \
+                            stats['version_distribution'].get(new_version, 0) + 1
+
+                        # 最后更新时间
+                        if stats['last_update'] is None or log_entry['timestamp'] > stats['last_update']:
+                            stats['last_update'] = log_entry['timestamp']
+
+        return {
+            'code': 200,
+            'message': 'success',
+            'data': stats
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'服务器错误: {str(e)}')

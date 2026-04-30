@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 网络权限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+
+    <!-- 相机权限 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <!-- 存储权限 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <!-- 录音权限 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- 防止休眠 -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- 震动权限 -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:name=".AIApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AIActivity"
+        android:usesCleartextTraffic="true">
+
+        <!-- 启动页 -->
+        <activity
+            android:name=".ui.SplashActivity"
+            android:theme="@style/SplashTheme"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 登录页 -->
+        <activity
+            android:name=".ui.LoginActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 模块选择页 -->
+        <activity
+            android:name=".ui.ModeSelectionActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- AI百变秀 - 风格浏览 -->
+        <activity
+            android:name=".ui.PhotoStyleActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- AI百变秀 - 身份验证 -->
+        <activity
+            android:name=".ui.LoginCheckActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="portrait" />
+
+        <!-- AI百变秀 - 照片选择 -->
+        <activity
+            android:name=".ui.PhotoSelectionActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="portrait" />
+
+        <!-- AI百变秀 - 拍照预览 -->
+        <activity
+            android:name=".ui.PreviewActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="portrait" />
+
+        <!-- AI百变秀 - 上传照片 -->
+        <activity
+            android:name=".ui.UploadActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="portrait" />
+
+        <!-- AI百变秀 - AI生成 -->
+        <activity
+            android:name=".ui.GenerationActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="portrait" />
+
+        <!-- AI百变秀 - 结果展示 -->
+        <activity
+            android:name=".ui.ResultActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- AI百变秀 - 签名输入 -->
+        <activity
+            android:name=".ui.SignatureActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- 知识答题首页 -->
+        <activity
+            android:name=".ui.QuizHomeActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 知识答题 -->
+        <activity
+            android:name=".ui.QuizActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 语音版知识答题 -->
+        <activity
+            android:name=".ui.QuizVoiceActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 答题结果 -->
+        <activity
+            android:name=".ui.QuizResultActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="portrait" />
+
+        <!-- 幸运抽奖 - 程序选择 -->
+        <activity
+            android:name=".ui.LotterySelectActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 幸运抽奖 - 抽奖执行 -->
+        <activity
+            android:name=".ui.LotteryActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 语音版抽奖 -->
+        <activity
+            android:name=".ui.LotteryVoiceActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 内场秀 -->
+        <activity
+            android:name=".ui.InnerActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 内场秀控制器 -->
+        <activity
+            android:name=".ui.InnerShowControllerActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 系统设置 -->
+        <activity
+            android:name=".ui.SettingActivity"
+            android:theme="@style/SettingsTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- AI百变秀设置 -->
+        <activity
+            android:name=".ui.AiShowSettingsActivity"
+            android:theme="@style/SettingsTheme"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 风格管理 -->
+        <activity
+            android:name=".ui.StyleManagementActivity"
+            android:theme="@style/SettingsTheme"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 抽奖设置 -->
+        <activity
+            android:name=".ui.LotterySettingsActivity"
+            android:theme="@style/SettingsTheme"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 知识问答设置 -->
+        <activity
+            android:name=".ui.QuizSettingsActivity"
+            android:theme="@style/SettingsTheme"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 通用设置 -->
+        <activity
+            android:name=".ui.GeneralSettingsActivity"
+            android:theme="@style/SettingsTheme"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 语音功能测试 -->
+        <activity
+            android:name=".ui.VoiceTestActivity"
+            android:theme="@style/SettingsTheme"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 3D球体抽奖 -->
+        <activity
+            android:name=".ui.Lottery3DActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 礼花抽奖 -->
+        <activity
+            android:name=".ui.FireworksLotteryActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 3D球体抽奖设置 -->
+        <activity
+            android:name=".ui.Lottery3DSettingsActivity"
+            android:theme="@style/SettingsTheme"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 内场秀网络设置 -->
+        <activity
+            android:name=".ui.InnerShowNetworkSettingsActivity"
+            android:theme="@style/SettingsTheme"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 数字人设置 -->
+        <activity
+            android:name=".ui.DigitalHumanSettingsActivity"
+            android:theme="@style/SettingsTheme"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 语音设置 -->
+        <activity
+            android:name=".ui.VoiceSettingsActivity"
+            android:theme="@style/SettingsTheme"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- Web上传页面 -->
+        <activity
+            android:name=".ui.WebUploadActivity"
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+    </application>
+
+</manifest>

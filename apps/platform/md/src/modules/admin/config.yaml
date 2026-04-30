@@ -1,0 +1,13 @@
+id: admin
+name: 管理后台 API 模块
+version: 1.0.0
+description: 提供管理后台 API 功能
+dependencies: [auth]
+
+config:
+  admin_roles:
+    - super_admin
+    - content_admin
+    - user_admin
+    - finance_admin
+  audit_log_enabled: true

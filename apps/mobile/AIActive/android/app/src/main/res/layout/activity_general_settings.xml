@@ -1,0 +1,1015 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 标题栏 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="16dp">
+
+            <Button
+                android:id="@+id/btn_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="← 返回"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="通用设置"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:gravity="center" />
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0" />
+        </LinearLayout>
+
+        <!-- 显示设置卡片 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="显示设置"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:paddingBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="显示生成时间"
+                        android:textSize="16sp"
+                        android:textColor="#000000" />
+
+                    <Switch
+                        android:id="@+id/switch_show_generation_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="在结果页显示AI图片生成的时间"
+                    android:textSize="14sp"
+                    android:textColor="#333333"
+                    android:paddingTop="8dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 离线模式卡片 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="离线模式"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:paddingBottom="12dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="当前网络状态："
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    android:paddingBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tv_network_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="正在检测..."
+                    android:textSize="14sp"
+                    android:textColor="#333333"
+                    android:paddingBottom="12dp"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="启用离线模式"
+                        android:textSize="16sp"
+                        android:textColor="#000000" />
+
+                    <Switch
+                        android:id="@+id/switch_offline_mode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="启用后将优先使用本地资源，部分功能可能受限"
+                    android:textSize="14sp"
+                    android:textColor="#333333"
+                    android:paddingTop="8dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 外接设备检测卡片 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="外接摄像设备与默认拍照设置"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:paddingBottom="12dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="选择的设备将作为AI百变秀的默认拍照设备"
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:paddingBottom="16dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="检测到的摄像头"
+                        android:textSize="16sp"
+                        android:textColor="#000000" />
+
+                    <Button
+                        android:id="@+id/btn_detect_cameras"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔍 检测"
+                        android:minWidth="80dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_camera_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="点击检测按钮扫描外接设备"
+                    android:textSize="14sp"
+                    android:textColor="#333333"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="12dp" />
+
+                <TextView
+                    android:id="@+id/tv_selected_camera"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="当前使用：默认摄像头"
+                    android:textSize="14sp"
+                    android:textColor="#2196F3"
+                    android:textStyle="bold"
+                    android:paddingTop="8dp" />
+
+                <!-- 分隔线 -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- 拍照方式选择 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="拍照方式"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:paddingBottom="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="选择点击拍照按钮后的默认行为"
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:paddingBottom="12dp" />
+
+                <RadioGroup
+                    android:id="@+id/rg_photo_source"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/rb_camera"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="📷 本机摄像头（倒计时拍摄）"
+                        android:textSize="15sp"
+                        android:padding="8dp" />
+
+                    <RadioButton
+                        android:id="@+id/rb_qrcode_upload"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="📱 扫码上传（手机扫码上传照片）"
+                        android:textSize="15sp"
+                        android:padding="8dp" />
+                </RadioGroup>
+
+                <TextView
+                    android:id="@+id/tv_photo_source_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="13sp"
+                    android:textColor="#4CAF50"
+                    android:paddingTop="8dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- 存储策略选择 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="存储策略"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:paddingBottom="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="选择文件存储服务（默认火山引擎TOS）"
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:paddingBottom="12dp" />
+
+                <RadioGroup
+                    android:id="@+id/rg_storage_strategy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/rb_storage_tos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="🔥 火山引擎TOS（默认，更快更稳定）"
+                        android:textSize="15sp"
+                        android:padding="8dp" />
+
+                    <RadioButton
+                        android:id="@+id/rb_storage_oss"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="☁️ 阿里云OSS（备用存储）"
+                        android:textSize="15sp"
+                        android:padding="8dp" />
+                </RadioGroup>
+
+                <TextView
+                    android:id="@+id/tv_storage_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="13sp"
+                    android:textColor="#2196F3"
+                    android:paddingTop="8dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- 存储域名配置 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="存储自定义域名"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:paddingBottom="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="配置文件存储服务的自定义域名（如：https://ykb.jcoding.chat）"
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:paddingBottom="12dp" />
+
+                <!-- TOS域名配置 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="火山引擎TOS域名："
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/et_tos_domain"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="https://ykb.jcoding.chat"
+                        android:inputType="textUri"
+                        android:textSize="14sp"
+                        android:padding="12dp"
+                        android:background="#FFFFFF"
+                        android:textColor="#000000" />
+
+                    <Button
+                        android:id="@+id/btn_save_tos_domain"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="保存"
+                        android:textSize="14sp"
+                        android:paddingLeft="20dp"
+                        android:paddingRight="20dp"
+                        android:layout_marginLeft="8dp" />
+                </LinearLayout>
+
+                <!-- OSS域名配置 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="阿里云OSS域名："
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/et_oss_domain"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="https://file.jcoding.chat"
+                        android:inputType="textUri"
+                        android:textSize="14sp"
+                        android:padding="12dp"
+                        android:background="#FFFFFF"
+                        android:textColor="#000000" />
+
+                    <Button
+                        android:id="@+id/btn_save_oss_domain"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="保存"
+                        android:textSize="14sp"
+                        android:paddingLeft="20dp"
+                        android:paddingRight="20dp"
+                        android:layout_marginLeft="8dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 敏感配置卡片 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="敏感配置（需管理员密码）"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:paddingBottom="12dp" />
+
+                <!-- 大模型API_KEY -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="大模型 API_KEY"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:paddingBottom="4dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/et_llm_api_key"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="点击解锁查看"
+                            android:inputType="textPassword"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:clickable="true"
+                            android:textSize="14sp"
+                            android:padding="12dp"
+                            android:background="@color/card_background" />
+
+                        <Button
+                            android:id="@+id/btn_unlock_llm"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔓"
+                            android:layout_marginStart="8dp"
+                            android:minWidth="48dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 大模型模型ID -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="大模型模型ID"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:paddingBottom="4dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/et_llm_model_id"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="点击解锁查看"
+                            android:inputType="text"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:clickable="true"
+                            android:textSize="14sp"
+                            android:padding="12dp"
+                            android:background="@color/card_background" />
+
+                        <Button
+                            android:id="@+id/btn_unlock_model_id"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔓"
+                            android:layout_marginStart="8dp"
+                            android:minWidth="48dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="默认值：doubao-seedream-4-5-251128"
+                        android:textSize="12sp"
+                        android:textColor="#666666"
+                        android:paddingTop="4dp" />
+                </LinearLayout>
+
+                <!-- TTS LicenseID -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TTS LicenseID"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:paddingBottom="4dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/et_tts_license_id"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="点击解锁查看"
+                            android:inputType="textPassword"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:clickable="true"
+                            android:textSize="14sp"
+                            android:padding="12dp"
+                            android:background="@color/card_background" />
+
+                        <Button
+                            android:id="@+id/btn_unlock_tts"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔓"
+                            android:layout_marginStart="8dp"
+                            android:minWidth="48dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- TTS LicenseKey -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TTS LicenseKey"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:paddingBottom="4dp" />
+
+                    <EditText
+                        android:id="@+id/et_tts_license_key"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="点击解锁查看"
+                        android:inputType="textPassword"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:clickable="true"
+                        android:textSize="14sp"
+                        android:padding="12dp"
+                        android:background="@color/card_background" />
+                </LinearLayout>
+
+                <!-- TTS LicensePk -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TTS LicensePk"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:paddingBottom="4dp" />
+
+                    <EditText
+                        android:id="@+id/et_tts_license_pk"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="点击解锁查看"
+                        android:inputType="textPassword"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:clickable="true"
+                        android:textSize="14sp"
+                        android:padding="12dp"
+                        android:background="@color/card_background" />
+                </LinearLayout>
+
+                <!-- ASR LicenseID -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="ASR LicenseID"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:paddingBottom="4dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/et_asr_license_id"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="点击解锁查看"
+                            android:inputType="textPassword"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:clickable="true"
+                            android:textSize="14sp"
+                            android:padding="12dp"
+                            android:background="@color/card_background" />
+
+                        <Button
+                            android:id="@+id/btn_unlock_asr"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔓"
+                            android:layout_marginStart="8dp"
+                            android:minWidth="48dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- ASR LicenseKey -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="ASR LicenseKey"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:paddingBottom="4dp" />
+
+                    <EditText
+                        android:id="@+id/et_asr_license_key"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="点击解锁查看"
+                        android:inputType="textPassword"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:clickable="true"
+                        android:textSize="14sp"
+                        android:padding="12dp"
+                        android:background="@color/card_background" />
+                </LinearLayout>
+
+                <!-- ASR LicensePk -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="ASR LicensePk"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:paddingBottom="4dp" />
+
+                    <EditText
+                        android:id="@+id/et_asr_license_pk"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="点击解锁查看"
+                        android:inputType="textPassword"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:clickable="true"
+                        android:textSize="14sp"
+                        android:padding="12dp"
+                        android:background="@color/card_background" />
+                </LinearLayout>
+
+                <!-- MiniMax配置分割线 -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- MiniMax配置标题 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="MiniMax TTS配置"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#2196F3"
+                    android:paddingBottom="12dp" />
+
+                <!-- MiniMax API Key -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="MiniMax API Key"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:paddingBottom="4dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/et_minimax_api_key"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="点击解锁查看"
+                            android:inputType="textPassword"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:clickable="true"
+                            android:textSize="14sp"
+                            android:padding="12dp"
+                            android:background="@color/card_background" />
+
+                        <Button
+                            android:id="@+id/btn_unlock_minimax"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔓"
+                            android:layout_marginStart="8dp"
+                            android:minWidth="48dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- MiniMax Group ID -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="MiniMax Group ID"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:paddingBottom="4dp" />
+
+                    <EditText
+                        android:id="@+id/et_minimax_group_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="点击解锁查看"
+                        android:inputType="textPassword"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:clickable="true"
+                        android:textSize="14sp"
+                        android:padding="12dp"
+                        android:background="@color/card_background" />
+                </LinearLayout>
+
+                <!-- MiniMax Voice ID -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="MiniMax发音人ID（可选）"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:paddingBottom="4dp" />
+
+                    <EditText
+                        android:id="@+id/et_minimax_voice_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="点击解锁查看，默认：female-tianmei"
+                        android:inputType="text"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:clickable="true"
+                        android:textSize="14sp"
+                        android:padding="12dp"
+                        android:background="@color/card_background" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="可选值：female-tianmei（甜美女声）、male-qn-qingse（清新男声）等"
+                        android:textSize="12sp"
+                        android:textColor="#666666"
+                        android:paddingTop="4dp" />
+                </LinearLayout>
+
+                <!-- 文件上传按钮 -->
+                <Button
+                    android:id="@+id/btn_upload_config"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="📁 从txt文件导入配置"
+                    android:background="@color/colorAccent"
+                    android:textColor="@android:color/white"
+                    android:padding="12dp"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="支持格式：key：key_value\n例如：llm_api_key：your_api_key_here"
+                    android:textSize="12sp"
+                    android:textColor="#333333"
+                    android:paddingTop="8dp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 功能说明卡片 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="功能说明"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:paddingBottom="12dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="📱 显示设置\n"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• 显示生成时间：在AI百变秀结果页面显示图片生成的时间戳\n\n"
+                    android:textSize="14sp"
+                    android:textColor="#333333"
+                    android:paddingBottom="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🌐 离线模式\n"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• 自动检测网络状态\n• 离线时优先使用本地资源\n• AI生成功能需要网络连接\n• 知识答题和抽奖支持完全离线"
+                    android:textSize="14sp"
+                    android:textColor="#333333" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 初始化按钮 -->
+        <Button
+            android:id="@+id/btn_init_modules"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🚀 初始化语音模块"
+            android:background="#4CAF50"
+            android:textColor="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginTop="8dp" />
+
+        <!-- 语音功能测试按钮 -->
+        <Button
+            android:id="@+id/btn_voice_test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🎤 语音功能测试（聊天界面）"
+            android:background="#FF9800"
+            android:textColor="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginTop="8dp" />
+
+        <!-- 保存按钮 -->
+        <Button
+            android:id="@+id/btn_save_settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="保存设置"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            android:padding="12dp" />
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>申请成为供应商 - 挺傻的</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="../logo/0128/挺傻的-圆.png" type="image/png">
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="logo">
+        <img src="../logo/0128/挺傻的.png" alt="挺傻的" style="height: 40px; width: auto;">
+      </a>
+      
+      <ul class="nav-links">
+        <li><a href="skills.html" class="nav-link">探索 Skills</a></li>
+        <li><a href="marketplace.html" class="nav-link">供应商市场</a></li>
+        <li><a href="teams.html" class="nav-link">团队协作</a></li>
+        <li><a href="docs.html" class="nav-link">文档</a></li>
+      </ul>
+      
+      <div class="nav-actions">
+        <a href="search.html" class="btn btn-ghost"><i class="fas fa-search"></i></a>
+        <a href="login.html" class="btn btn-secondary btn-sm">登录</a>
+        <a href="register.html" class="btn btn-primary btn-sm">注册</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 页面内容 -->
+  <div style="padding-top: 72px;">
+    <section style="padding: 60px 0;">
+      <div class="container" style="max-width: 800px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+          <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 12px;">申请成为供应商</h1>
+          <p style="color: var(--text-light);">分享你的专业知识，创造被动收入</p>
+        </div>
+        
+        <div class="card" style="padding: 40px;">
+          <form id="vendorForm">
+            <div style="margin-bottom: 24px;">
+              <label style="display: block; font-weight: 500; margin-bottom: 8px;">真实姓名 <span style="color: var(--accent);">*</span></label>
+              <input type="text" class="form-input" placeholder="请输入你的真实姓名" required style="width: 100%; padding: 12px 16px; background: var(--bg-dark-tertiary); border: 1px solid var(--border-light); border-radius: var(--radius-md); color: var(--text-white); font-size: 1rem;">
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+              <label style="display: block; font-weight: 500; margin-bottom: 8px;">身份证号 <span style="color: var(--accent);">*</span></label>
+              <input type="text" class="form-input" placeholder="用于实名认证" required style="width: 100%; padding: 12px 16px; background: var(--bg-dark-tertiary); border: 1px solid var(--border-light); border-radius: var(--radius-md); color: var(--text-white); font-size: 1rem;">
+              <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 6px;">仅用于身份验证，严格保密</p>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+              <label style="display: block; font-weight: 500; margin-bottom: 8px;">专业领域 <span style="color: var(--accent);">*</span></label>
+              <select required style="width: 100%; padding: 12px 16px; background: var(--bg-dark-tertiary); border: 1px solid var(--border-light); border-radius: var(--radius-md); color: var(--text-white); font-size: 1rem;">
+                <option value="">请选择专业领域</option>
+                <option value="frontend">前端开发</option>
+                <option value="backend">后端开发</option>
+                <option value="ai">人工智能</option>
+                <option value="design">设计</option>
+                <option value="product">产品</option>
+                <option value="data">数据分析</option>
+                <option value="marketing">市场营销</option>
+                <option value="other">其他</option>
+              </select>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+              <label style="display: block; font-weight: 500; margin-bottom: 8px;">从业年限 <span style="color: var(--accent);">*</span></label>
+              <select required style="width: 100%; padding: 12px 16px; background: var(--bg-dark-tertiary); border: 1px solid var(--border-light); border-radius: var(--radius-md); color: var(--text-white); font-size: 1rem;">
+                <option value="">请选择</option>
+                <option value="1-3">1-3 年</option>
+                <option value="3-5">3-5 年</option>
+                <option value="5-10">5-10 年</option>
+                <option value="10+">10 年以上</option>
+              </select>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+              <label style="display: block; font-weight: 500; margin-bottom: 8px;">个人简介</label>
+              <textarea rows="4" placeholder="介绍你的专业背景、擅长领域、项目经验等" style="width: 100%; padding: 12px 16px; background: var(--bg-dark-tertiary); border: 1px solid var(--border-light); border-radius: var(--radius-md); color: var(--text-white); font-size: 1rem; resize: vertical;"></textarea>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+              <label style="display: block; font-weight: 500; margin-bottom: 8px;">作品集链接</label>
+              <input type="url" placeholder="GitHub、个人网站、或其他展示你作品的平台" style="width: 100%; padding: 12px 16px; background: var(--bg-dark-tertiary); border: 1px solid var(--border-light); border-radius: var(--radius-md); color: var(--text-white); font-size: 1rem;">
+            </div>
+            
+            <div style="margin-bottom: 32px;">
+              <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
+                <input type="checkbox" required style="margin-top: 4px;">
+                <span style="font-size: 0.9rem; color: var(--text-light); line-height: 1.5;">
+                  我已阅读并同意 <a href="#" style="color: var(--primary-light);">供应商协议</a> 和 <a href="#" style="color: var(--primary-light);">内容发布规范</a>
+                </span>
+              </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+              <i class="fas fa-paper-plane"></i> 提交申请
+            </button>
+          </form>
+        </div>
+        
+        <div style="margin-top: 40px; padding: 24px; background: rgba(0,102,255,0.05); border-radius: var(--radius-md); border: 1px solid rgba(0,102,255,0.2);">
+          <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 16px;"><i class="fas fa-info-circle" style="color: var(--primary-light); margin-right: 8px;"></i>申请须知</h3>
+          <ul style="color: var(--text-light); font-size: 0.9rem; line-height: 2; padding-left: 20px;">
+            <li>申请审核通常需要 3-5 个工作日</li>
+            <li>需要提供至少一个 Skills 样本进行质量评估</li>
+            <li>所有 Skills 必须通过 AI 审核 + 人工复核</li>
+            <li>严禁发布侵权、违规或低质量内容</li>
+            <li>成为供应商后需遵守平台规范，违规将被下架</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <img src="../logo/0128/挺傻的-白.png" alt="挺傻的" style="height: 36px; margin-bottom: 16px;">
+          <p class="footer-desc">承认自己有时候挺傻的，这是智慧的开始。</p>
+        </div>
+        
+        <div>
+          <h4 class="footer-title">产品</h4>
+          <ul class="footer-links">
+            <li class="footer-link"><a href="skills.html">探索 Skills</a></li>
+            <li class="footer-link"><a href="marketplace.html">供应商市场</a></li>
+            <li class="footer-link"><a href="teams.html">团队协作</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="footer-title">开发者</h4>
+          <ul class="footer-links">
+            <li class="footer-link"><a href="docs.html">文档</a></li>
+            <li class="footer-link"><a href="api.html">API</a></li>
+            <li class="footer-link"><a href="sdk.html">SDK</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="footer-title">支持</h4>
+          <ul class="footer-links">
+            <li class="footer-link"><a href="help.html">帮助中心</a></li>
+            <li class="footer-link"><a href="contact.html">联系我们</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 挺傻的. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/vendor-api.js"></script>
+  <script src="js/mobile-menu.js"></script>
+  <script>
+    // 检查登录状态
+    function checkLoginStatus() {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        // 未登录，跳转到登录页
+        window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+        return false;
+      }
+      return true;
+    }
+
+    // 显示消息提示
+    function showMessage(message, type = 'success') {
+      const existingMsg = document.querySelector('.alert-message');
+      if (existingMsg) existingMsg.remove();
+
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert-message alert-${type}`;
+      alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        background: ${type === 'success' ? '#10b981' : '#ef4444'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+      `;
+      alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+      document.body.appendChild(alertDiv);
+
+      setTimeout(() => {
+        alertDiv.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => alertDiv.remove(), 300);
+      }, 5000);
+    }
+
+    // 设置加载状态
+    function setLoading(form, loading) {
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (!submitBtn) return;
+
+      if (loading) {
+        submitBtn.disabled = true;
+        submitBtn.dataset.originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
+      } else {
+        submitBtn.disabled = false;
+        if (submitBtn.dataset.originalText) {
+          submitBtn.innerHTML = submitBtn.dataset.originalText;
+        }
+      }
+    }
+
+    // 检查申请状态
+    async function checkApplicationStatus() {
+      try {
+        const response = await VendorAPI.getApplicationStatus();
+
+        if (response.success && response.data) {
+          const status = response.data.status;
+          const formContainer = document.querySelector('.card');
+
+          if (status === 'pending' || status === 'reviewing') {
+            formContainer.innerHTML = `
+              <div style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 4rem; margin-bottom: 20px;">⏳</div>
+                <h2 style="font-size: 1.5rem; margin-bottom: 12px;">申请审核中</h2>
+                <p style="color: var(--text-light); margin-bottom: 24px;">
+                  您的申请正在审核中，请耐心等待 3-5 个工作日
+                </p>
+                <div style="background: rgba(0,102,255,0.1); padding: 16px; border-radius: 8px; text-align: left;">
+                  <div style="margin-bottom: 8px;"><strong>申请时间：</strong>${new Date(response.data.createdAt).toLocaleString('zh-CN')}</div>
+                  ${response.data.realName ? `<div style="margin-bottom: 8px;"><strong>申请人：</strong>${response.data.realName}</div>` : ''}
+                  ${response.data.professionalField ? `<div style="margin-bottom: 8px;"><strong>专业领域：</strong>${response.data.professionalField}</div>` : ''}
+                </div>
+                <button onclick="location.reload()" class="btn btn-secondary" style="margin-top: 24px;">
+                  <i class="fas fa-sync"></i> 刷新状态
+                </button>
+              </div>
+            `;
+          } else if (status === 'approved') {
+            formContainer.innerHTML = `
+              <div style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+                <h2 style="font-size: 1.5rem; margin-bottom: 12px;">恭喜您！</h2>
+                <p style="color: var(--text-light); margin-bottom: 24px;">
+                  您的供应商申请已通过审核
+                </p>
+                <div style="background: rgba(16,185,129,0.1); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                  <div style="margin-bottom: 8px;"><strong>通过时间：</strong>${new Date(response.data.reviewedAt).toLocaleString('zh-CN')}</div>
+                </div>
+                <a href="marketplace.html" class="btn btn-primary">
+                  <i class="fas fa-store"></i> 前往供应商市场
+                </a>
+              </div>
+            `;
+          } else if (status === 'rejected') {
+            formContainer.innerHTML = `
+              <div style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 4rem; margin-bottom: 20px;">❌</div>
+                <h2 style="font-size: 1.5rem; margin-bottom: 12px;">申请未通过</h2>
+                <p style="color: var(--text-light); margin-bottom: 24px;">
+                  很遗憾，您的申请未通过审核
+                </p>
+                ${response.data.rejectionReason ? `
+                  <div style="background: rgba(239,68,68,0.1); padding: 16px; border-radius: 8px; margin-bottom: 24px; text-align: left;">
+                    <strong>拒绝原因：</strong><br>${response.data.rejectionReason}
+                  </div>
+                ` : ''}
+                <button onclick="location.reload()" class="btn btn-secondary">
+                  <i class="fas fa-redo"></i> 重新申请
+                </button>
+              </div>
+            `;
+          }
+        }
+      } catch (error) {
+        console.error('检查申请状态失败:', error);
+        // 如果检查失败，显示表单
+      }
+    }
+
+    // 初始化表单
+    document.addEventListener('DOMContentLoaded', async function() {
+      // 检查登录
+      if (!checkLoginStatus()) {
+        return;
+      }
+
+      // 检查申请状态
+      await checkApplicationStatus();
+
+      // 如果表单还存在（说明没有待处理申请），初始化表单提交
+      const form = document.getElementById('vendorForm');
+      if (!form) return;
+
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // 获取表单数据
+        const formData = {
+          realName: form.querySelector('input[placeholder="请输入你的真实姓名"]').value.trim(),
+          idCardNumber: form.querySelector('input[placeholder="用于实名认证"]').value.trim(),
+          professionalField: form.querySelector('select').value,
+          yearsOfExperience: form.querySelectorAll('select')[1].value,
+          bio: form.querySelector('textarea').value.trim(),
+          portfolioUrls: form.querySelector('input[type="url"]').value.trim()
+            ? [form.querySelector('input[type="url"]').value.trim()]
+            : []
+        };
+
+        // 验证
+        if (!formData.realName || !formData.idCardNumber || !formData.professionalField || !formData.yearsOfExperience) {
+          showMessage('请填写所有必填字段', 'error');
+          return;
+        }
+
+        // 验证身份证号格式（简单验证）
+        if (!/^\d{15}$|^\d{17}[\dXx]$/.test(formData.idCardNumber)) {
+          showMessage('请输入有效的身份证号', 'error');
+          return;
+        }
+
+        // 提交
+        setLoading(form, true);
+
+        try {
+          const response = await VendorAPI.submitApplication(formData);
+
+          if (response.success) {
+            showMessage('申请提交成功！我们将在 3-5 个工作日内审核您的申请。', 'success');
+            // 延迟刷新以显示新状态
+            setTimeout(() => location.reload(), 2000);
+          } else {
+            showMessage(response.message || '提交失败', 'error');
+          }
+        } catch (error) {
+          console.error('提交申请失败:', error);
+          showMessage(error.message || '提交失败，请稍后重试', 'error');
+        } finally {
+          setLoading(form, false);
+        }
+      });
+    });
+  </script>
+
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+  </style>
+</body>
+</html>

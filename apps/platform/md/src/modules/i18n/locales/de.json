@@ -1,0 +1,75 @@
+{
+  "app": {
+    "name": "SillyMD AI Skills Center",
+    "tagline": "KI-Skills Hosting & Marktplatz"
+  },
+  "nav": {
+    "home": "Startseite",
+    "skills": "Skills",
+    "categories": "Kategorien",
+    "about": "Über",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "logout": "Abmelden"
+  },
+  "skills": {
+    "title": "KI-Skills Marktplatz",
+    "subtitle": "KI-Skills erkunden, entdecken, nutzen",
+    "search": "Skills suchen...",
+    "noResults": "Keine passenden Skills gefunden",
+    "loading": "Laden...",
+    "featured": "Empfohlen",
+    "newest": "Neueste",
+    "popular": "Beliebt",
+    "categories": {
+      "tech": "Technik",
+      "product": "Produkt",
+      "design": "Design",
+      "marketing": "Marketing",
+      "ops": "Betrieb",
+      "all": "Alle Kategorien"
+    },
+    "actions": {
+      "install": "Installieren",
+      "demo": "Demo",
+      "view": "Details anzeigen",
+      "download": "Herunterladen",
+      "share": "Teilen",
+      "favorite": "Favorit"
+    },
+    "stats": {
+      "downloads": "Downloads",
+      "rating": "Bewertung",
+      "reviews": "Bewertungen"
+    },
+    "detail": {
+      "description": "Beschreibung",
+      "installation": "Installation",
+      "examples": "Beispiele",
+      "reviews": "Bewertungen",
+      "related": "Ähnliche Skills",
+      "author": "Autor",
+      "version": "Version",
+      "updated": "Zuletzt aktualisiert"
+    }
+  },
+  "common": {
+    "back": "Zurück",
+    "close": "Schließen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "submit": "Absenden",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "noData": "Keine Daten"
+  },
+  "footer": {
+    "copyright": "Urheberrecht",
+    "links": "Links",
+    "contact": "Kontakt"
+  }
+}

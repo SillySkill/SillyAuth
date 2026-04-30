@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ConfigActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="账户信息(在线)" />
+
+            <com.tencent.cloud.sdktts.ui.FormInput
+                android:id="@+id/input_online_secretid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <com.tencent.cloud.sdktts.ui.FormInput
+                android:id="@+id/input_online_secretkey"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="账户信息(离线)" />
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/btn_device"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="按设备授权" />
+
+                <RadioButton
+                    android:id="@+id/btn_app"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="按应用授权" />
+
+            </RadioGroup>
+
+            <LinearLayout
+                android:id="@+id/container_app"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <com.tencent.cloud.sdktts.ui.FormInput
+                    android:id="@+id/input_offline_lic"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <com.tencent.cloud.sdktts.ui.FormInput
+                    android:id="@+id/input_offline_lic_sign"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <com.tencent.cloud.sdktts.ui.FormInput
+                    android:id="@+id/input_offline_lic_pk"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/container_device"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <com.tencent.cloud.sdktts.ui.FormInput
+                    android:id="@+id/input_offline_secretid"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <com.tencent.cloud.sdktts.ui.FormInput
+                    android:id="@+id/input_offline_secretkey"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <com.tencent.cloud.sdktts.ui.FormInput
+                    android:id="@+id/input_offline_lic_dev_key"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <com.tencent.cloud.sdktts.ui.FormInput
+                    android:id="@+id/input_offline_lic_dev_pk"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                </com.tencent.cloud.sdktts.ui.FormInput>
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_save"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="保存" />
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

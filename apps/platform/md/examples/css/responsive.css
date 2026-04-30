@@ -1,0 +1,2041 @@
+/**
+ * Mobile Responsive Styles
+ * Comprehensive mobile adaptations for all pages
+ */
+
+/* ==================== Mobile Menu Styles ==================== */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-white);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: background 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-menu-toggle:active {
+  transform: scale(0.95);
+}
+
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 998;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-menu-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* ==================== Tablet (≤1024px) ==================== */
+@media (max-width: 1024px) {
+  /* Container adjustments */
+  .container {
+    padding: 0 var(--space-md);
+  }
+
+  /* Grid adjustments */
+  .grid-4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Sidebar layout adjustments */
+  .page-with-sidebar .sidebar {
+    position: relative;
+    width: 240px;
+  }
+
+  /* Dashboard specific */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Navigation adjustments */
+  .nav-links {
+    gap: var(--space-lg);
+  }
+
+  .nav-link {
+    font-size: 0.9rem;
+  }
+
+  /* Card adjustments */
+  .card {
+    padding: var(--space-lg);
+  }
+
+  /* Hero section */
+  .hero-content h1 {
+    font-size: 42px;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+  }
+
+  /* Feature grid */
+  .feature-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Table adjustments */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  /* Footer adjustments */
+  .footer-content {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Forms */
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ==================== Small Tablet/Large Phone (≤768px) ==================== */
+@media (max-width: 768px) {
+  /* Show mobile menu toggle */
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  /* Hide desktop nav */
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 72px;
+    left: 0;
+    right: 0;
+    background: var(--bg-dark-secondary);
+    flex-direction: column;
+    padding: var(--space-md);
+    gap: 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+
+  .nav-links li {
+    width: 100%;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .nav-links li:last-child {
+    border-bottom: none;
+  }
+
+  .nav-link {
+    display: block;
+    padding: var(--space-md) var(--space-sm);
+    width: 100%;
+    font-size: 1rem;
+  }
+
+  /* Hide desktop nav actions */
+  .nav-actions {
+    display: none !important;
+  }
+
+  /* Show mobile nav actions in menu */
+  .nav-actions-mobile {
+    display: flex !important;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border-top: 1px solid var(--border-light);
+  }
+
+  /* Container adjustments */
+  .container {
+    padding: 0 var(--space-sm);
+  }
+
+  /* Grid adjustments - single column */
+  .grid-4,
+  .grid-3,
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  /* Dashboard sidebar */
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    height: 100vh;
+    width: 280px;
+    z-index: 1001;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+
+  .sidebar-overlay.active {
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+  }
+
+  .top-bar {
+    padding: var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .top-bar .search-box {
+    flex: 1;
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Page header */
+  .page-header {
+    padding: var(--space-md);
+  }
+
+  .page-header h1 {
+    font-size: 1.75rem;
+  }
+
+  /* Cards */
+  .card {
+    margin-bottom: var(--space-md);
+    border-radius: var(--radius-md);
+  }
+
+  .card-header {
+    padding: var(--space-md);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  .card-body {
+    padding: var(--space-md);
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 12px var(--space-md);
+    font-size: 14px;
+    min-height: 44px;
+  }
+
+  .btn-sm {
+    padding: 8px 12px;
+    font-size: 13px;
+    min-height: 36px;
+  }
+
+  .btn-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-group .btn {
+    width: 100%;
+  }
+
+  /* Hero section */
+  .hero-content h1 {
+    font-size: 32px;
+    line-height: 1.2;
+  }
+
+  .hero-subtitle {
+    font-size: 14px;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-buttons .btn {
+    width: 100%;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  /* Feature cards */
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-card {
+    padding: var(--space-lg);
+  }
+
+  /* Search box */
+  .search-box {
+    flex-direction: column;
+    padding: var(--space-md);
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 12px var(--space-md);
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Forms */
+  .auth-container {
+    padding: var(--space-md);
+  }
+
+  .auth-box {
+    padding: var(--space-lg);
+  }
+
+  .form-group {
+    margin-bottom: var(--space-md);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px var(--space-sm);
+    min-height: 44px;
+  }
+
+  /* Tables - stack layout */
+  .table-responsive {
+    border: none;
+  }
+
+  .table-responsive table,
+  .table-responsive thead,
+  .table-responsive tbody,
+  .table-responsive th,
+  .table-responsive td,
+  .table-responsive tr {
+    display: block;
+  }
+
+  .table-responsive thead {
+    display: none;
+  }
+
+  .table-responsive tr {
+    margin-bottom: var(--space-md);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+
+  .table-responsive td {
+    padding: var(--space-sm) 0;
+    text-align: left;
+    position: relative;
+    padding-left: 50%;
+  }
+
+  .table-responsive td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 45%;
+    font-weight: 600;
+    color: var(--text-light);
+  }
+
+  /* Tags and badges */
+  .tag,
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 12px;
+    margin: 4px;
+  }
+
+  /* Filters sidebar */
+  .page-with-sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .page-with-sidebar .sidebar {
+    position: relative;
+    width: 100%;
+    top: 0;
+    margin-bottom: var(--space-md);
+  }
+
+  .page-with-sidebar .content {
+    width: 100%;
+  }
+
+  /* Pagination */
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pagination .btn {
+    min-width: 36px;
+    padding: 8px 12px;
+  }
+
+  /* Modal */
+  .modal-content {
+    margin: var(--space-md);
+    max-width: calc(100% - var(--space-2xl));
+    max-height: calc(100vh - var(--space-2xl));
+  }
+
+  /* Footer */
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .footer-links {
+    grid-template-columns: 1fr;
+  }
+
+  /* CTA section */
+  .cta-content {
+    padding: var(--space-xl) var(--space-md);
+  }
+
+  .cta-content h2 {
+    font-size: 1.75rem;
+  }
+
+  /* Toast notifications */
+  .toast {
+    left: var(--space-md);
+    right: var(--space-md);
+    margin: 0;
+    width: auto;
+  }
+
+  /* Skill cards */
+  .skill-card {
+    padding: var(--space-md);
+  }
+
+  .skill-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  /* Vendor cards */
+  .vendor-card {
+    padding: var(--space-md);
+    text-align: center;
+  }
+
+  /* Activity list */
+  .activity-item {
+    padding: var(--space-md);
+  }
+
+  /* Quick actions */
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .action-btn {
+    padding: var(--space-md);
+  }
+
+  /* Charts */
+  .chart-container {
+    height: 250px;
+    padding: var(--space-md);
+  }
+
+  /* Progress bars */
+  .progress-bar {
+    height: 8px;
+  }
+
+  /* Tabs */
+  .tabs {
+    flex-direction: column;
+    border-bottom: none;
+  }
+
+  .tab {
+    border-bottom: 1px solid var(--border-light);
+    border-left: 3px solid transparent;
+  }
+
+  .tab.active {
+    border-left-color: var(--primary);
+    border-bottom-color: var(--border-light);
+  }
+
+  /* Alerts */
+  .alert {
+    padding: var(--space-md);
+  }
+
+  .alert i {
+    margin-right: var(--space-sm);
+  }
+
+  /* Dropdowns */
+  .dropdown-menu {
+    position: fixed !important;
+    top: auto !important;
+    left: var(--space-md) !important;
+    right: var(--space-md) !important;
+    width: auto !important;
+    max-width: none;
+  }
+
+  /* Tooltips */
+  .tooltip {
+    display: none;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb-item {
+    font-size: 14px;
+  }
+
+  /* Price display */
+  .price-large {
+    font-size: 1.5rem;
+  }
+
+  /* Rating stars */
+  .rating-stars {
+    font-size: 14px;
+  }
+
+  /* Social sharing */
+  .social-share {
+    flex-wrap: wrap;
+  }
+
+  .social-share-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Comment section */
+  .comment {
+    padding: var(--space-md);
+  }
+
+  .comment-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* File upload */
+  .file-upload {
+    padding: var(--space-xl) var(--space-md);
+  }
+
+  .file-upload-icon {
+    font-size: 32px;
+  }
+
+  /* Code blocks */
+  pre,
+  code {
+    font-size: 14px;
+  }
+
+  .code-header {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 13px;
+  }
+
+  /* Pricing cards */
+  .pricing-card {
+    padding: var(--space-lg);
+  }
+
+  .pricing-card-featured {
+    transform: none;
+    margin: var(--space-md) 0;
+  }
+
+  /* Testimonials */
+  .testimonial-card {
+    padding: var(--space-lg);
+  }
+
+  .testimonial-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* FAQ accordion */
+  .faq-item {
+    margin-bottom: var(--space-sm);
+  }
+
+  .faq-question {
+    padding: var(--space-md);
+    font-size: 15px;
+  }
+
+  .faq-answer {
+    padding: 0 var(--space-md) var(--space-md);
+    font-size: 14px;
+  }
+
+  /* Step indicators */
+  .steps {
+    flex-direction: column;
+  }
+
+  .step {
+    width: 100%;
+    padding-bottom: var(--space-md);
+  }
+
+  .step::after {
+    display: none;
+  }
+
+  /* Empty states */
+  .empty-state {
+    padding: var(--space-2xl) var(--space-md);
+  }
+
+  .empty-state-icon {
+    font-size: 48px;
+  }
+
+  .empty-state-title {
+    font-size: 1.25rem;
+  }
+
+  /* Loading states */
+  .spinner {
+    width: 32px;
+    height: 32px;
+  }
+
+  .skeleton {
+    height: 40px;
+  }
+
+  /* Notification badges */
+  .badge {
+    min-width: 18px;
+    height: 18px;
+    font-size: 11px;
+    padding: 0 4px;
+  }
+
+  /* User menu */
+  .user-menu {
+    padding: var(--space-md);
+  }
+
+  .user-menu-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* Search results */
+  .search-result {
+    padding: var(--space-md);
+  }
+
+  .search-result-thumb {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* Onboarding */
+  .onboarding-step {
+    padding: var(--space-lg);
+  }
+
+  .onboarding-illustration {
+    max-width: 200px;
+    margin: 0 auto var(--space-md);
+  }
+
+  /* Dashboard widgets */
+  .widget {
+    margin-bottom: var(--space-md);
+  }
+
+  .widget-header {
+    padding: var(--space-md);
+  }
+
+  .widget-body {
+    padding: var(--space-md);
+  }
+
+  /* Data tables */
+  .data-table th,
+  .data-table td {
+    padding: var(--space-sm);
+    font-size: 13px;
+  }
+
+  /* Calendar */
+  .calendar-day {
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  /* Timeline */
+  .timeline-item {
+    padding-left: var(--space-lg);
+  }
+
+  .timeline-dot {
+    left: 0;
+    width: 12px;
+    height: 12px;
+  }
+
+  .timeline-date {
+    font-size: 12px;
+  }
+
+  /* Icon boxes */
+  .icon-box {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  /* Notification panel */
+  .notification-panel {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  /* Context menu */
+  .context-menu {
+    min-width: 150px;
+  }
+
+  /* Slider/carousel */
+  .slider-container {
+    padding: 0 var(--space-sm);
+  }
+
+  .slide {
+    min-width: 280px;
+  }
+
+  /* Filters panel */
+  .filters-panel {
+    position: fixed;
+    left: -100%;
+    top: 72px;
+    width: 100%;
+    height: calc(100vh - 72px);
+    z-index: 999;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .filters-panel.active {
+    left: 0;
+  }
+
+  .filters-toggle {
+    display: flex;
+  }
+
+  /* Sort dropdown */
+  .sort-dropdown {
+    position: relative;
+    width: 100%;
+    margin-top: var(--space-md);
+  }
+
+  /* Map embeds */
+  .map-container {
+    height: 250px;
+  }
+
+  /* Video embeds */
+  .video-container {
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  }
+
+  .video-container iframe {
+    height: 100%;
+  }
+
+  /* Image gallery */
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .gallery-item {
+    aspect-ratio: 1;
+  }
+
+  /* Comparison tables */
+  .comparison-table {
+    font-size: 13px;
+  }
+
+  .comparison-table th,
+  .comparison-table td {
+    padding: var(--space-sm);
+  }
+
+  /* Feature comparison */
+  .feature-comparison {
+    overflow-x: auto;
+  }
+
+  /* Dashboard stats cards */
+  .stat-card {
+    padding: var(--space-md);
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 13px;
+  }
+
+  /* Charts legend */
+  .chart-legend {
+    font-size: 12px;
+  }
+
+  /* Download cards */
+  .download-card {
+    padding: var(--space-md);
+  }
+
+  .download-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* Integration cards */
+  .integration-card {
+    padding: var(--space-md);
+  }
+
+  .integration-logo {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* Team member cards */
+  .team-card {
+    padding: var(--space-md);
+    text-align: center;
+  }
+
+  .team-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  /* Testimonial carousel */
+  .testimonial-carousel {
+    padding: 0 var(--space-md);
+  }
+
+  /* Feature highlights */
+  .feature-highlight {
+    padding: var(--space-lg);
+  }
+
+  .feature-highlight-icon {
+    font-size: 32px;
+  }
+
+  /* Pricing toggle */
+  .pricing-toggle {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  /* Anchor links */
+  .anchor-nav {
+    position: relative;
+    top: 0;
+    margin-bottom: var(--space-md);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  /* Back to top button */
+  .back-to-top {
+    bottom: var(--space-md);
+    right: var(--space-md);
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Print styles */
+  @media print {
+    .navbar,
+    .sidebar,
+    .footer,
+    .btn,
+    .back-to-top {
+      display: none !important;
+    }
+
+    .main-content {
+      margin: 0 !important;
+    }
+
+    .card {
+      break-inside: avoid;
+    }
+  }
+}
+
+/* ==================== Small Phone (≤480px) ==================== */
+@media (max-width: 480px) {
+  /* Even smaller adjustments */
+  .container {
+    padding: 0 var(--space-sm);
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  h4 {
+    font-size: 1.1rem;
+  }
+
+  p {
+    font-size: 14px;
+  }
+
+  /* Logo */
+  .logo {
+    font-size: 1.25rem;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  /* Navbar */
+  .navbar-content {
+    height: 60px;
+  }
+
+  .mobile-menu-toggle {
+    font-size: 20px;
+  }
+
+  /* Hero */
+  .hero-content h1 {
+    font-size: 24px;
+  }
+
+  .hero-subtitle {
+    font-size: 13px;
+  }
+
+  /* Cards */
+  .card {
+    padding: var(--space-md);
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 10px var(--space-sm);
+    font-size: 13px;
+  }
+
+  .btn-lg {
+    padding: 12px var(--space-md);
+    font-size: 14px;
+  }
+
+  /* Forms */
+  .auth-box {
+    padding: var(--space-md);
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  /* Stats */
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  /* Feature cards */
+  .feature-card {
+    padding: var(--space-md);
+  }
+
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  /* Tags */
+  .tag {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  /* Pagination */
+  .pagination .btn {
+    min-width: 32px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  /* Modal */
+  .modal-content {
+    margin: var(--space-sm);
+    max-width: calc(100% - var(--space-md));
+  }
+
+  /* Toast */
+  .toast {
+    font-size: 13px;
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  /* Footer */
+  .footer {
+    padding: var(--space-lg) 0 var(--space-md);
+  }
+
+  .footer-content {
+    gap: var(--space-md);
+  }
+
+  /* Quick actions - single column */
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  /* Comments */
+  .comment-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Gallery */
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Team */
+  .team-avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  /* File list */
+  .file-item {
+    padding: var(--space-sm);
+  }
+
+  .file-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb-item:not(:last-child)::after {
+    margin-left: 6px;
+  }
+
+  /* Progress */
+  .progress-label {
+    font-size: 12px;
+  }
+
+  /* Alerts */
+  .alert {
+    font-size: 13px;
+  }
+
+  /* Tooltips disabled on small screens */
+  [data-tooltip] {
+    pointer-events: none;
+  }
+
+  /* Touch targets - ensure minimum size */
+  .btn,
+  .nav-link,
+  .action-btn,
+  .tag,
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Increase spacing for touch */
+  .btn-group-vertical > .btn {
+    margin-top: var(--space-sm);
+  }
+
+  /* Full width inputs on small screens */
+  input,
+  select,
+  textarea {
+    width: 100%;
+  }
+
+  /* Search box */
+  .search-box {
+    flex-direction: row;
+    padding: var(--space-sm);
+  }
+
+  .search-box input {
+    flex: 1;
+  }
+
+  /* List items */
+  .list-item {
+    padding: var(--space-md);
+  }
+
+  /* Menu items */
+  .menu-item {
+    padding: var(--space-md);
+  }
+
+  /* Icon buttons */
+  .btn-icon {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Social login */
+  .social-login {
+    flex-direction: column;
+  }
+
+  .social-btn {
+    width: 100%;
+  }
+
+  /* Two-factor code input */
+  .code-input {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 18px;
+  }
+
+  /* OTP buttons */
+  .otp-digit {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  /* Date picker */
+  .date-picker {
+    font-size: 14px;
+  }
+
+  /* Time picker */
+  .time-picker {
+    font-size: 14px;
+  }
+
+  /* Color picker */
+  .color-picker {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Range slider */
+  input[type="range"] {
+    height: 44px;
+  }
+
+  /* File input */
+  .file-input-label {
+    padding: var(--space-md);
+    font-size: 13px;
+  }
+
+  /* Image preview */
+  .image-preview {
+    min-height: 150px;
+  }
+
+  /* Avatar upload */
+  .avatar-upload {
+    width: 100px;
+    height: 100px;
+  }
+
+  /* Switch toggle */
+  .switch {
+    width: 50px;
+    height: 28px;
+  }
+
+  .switch::after {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Radio cards */
+  .radio-card {
+    padding: var(--space-md);
+  }
+
+  /* Checklist */
+  .checklist-item {
+    padding: var(--space-md);
+  }
+
+  /* Stepper */
+  .stepper-item {
+    padding: var(--space-md);
+  }
+
+  /* Notification item */
+  .notification-item {
+    padding: var(--space-md);
+  }
+
+  /* Message bubble */
+  .message-bubble {
+    max-width: calc(100% - var(--space-lg));
+    padding: var(--space-md);
+  }
+
+  /* Chat input */
+  .chat-input {
+    padding: var(--space-md);
+  }
+
+  /* Stickers */
+  .sticker-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Emoji picker */
+  .emoji-btn {
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 20px;
+  }
+
+  /* Gif selector */
+  .gif-item {
+    height: 100px;
+  }
+
+  /* Voice recorder */
+  .voice-record-btn {
+    width: 64px;
+    height: 64px;
+  }
+
+  /* Attachment preview */
+  .attachment-preview {
+    width: 80px;
+    height: 80px;
+  }
+
+  /* Map marker */
+  .map-marker {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Location list */
+  .location-item {
+    padding: var(--space-md);
+  }
+
+  /* Calendar event */
+  .calendar-event {
+    padding: var(--space-sm);
+    font-size: 12px;
+  }
+
+  /* Schedule item */
+  .schedule-item {
+    padding: var(--space-md);
+  }
+
+  /* Appointment card */
+  .appointment-card {
+    padding: var(--space-md);
+  }
+
+  /* Booking summary */
+  .booking-summary {
+    padding: var(--space-md);
+  }
+
+  /* Ticket */
+  .ticket {
+    padding: var(--space-md);
+  }
+
+  /* QR code */
+  .qr-code {
+    width: 150px;
+    height: 150px;
+  }
+
+  /* Barcode */
+  .barcode {
+    height: 60px;
+  }
+
+  /* Receipt */
+  .receipt {
+    padding: var(--space-md);
+  }
+
+  /* Invoice */
+  .invoice {
+    padding: var(--space-md);
+  }
+
+  /* Payment method */
+  .payment-method {
+    padding: var(--space-md);
+  }
+
+  /* Credit card */
+  .credit-card {
+    padding: var(--space-md);
+    min-height: 180px;
+  }
+
+  /* Bank account */
+  .bank-account {
+    padding: var(--space-md);
+  }
+
+  /* Transaction list */
+  .transaction-item {
+    padding: var(--space-md);
+  }
+
+  /* Balance */
+  .balance-display {
+    font-size: 1.5rem;
+  }
+
+  /* Currency converter */
+  .currency-input {
+    padding: var(--space-md);
+  }
+
+  /* Investment card */
+  .investment-card {
+    padding: var(--space-md);
+  }
+
+  /* Portfolio summary */
+  .portfolio-summary {
+    padding: var(--space-md);
+  }
+
+  /* Stock chart */
+  .stock-chart {
+    height: 200px;
+  }
+
+  /* News item */
+  .news-item {
+    padding: var(--space-md);
+  }
+
+  /* Article card */
+  .article-card {
+    padding: var(--space-md);
+  }
+
+  /* Blog post */
+  .blog-post {
+    padding: var(--space-md);
+  }
+
+  /* Reader mode */
+  .reader-content {
+    font-size: 16px;
+    line-height: 1.8;
+  }
+
+  /* Bookmark */
+  .bookmark-item {
+    padding: var(--space-md);
+  }
+
+  /* Note card */
+  .note-card {
+    padding: var(--space-md);
+  }
+
+  /* Todo item */
+  .todo-item {
+    padding: var(--space-md);
+  }
+
+  /* Habit tracker */
+  .habit-item {
+    padding: var(--space-md);
+  }
+
+  /* Goal card */
+  .goal-card {
+    padding: var(--space-md);
+  }
+
+  /* Timer display */
+  .timer-display {
+    font-size: 2rem;
+  }
+
+  /* Stopwatch */
+  .stopwatch-display {
+    font-size: 2rem;
+  }
+
+  /* Countdown */
+  .countdown-display {
+    font-size: 1.75rem;
+  }
+
+  /* Alarm card */
+  .alarm-card {
+    padding: var(--space-md);
+  }
+
+  /* World clock */
+  .world-clock-card {
+    padding: var(--space-md);
+  }
+
+  /* Weather widget */
+  .weather-widget {
+    padding: var(--space-md);
+  }
+
+  /* Forecast */
+  .forecast-item {
+    padding: var(--space-sm);
+  }
+
+  /* Fitness tracker */
+  .fitness-card {
+    padding: var(--space-md);
+  }
+
+  /* Workout item */
+  .workout-item {
+    padding: var(--space-md);
+  }
+
+  /* Exercise card */
+  .exercise-card {
+    padding: var(--space-md);
+  }
+
+  /* Nutrition log */
+  .nutrition-item {
+    padding: var(--space-md);
+  }
+
+  /* Sleep tracker */
+  .sleep-card {
+    padding: var(--space-md);
+  }
+
+  /* Water intake */
+  .water-tracker {
+    padding: var(--space-md);
+  }
+
+  /* Meditation timer */
+  .meditation-card {
+    padding: var(--space-md);
+  }
+
+  /* Breathing exercise */
+  .breathing-circle {
+    width: 150px;
+    height: 150px;
+  }
+
+  /* Mood tracker */
+  .mood-selector {
+    padding: var(--space-md);
+  }
+
+  /* Journal entry */
+  .journal-entry {
+    padding: var(--space-md);
+  }
+
+  /* Gratitude list */
+  .gratitude-item {
+    padding: var(--space-md);
+  }
+
+  /* Affirmation card */
+  .affirmation-card {
+    padding: var(--space-lg);
+  }
+
+  /* Quote card */
+  .quote-card {
+    padding: var(--space-lg);
+  }
+
+  /* Poem */
+  .poem-card {
+    padding: var(--space-lg);
+  }
+
+  /* Story card */
+  .story-card {
+    padding: var(--space-md);
+  }
+
+  /* Book item */
+  .book-item {
+    padding: var(--space-md);
+  }
+
+  /* Movie card */
+  .movie-card {
+    padding: var(--space-md);
+  }
+
+  /* TV show card */
+  .tv-card {
+    padding: var(--space-md);
+  }
+
+  /* Music player */
+  .music-player {
+    padding: var(--space-md);
+  }
+
+  /* Playlist item */
+  .playlist-item {
+    padding: var(--space-md);
+  }
+
+  /* Podcast episode */
+  .podcast-item {
+    padding: var(--space-md);
+  }
+
+  /* Radio station */
+  .radio-item {
+    padding: var(--space-md);
+  }
+
+  /* Game card */
+  .game-card {
+    padding: var(--space-md);
+  }
+
+  /* Score display */
+  .score-display {
+    font-size: 2rem;
+  }
+
+  /* Leaderboard */
+  .leaderboard-item {
+    padding: var(--space-md);
+  }
+
+  /* Achievement card */
+  .achievement-card {
+    padding: var(--space-md);
+  }
+
+  /* Badge grid */
+  .badge-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Profile header */
+  .profile-header {
+    padding: var(--space-lg);
+  }
+
+  /* Profile avatar */
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  /* Profile stats */
+  .profile-stats {
+    flex-wrap: wrap;
+  }
+
+  /* Social link */
+  .social-link {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Following card */
+  .following-card {
+    padding: var(--space-md);
+  }
+
+  /* Follower card */
+  .follower-card {
+    padding: var(--space-md);
+  }
+
+  /* Group card */
+  .group-card {
+    padding: var(--space-md);
+  }
+
+  /* Event card */
+  .event-card {
+    padding: var(--space-md);
+  }
+
+  /* RSVP button */
+  .rsvp-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Poll card */
+  .poll-card {
+    padding: var(--space-md);
+  }
+
+  /* Poll option */
+  .poll-option {
+    padding: var(--space-md);
+  }
+
+  /* Survey question */
+  .survey-question {
+    padding: var(--space-md);
+  }
+
+  /* Feedback form */
+  .feedback-form {
+    padding: var(--space-md);
+  }
+
+  /* Support ticket */
+  .ticket-card {
+    padding: var(--space-md);
+  }
+
+  /* FAQ item */
+  .faq-item {
+    padding: var(--space-md);
+  }
+
+  /* Help article */
+  .help-article {
+    padding: var(--space-md);
+  }
+
+  /* Contact form */
+  .contact-form {
+    padding: var(--space-md);
+  }
+
+  /* Report form */
+  .report-form {
+    padding: var(--space-md);
+  }
+
+  /* Privacy settings */
+  .privacy-item {
+    padding: var(--space-md);
+  }
+
+  /* Security setting */
+  .security-item {
+    padding: var(--space-md);
+  }
+
+  /* Notification setting */
+  .notification-setting {
+    padding: var(--space-md);
+  }
+
+  /* Account setting */
+  .account-setting {
+    padding: var(--space-md);
+  }
+
+  /* Preference card */
+  .preference-card {
+    padding: var(--space-md);
+  }
+
+  /* Language selector */
+  .language-option {
+    padding: var(--space-md);
+  }
+
+  /* Theme selector */
+  .theme-option {
+    padding: var(--space-md);
+  }
+
+  /* Accessibility option */
+  .a11y-option {
+    padding: var(--space-md);
+  }
+
+  /* Display setting */
+  .display-setting {
+    padding: var(--space-md);
+  }
+
+  /* Sound setting */
+  .sound-setting {
+    padding: var(--space-md);
+  }
+
+  /* Vibration setting */
+  .vibration-setting {
+    padding: var(--space-md);
+  }
+
+  /* Storage usage */
+  .storage-card {
+    padding: var(--space-md);
+  }
+
+  /* Data usage */
+  .data-usage-card {
+    padding: var(--space-md);
+  }
+
+  /* Network status */
+  .network-status {
+    padding: var(--space-md);
+  }
+
+  /* Battery status */
+  .battery-status {
+    padding: var(--space-md);
+  }
+
+  /* Device info */
+  .device-info {
+    padding: var(--space-md);
+  }
+
+  /* App version */
+  .app-version {
+    padding: var(--space-md);
+  }
+
+  /* About page */
+  .about-content {
+    padding: var(--space-md);
+  }
+
+  /* Terms of service */
+  .terms-content {
+    padding: var(--space-md);
+  }
+
+  /* Privacy policy */
+  .privacy-content {
+    padding: var(--space-md);
+  }
+
+  /* License info */
+  .license-content {
+    padding: var(--space-md);
+  }
+
+  /* Changelog */
+  .changelog-item {
+    padding: var(--space-md);
+  }
+
+  /* Credits */
+  .credit-item {
+    padding: var(--space-md);
+  }
+
+  /* Links page */
+  .link-item {
+    padding: var(--space-md);
+  }
+
+  /* Sitemap */
+  .sitemap-item {
+    padding: var(--space-md);
+  }
+}
+
+/* ==================== Landscape Mode ==================== */
+@media (max-width: 768px) and (orientation: landscape) {
+  /* Reduce vertical spacing in landscape */
+  .hero-content h1 {
+    font-size: 24px;
+  }
+
+  .hero-subtitle {
+    font-size: 13px;
+    margin-bottom: var(--space-md);
+  }
+
+  .hero-buttons {
+    flex-direction: row;
+  }
+
+  .hero-buttons .btn {
+    width: auto;
+  }
+
+  /* Adjust navbar height */
+  .navbar-content {
+    height: 56px;
+  }
+
+  .mobile-menu-toggle {
+    padding: 4px;
+  }
+
+  /* Adjust modal */
+  .modal-content {
+    max-height: 80vh;
+  }
+
+  /* Adjust forms */
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Adjust stats */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Adjust quick actions */
+  .quick-actions {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .action-btn {
+    padding: var(--space-sm);
+  }
+
+  /* Adjust pagination */
+  .pagination {
+    flex-wrap: nowrap;
+  }
+}
+
+/* ==================== Touch Device Optimizations ==================== */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .btn:hover,
+  .nav-link:hover,
+  .card:hover,
+  .feature-card:hover {
+    transform: none;
+  }
+
+  /* Add active state feedback */
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .nav-link:active {
+    opacity: 0.7;
+  }
+
+  /* Make dropdowns wider for touch */
+  .dropdown-menu {
+    min-width: 200px;
+  }
+
+  .dropdown-item {
+    padding: var(--space-md);
+    min-height: 44px;
+  }
+
+  /* Increase tap targets */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Adjust scroll snap */
+  .snap-container {
+    scroll-snap-type: x mandatory;
+  }
+
+  .snap-item {
+    scroll-snap-align: center;
+  }
+}
+
+/* ==================== High DPI Displays ==================== */
+@media (-webkit-min-device-pixel-ratio: 2),
+       (min-resolution: 192dpi) {
+  /* Crisper borders on high DPI */
+  .card,
+  .btn,
+  input,
+  select,
+  textarea {
+    border-width: 0.5px;
+  }
+
+  /* Smoother icons */
+  .fa,
+  .fas,
+  .far,
+  .fab {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ==================== Dark Mode Support ==================== */
+@media (prefers-color-scheme: dark) {
+  /* Ensure dark mode colors work well on mobile */
+  :root {
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+  }
+}
+
+/* ==================== Reduced Motion ==================== */
+@media (prefers-reduced-motion: reduce) {
+  /* Disable animations for users who prefer reduced motion */
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .floating-card,
+  .gradient-orb,
+  .tech-ring {
+    animation: none;
+  }
+}
+
+/* ==================== Print Styles (Mobile) ==================== */
+@media print and (max-width: 768px) {
+  body {
+    font-size: 10pt;
+  }
+
+  .container {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .card,
+  .section {
+    page-break-inside: avoid;
+  }
+}

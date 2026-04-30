@@ -1,0 +1,53 @@
+/* ==================== 海洋青主题 ==================== */
+:root {
+    /* 主色调 */
+    --primary-color: #14b8a6;
+    --primary-dark: #0d9488;
+    --primary-light: #2dd4bf;
+    --secondary-color: #06b6d4;
+    --accent-color: #22d3ee;
+    
+    /* 状态色 */
+    --success-color: #22c55e;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+    
+    /* 背景色 */
+    --bg-primary: #134e4a;
+    --bg-secondary: #115e59;
+    --bg-tertiary: #0f766e;
+    --bg-card: rgba(17, 94, 89, 0.8);
+    
+    /* 文字色 */
+    --text-primary: #f0fdfa;
+    --text-secondary: #ccfbf1;
+    --text-muted: #99f6e4;
+    
+    /* 边框和阴影 */
+    --border-color: rgba(20, 184, 166, 0.2);
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --glow-color: rgba(20, 184, 166, 0.5);
+    
+    /* 渐变 */
+    --gradient-primary: linear-gradient(135deg, #14b8a6, #06b6d4);
+    --gradient-glow: radial-gradient(circle, rgba(20, 184, 166, 0.15), transparent);
+}
+
+/* 主题特定的发光效果 */
+.ocean-teal-glow {
+    box-shadow: 0 0 30px rgba(20, 184, 166, 0.3);
+}
+
+/* 按钮渐变 */
+.btn-primary {
+    background: linear-gradient(135deg, #14b8a6, #06b6d4);
+}
+
+/* 悬浮球 */
+.gradient-orb.orb-1 {
+    background: linear-gradient(135deg, #14b8a6, #06b6d4);
+}
+
+.gradient-orb.orb-2 {
+    background: linear-gradient(135deg, #22d3ee, #06b6d4);
+}

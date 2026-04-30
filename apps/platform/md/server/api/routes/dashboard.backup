@@ -1,0 +1,357 @@
+"""
+Dashboard API Routes
+仪表盘 API 路由
+
+提供用户仪表板数据、统计信息、最近活动等
+"""
+from fastapi import APIRouter, Depends, Query
+from typing import Optional, List, Dict, Any
+from datetime import datetime, timedelta
+from pydantic import BaseModel
+import logging
+
+from database import get_db
+from psycopg2.extras import RealDictCursor
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/dashboard", tags=["仪表盘"])
+
+# DB配置需要在调用时传入
+DB_CONFIG = None
+
+
+def set_db_config(config):
+    """设置数据库配置"""
+    global DB_CONFIG
+    DB_CONFIG = config
+
+
+# ============================================
+# Response Models
+# ============================================
+
+class DashboardStats(BaseModel):
+    """仪表板统计数据"""
+    totalViews: int
+    totalUsers: int
+    totalSkills: int
+    conversionRate: float
+    revenue: float
+    viewsChange: float
+    usersChange: float
+    conversionChange: float
+    revenueChange: float
+
+
+class ActivityItem(BaseModel):
+    """活动项"""
+    id: int
+    action: str
+    username: Optional[str] = None
+    description: str
+    timestamp: datetime
+    icon: str
+
+
+class QuickAction(BaseModel):
+    """快速操作"""
+    name: str
+    icon: str
+    url: str
+    description: str
+
+
+# ============================================
+# Dashboard API Endpoints
+# ============================================
+
+@router.get("/stats", response_model=Dict[str, Any])
+async def get_dashboard_stats(
+    days: int = Query(7, description="统计天数", ge=1, le=90),
+    language: str = Query("zh", description="语言")
+):
+    """
+    获取仪表板统计数据
+
+    返回访问量、用户数、转化率等核心指标
+    """
+    try:
+        with get_db(DB_CONFIG) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 计算时间范围
+                current_period_start = datetime.now() - timedelta(days=days)
+                previous_period_start = current_period_start - timedelta(days=days)
+
+                # 当前期间统计
+                cur.execute("""
+                    SELECT
+                        COUNT(DISTINCT user_id) as total_users,
+                        COUNT(*) as total_views
+                    FROM user_activity_logs
+                    WHERE created_at >= %s
+                """, (current_period_start,))
+                current_stats = cur.fetchone()
+
+                # 上一期间统计
+                cur.execute("""
+                    SELECT
+                        COUNT(DISTINCT user_id) as total_users,
+                        COUNT(*) as total_views
+                    FROM user_activity_logs
+                    WHERE created_at >= %s AND created_at < %s
+                """, (previous_period_start, current_period_start))
+                previous_stats = cur.fetchone()
+
+                # 总Skills数
+                cur.execute("""
+                    SELECT COUNT(*) as count
+                    FROM skills
+                    WHERE is_deleted = FALSE
+                      AND skill_id NOT LIKE 'seed_%%'
+                """)
+                total_skills = cur.fetchone()['count']
+
+                # 模拟转化率和收入数据（实际应该从订单表计算）
+                conversion_rate = 68.2
+                revenue = 12345.0
+
+                # 计算变化率
+                views_change = 0
+                users_change = 0
+
+                if previous_stats['total_views'] > 0:
+                    views_change = ((current_stats['total_views'] - previous_stats['total_views']) / previous_stats['total_views']) * 100
+
+                if previous_stats['total_users'] > 0:
+                    users_change = ((current_stats['total_users'] - previous_stats['total_users']) / previous_stats['total_users']) * 100
+
+                return {
+                    "success": True,
+                    "data": {
+                        "totalViews": current_stats['total_views'] or 0,
+                        "totalUsers": current_stats['total_users'] or 0,
+                        "totalSkills": total_skills,
+                        "conversionRate": conversion_rate,
+                        "revenue": revenue,
+                        "viewsChange": round(views_change, 1),
+                        "usersChange": round(users_change, 1),
+                        "conversionChange": 5.1,
+                        "revenueChange": -2.3
+                    }
+                }
+    except Exception as e:
+        logger.error(f"获取仪表板统计失败: {str(e)}")
+        return {
+            "success": False,
+            "message": f"获取仪表板统计失败: {str(e)}"
+        }
+
+
+@router.get("/recent-activity", response_model=Dict[str, Any])
+async def get_recent_activity(
+    limit: int = Query(10, description="返回数量", ge=1, le=50)
+):
+    """
+    获取最近活动列表
+
+    返回用户登录、内容创建等最近活动
+    """
+    try:
+        with get_db(DB_CONFIG) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT
+                        al.id,
+                        al.action,
+                        al.entity,
+                        al.entity_id,
+                        al.details,
+                        al.created_at,
+                        u.username,
+                        u.avatar_url
+                    FROM user_activity_logs al
+                    LEFT JOIN users u ON al.user_id = u.id
+                    ORDER BY al.created_at DESC
+                    LIMIT %s
+                """, (limit,))
+
+                activities = cur.fetchall()
+
+                # 格式化活动数据
+                formatted_activities = []
+                for activity in activities:
+                    # 根据action类型确定图标和描述
+                    icon_map = {
+                        'LOGIN': 'fa-sign-in-alt',
+                        'LOGOUT': 'fa-sign-out-alt',
+                        'CREATE_SKILL': 'fa-file-alt',
+                        'UPDATE_SKILL': 'fa-edit',
+                        'DELETE_SKILL': 'fa-trash',
+                        'REGISTER': 'fa-user-plus',
+                        'COMMENT': 'fa-comment',
+                        'DOWNLOAD': 'fa-download',
+                        'FAVORITE': 'fa-heart'
+                    }
+
+                    icon = icon_map.get(activity['action'], 'fa-circle')
+
+                    # 构建描述
+                    description = f"{activity.get('username', '未知用户')} 执行了 {activity['action']} 操作"
+
+                    formatted_activities.append({
+                        "id": activity['id'],
+                        "action": activity['action'],
+                        "username": activity.get('username'),
+                        "description": description,
+                        "timestamp": activity['created_at'].isoformat() if activity['created_at'] else None,
+                        "icon": icon
+                    })
+
+                return {
+                    "success": True,
+                    "data": formatted_activities
+                }
+    except Exception as e:
+        logger.error(f"获取最近活动失败: {str(e)}")
+        return {
+            "success": False,
+            "message": f"获取最近活动失败: {str(e)}",
+            "data": []
+        }
+
+
+@router.get("/quick-actions", response_model=Dict[str, Any])
+async def get_quick_actions():
+    """
+    获取快速操作列表
+
+    返回用户常用的快捷操作
+    """
+    quick_actions = [
+        {
+            "name": "新建项目",
+            "icon": "fa-plus-circle",
+            "url": "projects.html",
+            "description": "创建新的项目"
+        },
+        {
+            "name": "发送消息",
+            "icon": "fa-envelope",
+            "url": "messages.html",
+            "description": "给其他用户发送消息"
+        },
+        {
+            "name": "查看分析",
+            "icon": "fa-chart-line",
+            "url": "analytics.html",
+            "description": "查看数据分析"
+        },
+        {
+            "name": "设置",
+            "icon": "fa-cog",
+            "url": "settings.html",
+            "description": "管理账户和偏好设置"
+        }
+    ]
+
+    return {
+        "success": True,
+        "data": quick_actions
+    }
+
+
+@router.get("/user-activity", response_model=Dict[str, Any])
+async def get_user_activity(
+    user_id: int = Query(..., description="用户ID"),
+    days: int = Query(30, description="统计天数", ge=1, le=365)
+):
+    """
+    获取用户活动统计
+
+    返回指定用户的活动数据和趋势
+    """
+    try:
+        with get_db(DB_CONFIG) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                start_date = datetime.now() - timedelta(days=days)
+
+                # 用户活动统计
+                cur.execute("""
+                    SELECT
+                        COUNT(*) as total_actions,
+                        COUNT(DISTINCT DATE(created_at)) as active_days,
+                        COUNT(CASE WHEN action = 'LOGIN' THEN 1 END) as logins,
+                        COUNT(CASE WHEN action = 'CREATE_SKILL' THEN 1 END) as skills_created
+                    FROM user_activity_logs
+                    WHERE user_id = %s
+                      AND created_at >= %s
+                """, (user_id, start_date))
+
+                stats = cur.fetchone()
+
+                # 每日活动趋势（最近7天）
+                cur.execute("""
+                    SELECT
+                        DATE(created_at) as date,
+                        COUNT(*) as actions
+                    FROM user_activity_logs
+                    WHERE user_id = %s
+                      AND created_at >= %s
+                    GROUP BY DATE(created_at)
+                    ORDER BY date DESC
+                    LIMIT 7
+                """, (user_id, datetime.now() - timedelta(days=7)))
+
+                daily_trend = []
+                for row in cur.fetchall():
+                    daily_trend.append({
+                        "date": row['date'].isoformat() if row['date'] else None,
+                        "actions": row['actions']
+                    })
+
+                return {
+                    "success": True,
+                    "data": {
+                        "totalActions": stats['total_actions'] or 0,
+                        "activeDays": stats['active_days'] or 0,
+                        "logins": stats['logins'] or 0,
+                        "skillsCreated": stats['skills_created'] or 0,
+                        "dailyTrend": list(reversed(daily_trend))
+                    }
+                }
+    except Exception as e:
+        logger.error(f"获取用户活动失败: {str(e)}")
+        return {
+            "success": False,
+            "message": f"获取用户活动失败: {str(e)}"
+        }
+
+
+@router.get("/overview", response_model=Dict[str, Any])
+async def get_dashboard_overview():
+    """
+    获取仪表板概览数据
+
+    一次性返回所有仪表板需要的数据
+    """
+    try:
+        # 并行获取各种数据
+        stats_result = await get_dashboard_stats()
+        activity_result = await get_recent_activity(limit=5)
+        actions_result = await get_quick_actions()
+
+        return {
+            "success": True,
+            "data": {
+                "stats": stats_result.get("data", {}),
+                "recentActivity": activity_result.get("data", []),
+                "quickActions": actions_result.get("data", [])
+            }
+        }
+    except Exception as e:
+        logger.error(f"获取仪表板概览失败: {str(e)}")
+        return {
+            "success": False,
+            "message": f"获取仪表板概览失败: {str(e)}"
+        }

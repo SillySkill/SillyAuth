@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="dashboard.title">控制台 - 挺傻的网站</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/tech-blue.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo">
+                <img src="" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <i class="fas fa-cube" style="display:none;"></i>
+                <span data-i18n="site.name">挺傻的网站</span>
+            </a>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span data-i18n="dashboard.overview">概览</span>
+            </a>
+            <a href="analytics.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span data-i18n="dashboard.analytics">分析</span>
+            </a>
+            <a href="projects.html" class="nav-item">
+                <i class="fas fa-folder"></i>
+                <span data-i18n="dashboard.projects">项目</span>
+            </a>
+            <a href="messages.html" class="nav-item">
+                <i class="fas fa-envelope"></i>
+                <span data-i18n="dashboard.messages">消息</span>
+                <span class="badge">3</span>
+            </a>
+            <a href="settings.html" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span data-i18n="nav.settings">设置</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <span class="user-name">Test User</span>
+                    <span class="user-role">Free Plan</span>
+                </div>
+                <button class="btn-icon" onclick="auth.logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 顶部栏 -->
+        <header class="top-bar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="搜索...">
+            </div>
+            
+            <div class="top-actions">
+                <button class="btn-icon">
+                    <i class="fas fa-bell"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- 页面内容 -->
+        <div class="page-content">
+            <div class="page-header">
+                <h1 data-i18n="dashboard.welcome">欢迎回来，Test User</h1>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <span class="stat-change">+12.5%</span>
+                    </div>
+                    <div class="stat-value">24,521</div>
+                    <div class="stat-label">总访问量</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <span class="stat-change">+8.2%</span>
+                    </div>
+                    <div class="stat-value">1,234</div>
+                    <div class="stat-label">新用户</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <span class="stat-change">+5.1%</span>
+                    </div>
+                    <div class="stat-value">68.2%</div>
+                    <div class="stat-label">转化率</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #f87171);">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <span class="stat-change negative">-2.3%</span>
+                    </div>
+                    <div class="stat-value">¥12,345</div>
+                    <div class="stat-label">收入</div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">最近活动</h3>
+                        <a href="#" class="btn btn-text">查看全部</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text"><strong>张三</strong> 登录了系统</div>
+                                    <div class="activity-time">2分钟前</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text"><strong>李四</strong> 创建了新项目 <strong>网站重构</strong></div>
+                                    <div class="activity-time">1小时前</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-comment"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text"><strong>王五</strong> 回复了你的消息</div>
+                                    <div class="activity-time">3小时前</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">快速操作</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <a href="projects.html" class="action-btn">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>新建项目</span>
+                            </a>
+                            <a href="messages.html" class="action-btn">
+                                <i class="fas fa-envelope"></i>
+                                <span>发送消息</span>
+                            </a>
+                            <a href="analytics.html" class="action-btn">
+                                <i class="fas fa-chart-line"></i>
+                                <span>查看分析</span>
+                            </a>
+                            <a href="settings.html" class="action-btn">
+                                <i class="fas fa-cog"></i>
+                                <span>设置</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/mobile-menu.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        // 动态加载Logo
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoImg = document.querySelector('.logo-img');
+            if (logoImg && window.getFileProxyUrl) {
+                logoImg.src = window.getFileProxyUrl('silly/logo/logo.svg');
+            }
+        });
+    </script>
+</body>
+</html>

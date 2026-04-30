@@ -1,0 +1,14 @@
+id: skills
+name: Skills 平台模块
+version: 1.0.0
+description: 提供 Skills 托管、发布、管理功能
+dependencies: [auth, storage]
+
+config:
+  max_skill_size_mb: 100
+  allowed_extensions: [py, js, json, yaml]
+  approval_required: true
+
+routes:
+  prefix: /api/skills
+  tags: [Skills]

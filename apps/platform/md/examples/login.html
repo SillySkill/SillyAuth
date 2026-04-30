@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="login.title">登录 - 挺傻的网站</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/tech-blue.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QRCode Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+</head>
+<body class="auth-page">
+    <!-- 背景动画 -->
+    <div class="auth-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+
+    <!-- 语言选择器 -->
+    <div class="auth-lang-selector">
+        <button class="lang-btn" id="langBtn">
+            <i class="fas fa-globe"></i>
+            <span>中文</span>
+        </button>
+        <div class="lang-dropdown">
+            <a href="#" data-lang="zh-CN">中文</a>
+            <a href="#" data-lang="en">English</a>
+            <a href="#" data-lang="ja">日本語</a>
+            <a href="#" data-lang="ko">한국어</a>
+        </div>
+    </div>
+
+    <!-- 登录容器 -->
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <a href="index.html" class="logo">
+                    <img src="" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <i class="fas fa-cube" style="display:none;"></i>
+                    <span data-i18n="site.name">挺傻的网站</span>
+                </a>
+                <!-- 登录方式切换 -->
+                <div class="login-tabs">
+                    <button type="button" class="login-tab active" data-tab="password">
+                        <i class="fas fa-key"></i>
+                        <span>密码登录</span>
+                    </button>
+                    <button type="button" class="login-tab" data-tab="qrcode">
+                        <i class="fas fa-qrcode"></i>
+                        <span>扫码登录</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 密码登录表单 -->
+            <form class="auth-form" id="passwordForm">
+                <div class="form-group">
+                    <label for="email" data-i18n="form.email">邮箱地址</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" required
+                               placeholder="name@example.com"
+                               data-i18n-placeholder="form.emailPlaceholder">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" data-i18n="form.password">密码</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" required
+                               placeholder="••••••••"
+                               data-i18n-placeholder="form.passwordPlaceholder">
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="remember">
+                        <span data-i18n="form.remember">记住我</span>
+                    </label>
+                    <a href="forgot-password.html" class="forgot-link" data-i18n="form.forgotPassword">忘记密码？</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full" id="passwordSubmit">
+                    <span>登录</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <!-- 二维码登录区域 -->
+            <div class="qr-login-section hidden" id="qrcodeSection">
+                <div class="qr-container">
+                    <div class="qr-code-box" id="qrCodeBox">
+                        <div class="qr-loading" id="qrLoading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>生成二维码中...</span>
+                        </div>
+                        <div class="qr-code-display hidden" id="qrCodeDisplay">
+                            <!-- QR code will be inserted here -->
+                        </div>
+                    </div>
+                    <div class="qr-status" id="qrStatus">
+                        <span class="status-dot"></span>
+                        <span class="status-text">等待扫码...</span>
+                    </div>
+                    <p class="qr-hint">打开 SillyMD App 扫码登录</p>
+                    <button type="button" class="btn btn-secondary btn-full" id="refreshQR" style="margin-top: 1rem;">
+                        <i class="fas fa-redo"></i>
+                        <span>刷新二维码</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="auth-divider" id="passwordDivider">
+                <span data-i18n="auth.orContinueWith">或使用以下方式</span>
+            </div>
+
+            <div class="social-login" id="socialLogin">
+                <button class="social-btn google">
+                    <i class="fab fa-google"></i>
+                    <span>Google</span>
+                </button>
+                <button class="social-btn github">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub</span>
+                </button>
+            </div>
+
+            <div class="auth-footer">
+                <p data-i18n="login.noAccount">还没有账户？</p>
+                <a href="register.html" class="auth-link" data-i18n="login.registerNow">立即注册</a>
+            </div>
+        </div>
+
+        <!-- 装饰元素 -->
+        <div class="auth-decoration">
+            <div class="tech-ring"></div>
+            <div class="tech-ring ring-2"></div>
+            <div class="floating-icons">
+                <i class="fas fa-shield-alt"></i>
+                <i class="fas fa-lock"></i>
+                <i class="fas fa-fingerprint"></i>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/mobile-menu.js"></script>
+    <script>
+        // 动态加载Logo
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoImg = document.querySelector('.logo-img');
+            if (logoImg && window.getFileProxyUrl) {
+                logoImg.src = window.getFileProxyUrl('silly/logo/logo.svg');
+            }
+
+            // 初始化登录标签切换
+            initLoginTabs();
+
+            // 初始化二维码登录
+            initQRCodeLogin();
+        });
+
+        // 登录标签切换
+        function initLoginTabs() {
+            const tabs = document.querySelectorAll('.login-tab');
+            const passwordForm = document.getElementById('passwordForm');
+            const qrcodeSection = document.getElementById('qrcodeSection');
+            const passwordDivider = document.getElementById('passwordDivider');
+            const socialLogin = document.getElementById('socialLogin');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    if (tabName === 'password') {
+                        passwordForm.classList.remove('hidden');
+                        qrcodeSection.classList.add('hidden');
+                        passwordDivider.style.display = '';
+                        socialLogin.style.display = '';
+                        stopQRPolling();
+                    } else {
+                        passwordForm.classList.add('hidden');
+                        qrcodeSection.classList.remove('hidden');
+                        passwordDivider.style.display = 'none';
+                        socialLogin.style.display = 'none';
+                        generateQRCode();
+                    }
+                });
+            });
+        }
+
+        // 二维码登录
+        const API_BASE = '/api/v1';
+        let currentQRCode = null;
+        let qrPollingInterval = null;
+
+        function initQRCodeLogin() {
+            const refreshBtn = document.getElementById('refreshQR');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => {
+                    stopQRPolling();
+                    generateQRCode();
+                });
+            }
+        }
+
+        async function generateQRCode() {
+            const qrLoading = document.getElementById('qrLoading');
+            const qrDisplay = document.getElementById('qrCodeDisplay');
+            const qrStatus = document.getElementById('qrStatus');
+
+            // 显示加载状态
+            qrLoading.classList.remove('hidden');
+            qrDisplay.classList.add('hidden');
+            qrStatus.className = 'qr-status';
+            qrStatus.querySelector('.status-text').textContent = '等待扫码...';
+
+            try {
+                const response = await fetch(`${API_BASE}/qrcode/generate`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentQRCode = data.data.code;
+
+                    // 生成真正的二维码
+                    qrLoading.classList.add('hidden');
+                    qrDisplay.classList.remove('hidden');
+
+                    // 使用 qrcode-generator 生成二维码
+                    // 二维码内容：包含登录会话信息
+                    const qrData = JSON.stringify({
+                        code: currentQRCode,
+                        app: 'SillyMD',
+                        version: '1.0'
+                    });
+
+                    try {
+                        const qr = qrcode(0, 'M');
+                        qr.addData(qrData);
+                        qr.make();
+
+                        // 生成二维码图片
+                        const qrImageUrl = qr.createDataURL(8, 4);
+
+                        qrDisplay.innerHTML = `
+                            <img src="${qrImageUrl}" alt="Login QR Code" style="width: 180px; height: 180px;">
+                        `;
+                    } catch (e) {
+                        // 如果生成失败，显示占位符
+                        qrDisplay.innerHTML = `
+                            <div class="qr-placeholder-pattern">
+                                <i class="fas fa-qrcode"></i>
+                            </div>
+                            <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #94A3B8;">
+                                ${currentQRCode.substring(0, 8)}...
+                            </div>
+                        `;
+                    }
+
+                    // 开始轮询二维码状态
+                    startQRPolling();
+
+                    // 5分钟后自动过期
+                    setTimeout(() => {
+                        if (currentQRCode) {
+                            stopQRPolling();
+                            qrStatus.classList.add('expired');
+                            qrStatus.querySelector('.status-text').textContent = '二维码已过期，请刷新';
+                        }
+                    }, 5 * 60 * 1000);
+                } else {
+                    qrLoading.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--error-color);"></i><span>生成失败</span>';
+                }
+            } catch (error) {
+                qrLoading.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--error-color);"></i><span>网络错误</span>';
+            }
+        }
+
+        function startQRPolling() {
+            if (qrPollingInterval) return;
+
+            qrPollingInterval = setInterval(async () => {
+                if (!currentQRCode) return;
+
+                try {
+                    const response = await fetch(`${API_BASE}/qrcode/${currentQRCode}/status`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        updateQRStatus(data.data);
+                    }
+                } catch (error) {
+                    console.error('QR status check failed');
+                }
+            }, 2000);
+        }
+
+        function stopQRPolling() {
+            if (qrPollingInterval) {
+                clearInterval(qrPollingInterval);
+                qrPollingInterval = null;
+            }
+            currentQRCode = null;
+        }
+
+        function updateQRStatus(status) {
+            const qrStatus = document.getElementById('qrStatus');
+            const statusText = qrStatus.querySelector('.status-text');
+
+            qrStatus.classList.remove('scanned', 'confirmed', 'expired');
+
+            switch (status.status) {
+                case 'SCANNED':
+                    qrStatus.classList.add('scanned');
+                    statusText.textContent = '已扫码，请在手机上确认登录';
+                    break;
+                case 'CONFIRMED':
+                    qrStatus.classList.add('confirmed');
+                    statusText.textContent = '登录成功！正在跳转...';
+                    stopQRPolling();
+
+                    // 保存token并跳转
+                    if (status.token) {
+                        localStorage.setItem('token', status.token);
+                        setTimeout(() => {
+                            const redirect = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
+                            window.location.href = redirect;
+                        }, 1000);
+                    }
+                    break;
+                case 'EXPIRED':
+                    qrStatus.classList.add('expired');
+                    statusText.textContent = '二维码已过期，请刷新';
+                    stopQRPolling();
+                    break;
+                case 'CANCELLED':
+                    qrStatus.classList.add('expired');
+                    statusText.textContent = '登录已取消，请重新扫码';
+                    stopQRPolling();
+                    break;
+                default:
+                    statusText.textContent = '等待扫码...';
+            }
+        }
+
+        // 检查是否已登录
+        const token = localStorage.getItem('token');
+        if (token) {
+            fetch(`${API_BASE}/auth/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(res => res.json()).then(data => {
+                if (data.success) {
+                    window.location.href = 'index.html';
+                }
+            }).catch(() => {
+                localStorage.removeItem('token');
+            });
+        }
+    </script>
+</body>
+</html>

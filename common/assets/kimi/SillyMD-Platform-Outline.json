@@ -1,0 +1,184 @@
+{
+  "pages": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "SillyMD Skills 在线平台",
+      "content": "终极全量集成文档 v9.0 | 通用爬虫 + AI 智能审核 + 自动修正 + 多领域团队协作"
+    },
+    {
+      "number": 2,
+      "type": "table_of_contents",
+      "title": "目录",
+      "content": "01 平台概述与核心价值; 02 技术架构全景; 03 核心功能模块; 04 通用爬虫系统; 05 AI 智能审核系统; 06 修正建议与自动修正系统; 07 申诉与人工介入系统; 08 多领域团队协作系统; 09 Skills 资产目录; 10 商业模式与开发路线图"
+    },
+    {
+      "number": 3,
+      "type": "chapter",
+      "title": "01 平台概述",
+      "content": "AI Skills Web3 资产托管中心 + 多领域全项目协作网络"
+    },
+    {
+      "number": 4,
+      "type": "content",
+      "title": "平台基本信息与定位",
+      "content": "呈现平台域名、服务器、核心定位等基础信息，阐述平台作为AI Skills Web3资产托管中心的战略定位，以及多领域全项目协作网络的扩展愿景。"
+    },
+    {
+      "number": 5,
+      "type": "content",
+      "title": "核心价值升级 v9.0",
+      "content": "详细阐述六大核心价值：资产化、可验证、可交易、多领域化、智能化、统一标准，展示平台如何将AI Skills从文档升级为链上资产。"
+    },
+    {
+      "number": 6,
+      "type": "content",
+      "title": "多领域协作理念",
+      "content": "展示平台如何打破技术Skills壁垒，支持技术、产品、设计、市场、运营、内容、客服、法务/HR/财务等所有团队的统一协作标准。"
+    },
+    {
+      "number": 7,
+      "type": "chapter",
+      "title": "02 技术架构",
+      "content": "全栈技术选型与系统架构设计"
+    },
+    {
+      "number": 8,
+      "type": "content",
+      "title": "技术栈选型矩阵",
+      "content": "展示从React/Vue3前端到Python Flask后端，从Scrapy爬虫到DeepSeek AI审核，从MySQL数据库到Polygon区块链的完整技术栈层级结构。"
+    },
+    {
+      "number": 9,
+      "type": "content",
+      "title": "系统架构全景图",
+      "content": "呈现前端、后端、爬虫、AI引擎、数据库、缓存、区块链、智能合约等各个模块之间的交互关系和数据流向。"
+    },
+    {
+      "number": 10,
+      "type": "chapter",
+      "title": "03 核心功能模块",
+      "content": "从通用爬虫到AI审核的完整功能链路"
+    },
+    {
+      "number": 11,
+      "type": "content",
+      "title": "通用爬虫系统架构",
+      "content": "展示Scrapy+Playwright+LangChain技术组合的爬虫系统，支持GitHub、GitLab、Medium、CSDN、掘金等多数据源的配置与采集能力。"
+    },
+    {
+      "number": 12,
+      "type": "content",
+      "title": "AI 智能审核系统",
+      "content": "展示DeepSeek驱动的四维审核体系：伦理道德、法律合规、格式规范、技术准确，以及针对代码、设计、产品、市场项目的差异化审核维度。"
+    },
+    {
+      "number": 13,
+      "type": "content",
+      "title": "修正建议与自动修正系统",
+      "content": "展示AI审核员如何提出具体修正建议，用户一键同意后系统自动完成修正并重新上架的完整流程，包括修正前后对比和自动重新审核机制。"
+    },
+    {
+      "number": 14,
+      "type": "content",
+      "title": "申诉与人工介入机制",
+      "content": "展示用户对AI审核结果提出异议的申诉流程，以及管理员进行人工复核的介入机制，确保审核结果的公正性和准确性。"
+    },
+    {
+      "number": 15,
+      "type": "content",
+      "title": "管理员发布通道",
+      "content": "展示管理员账号的特殊发布通道，允许绕过部分AI审核流程，但AI审核员仍需提出审核意见，最终上架决定由管理员自行把控。"
+    },
+    {
+      "number": 16,
+      "type": "chapter",
+      "title": "04 多领域团队协作",
+      "content": "v9.0 核心革命：所有项目统一按Skills标准管理"
+    },
+    {
+      "number": 17,
+      "type": "content",
+      "title": "统一组织标识与域名策略",
+      "content": "展示sillymd.com/团队名的统一标识格式，包括官方Skills、技术团队、产品团队、设计团队等示例，以及不再使用子域名的品牌强化策略。"
+    },
+    {
+      "number": 18,
+      "type": "content",
+      "title": "项目类型与统一评判标准",
+      "content": "展示代码、设计、产品、市场、运营、内容、客服等七大项目类型，以及所有项目必须遵循的结构化提交、版本管理、三级审核、正式文档、标准化输出五大统一标准。"
+    },
+    {
+      "number": 19,
+      "type": "content",
+      "title": "Skills 行业与应用场景分类",
+      "content": "展示金融、电商、教育、医疗、制造、旅游、娱乐、餐饮八大行业分类，以及数据分析、自动化、客户服务、市场营销、产品开发、项目管理、内容创作七大应用场景分类。"
+    },
+    {
+      "number": 20,
+      "type": "content",
+      "title": "扩展的权限分级系统",
+      "content": "展示从团队拥有者到只读成员的11级角色体系，包括技术、产品、设计、市场、运营五大领域负责人，以及L1/L2/L3三级审核员的分工与权限。"
+    },
+    {
+      "number": 21,
+      "type": "content",
+      "title": "数据库设计扩展",
+      "content": "展示支持多领域协作的数据库表结构扩展，包括团队表、项目表、修正建议表、正式文档表等核心表的字段设计与关联关系。"
+    },
+    {
+      "number": 22,
+      "type": "chapter",
+      "title": "05 Skills 资产目录",
+      "content": "按行业与应用场景分类的Skills展示"
+    },
+    {
+      "number": 23,
+      "type": "content",
+      "title": "金融行业 Skills 示例",
+      "content": "展示金融行业的代码项目(交易机器人)和设计项目(金融APP界面)，包括文件、版本、存储方式等详细信息。"
+    },
+    {
+      "number": 24,
+      "type": "content",
+      "title": "电商与教育行业 Skills 示例",
+      "content": "展示电商行业的产品项目(用户增长策略)和市场项目(社交媒体营销)，以及教育行业的内容项目(在线课程制作)。"
+    },
+    {
+      "number": 25,
+      "type": "chapter",
+      "title": "06 商业模式与路线图",
+      "content": "从MVP到生态扩展的完整发展路径"
+    },
+    {
+      "number": 26,
+      "type": "content",
+      "title": "商业模式与代币经济",
+      "content": "展示平台的商业化架构，包括Skills资产交易、使用权流转、平台AI值积分系统、订阅管理等商业模式，以及代币经济的设计原则。"
+    },
+    {
+      "number": 27,
+      "type": "content",
+      "title": "开发路线图：Phase 1-4",
+      "content": "展示MVP(0-3月)、核心功能(3-6月)、商业化(6-9月)、通用爬虫+AI审核(9-12月)四个阶段的关键里程碑和交付物。"
+    },
+    {
+      "number": 28,
+      "type": "content",
+      "title": "开发路线图：Phase 5-9",
+      "content": "展示自动修正(12-15月)、申诉与人工介入(15-18月)、管理员发布(18-21月)、多领域协作v9.0(21-24月)、生态扩展(24月+)五个阶段的完整规划。"
+    },
+    {
+      "number": 29,
+      "type": "content",
+      "title": "快速开始指南",
+      "content": "展示平台的安装配置步骤、访问链接、相关文件和快速链接，帮助用户和开发者快速上手使用SillyMD平台。"
+    },
+    {
+      "number": 30,
+      "type": "final",
+      "title": "构建 AI Skills 的 Web3 未来",
+      "content": "SillyMD 平台愿景：打造全球首个基于通用爬虫 + AI 智能审核 + 自动修正 + 多领域团队协作的 AI Skills 全域资产托管网络"
+    }
+  ]
+}

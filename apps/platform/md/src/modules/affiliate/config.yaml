@@ -1,0 +1,17 @@
+id: affiliate
+name: 分销系统模块
+version: 1.0.0
+description: 员工分销统计系统，支持通过分享链接追踪订单和统计员工业绩
+dependencies: [auth]
+
+config:
+  # 默认佣金比例 (5%)
+  default_commission_rate: 0.05
+  # 链接有效期（天）
+  link_expiry_days: 365
+  # 访问记录有效期（小时）
+  visit_cookie_hours: 168
+  # 排行榜限制
+  leaderboard_limit: 50
+  # 最小提现额度
+  min_withdrawal: 100

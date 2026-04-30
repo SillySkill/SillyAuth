@@ -1,0 +1,22 @@
+{
+  "Aibeing": {
+    "project": {
+      "JC2026012100001": {
+        "operate": {
+          "open_hand": ["aibeing/JC2026012100001/1.gif"],
+          "say_hello": ["aibeing/JC2026012100001/2.gif"],
+          "applaud": ["aibeing/JC2026012100001/3.gif"],
+          "salute": ["aibeing/JC2026012100001/4.gif"],
+          "introduce": ["aibeing/JC2026012100001/5.gif", "aibeing/JC2026012100001/6.gif", "aibeing/JC2026012100001/7.gif", "aibeing/JC2026012100001/10.gif"],
+          "congratulate": ["aibeing/JC2026012100001/8.gif"],
+          "left_point": ["aibeing/JC2026012100001/9.gif"]
+        },
+        "main_pic": "aibeing/JC2026012100001/10.gif",
+        "voice": "voice/default.mp3",
+        "default_operate": "aibeing/JC2026012100001/10.gif",
+        "name": "AI百变秀",
+        "description": "你可以拍照后生成对应风格照片"
+      }
+    }
+  }
+}

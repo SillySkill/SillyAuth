@@ -1,0 +1,422 @@
+[
+  {
+    "id": "user_001",
+    "username": "chen_94",
+    "displayName": "临时工",
+    "nickname": "临时工",
+    "realName": "陈婕",
+    "gender": "female",
+    "avatar": "https://randomuser.me/api/portraits/women/13.jpg",
+    "bio": "阿里云高级算法工程师，电商领域深耕7年。擅长AI应用开发，追求极致用户体验。",
+    "role": "vendor",
+    "vendorLevel": "premium",
+    "joinDate": "2024-08-29",
+    "stats": {
+      "totalSkills": 25,
+      "totalSales": 2458,
+      "rating": 4.3
+    },
+    "location": "广州",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_002",
+    "username": "任_design",
+    "displayName": "蛋糕",
+    "nickname": "蛋糕",
+    "realName": "任月",
+    "gender": "female",
+    "avatar": "https://randomuser.me/api/portraits/women/26.jpg",
+    "bio": "前叮咚买菜算法工程师，现技术顾问。9年教育经验，服务过206+企业客户。",
+    "role": "vendor",
+    "vendorLevel": "normal",
+    "joinDate": "2025-02-04",
+    "stats": {
+      "totalSkills": 10,
+      "totalSales": 2678,
+      "rating": 4.6
+    },
+    "location": "杭州",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_003",
+    "username": "zhou660",
+    "displayName": "NaN",
+    "nickname": "NaN",
+    "realName": "周彤",
+    "gender": "female",
+    "avatar": "https://randomuser.me/api/portraits/women/39.jpg",
+    "bio": "技术布道师，餐饮领域专家。叮咚买菜前技术总监，现专注于自动化测试研究与实践。",
+    "role": "vendor",
+    "vendorLevel": "gold",
+    "joinDate": "2024-10-29",
+    "stats": {
+      "totalSkills": 26,
+      "totalSales": 29682,
+      "rating": 4.7
+    },
+    "location": " remote",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_004",
+    "username": "li.dev",
+    "displayName": "神佬",
+    "nickname": "神佬",
+    "realName": "李辰",
+    "gender": "male",
+    "avatar": "https://randomuser.me/api/portraits/men/68.jpg",
+    "bio": "现任百度算法工程师，专注餐饮领域10年。相信技术改变世界，乐于分享实战经验。",
+    "role": "vendor",
+    "vendorLevel": "gold",
+    "joinDate": "2024-09-09",
+    "stats": {
+      "totalSkills": 12,
+      "totalSales": 30366,
+      "rating": 4.2
+    },
+    "location": "广州",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_005",
+    "username": "杜356",
+    "displayName": "清蒸鱼",
+    "nickname": "清蒸鱼",
+    "realName": "杜轩",
+    "gender": "male",
+    "avatar": "https://randomuser.me/api/portraits/men/85.jpg",
+    "bio": "独立技术老炮，14年电商实战经验。前字节跳动项目经理，现专注自动化测试。",
+    "role": "user",
+    "vendorLevel": "user",
+    "joinDate": "2025-05-26",
+    "stats": {
+      "totalSkills": 0,
+      "totalSales": 0,
+      "rating": 0
+    },
+    "location": "武汉",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_006",
+    "username": "程.ai",
+    "displayName": "RaceCondition",
+    "nickname": "RaceCondition",
+    "realName": "程怡",
+    "gender": "female",
+    "avatar": "https://randomuser.me/api/portraits/women/78.jpg",
+    "bio": "连续创业者，金融领域专家。曾任小鹏汽车VP，现专注系统架构方向。",
+    "role": "vendor",
+    "vendorLevel": "premium",
+    "joinDate": "2025-04-18",
+    "stats": {
+      "totalSkills": 8,
+      "totalSales": 15333,
+      "rating": 4.8
+    },
+    "location": "武汉",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_007",
+    "username": "梁1998",
+    "displayName": "星河",
+    "nickname": "星河",
+    "realName": "梁洁",
+    "gender": "female",
+    "avatar": "https://randomuser.me/api/portraits/women/91.jpg",
+    "bio": "技术布道师，教育领域专家。拼多多前算法工程师，现专注于用户体验设计研究与实践。",
+    "role": "vendor",
+    "vendorLevel": "normal",
+    "joinDate": "2024-02-24",
+    "stats": {
+      "totalSkills": 5,
+      "totalSales": 1363,
+      "rating": 4.4
+    },
+    "location": "广州",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_008",
+    "username": "guoai",
+    "displayName": "程序员爸爸",
+    "nickname": "程序员爸爸",
+    "realName": "郭彤",
+    "gender": "female",
+    "avatar": "https://randomuser.me/api/portraits/women/4.jpg",
+    "bio": "蚂蚁金服资深联合创始人，热爱餐饮，擅长云原生技术。致力于用技术解决实际问题。",
+    "role": "vendor",
+    "vendorLevel": "normal",
+    "joinDate": "2024-01-30",
+    "stats": {
+      "totalSkills": 21,
+      "totalSales": 945,
+      "rating": 4.6
+    },
+    "location": "杭州",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_009",
+    "username": "苏1983",
+    "displayName": "老鸟",
+    "nickname": "老鸟",
+    "realName": "苏天",
+    "gender": "male",
+    "avatar": "https://randomuser.me/api/portraits/men/53.jpg",
+    "bio": "Twitter资深CTO，热爱电商，擅长区块链应用。致力于用技术解决实际问题。",
+    "role": "vendor",
+    "vendorLevel": "gold",
+    "joinDate": "2024-12-19",
+    "stats": {
+      "totalSkills": 29,
+      "totalSales": 38105,
+      "rating": 4.5
+    },
+    "location": "西安",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_010",
+    "username": "蔡_91",
+    "displayName": "枫",
+    "nickname": "枫",
+    "realName": "蔡莉",
+    "gender": "female",
+    "avatar": "https://randomuser.me/api/portraits/women/30.jpg",
+    "bio": "6年电商老兵，独立开发者技术负责人。开源爱好者，多个热门项目维护者。",
+    "role": "vendor",
+    "vendorLevel": "premium",
+    "joinDate": "2025-12-25",
+    "stats": {
+      "totalSkills": 29,
+      "totalSales": 19250,
+      "rating": 4.7
+    },
+    "location": "北京",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_011",
+    "username": "董_design",
+    "displayName": "静香",
+    "nickname": "静香",
+    "realName": "董辉",
+    "gender": "male",
+    "avatar": "https://randomuser.me/api/portraits/men/87.jpg",
+    "bio": "滴滴高级事业部总监，制造领域深耕8年。擅长云原生技术，追求极致用户体验。",
+    "role": "vendor",
+    "vendorLevel": "gold",
+    "joinDate": "2024-06-24",
+    "stats": {
+      "totalSkills": 29,
+      "totalSales": 66381,
+      "rating": 4.4
+    },
+    "location": "广州",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_012",
+    "username": "叶558",
+    "displayName": "K8sGirl",
+    "nickname": "K8sGirl",
+    "realName": "叶娟",
+    "gender": "female",
+    "avatar": "https://randomuser.me/api/portraits/women/56.jpg",
+    "bio": "现任美团测试开发，专注餐饮领域6年。相信技术改变世界，乐于分享实战经验。",
+    "role": "vendor",
+    "vendorLevel": "premium",
+    "joinDate": "2025-05-28",
+    "stats": {
+      "totalSkills": 6,
+      "totalSales": 18691,
+      "rating": 4.4
+    },
+    "location": "杭州",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_013",
+    "username": "杜_94",
+    "displayName": "CTO大人",
+    "nickname": "CTO大人",
+    "realName": "杜飞",
+    "gender": "male",
+    "avatar": "https://randomuser.me/api/portraits/men/21.jpg",
+    "bio": "独立技术老炮，6年医疗实战经验。前比亚迪测试开发，现专注前端工程化。",
+    "role": "user",
+    "vendorLevel": "user",
+    "joinDate": "2024-07-27",
+    "stats": {
+      "totalSkills": 0,
+      "totalSales": 0,
+      "rating": 0
+    },
+    "location": "广州",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_014",
+    "username": "wang.cn",
+    "displayName": "二号机",
+    "nickname": "二号机",
+    "realName": "王峰",
+    "gender": "male",
+    "avatar": "https://randomuser.me/api/portraits/men/38.jpg",
+    "bio": "技术布道师，餐饮领域专家。比亚迪前测试开发，现专注于自动化测试研究与实践。",
+    "role": "vendor",
+    "vendorLevel": "normal",
+    "joinDate": "2025-02-05",
+    "stats": {
+      "totalSkills": 16,
+      "totalSales": 3679,
+      "rating": 5
+    },
+    "location": "北京",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_015",
+    "username": "zhou_design",
+    "displayName": "猫头鹰",
+    "nickname": "猫头鹰",
+    "realName": "周彤",
+    "gender": "female",
+    "avatar": "https://randomuser.me/api/portraits/women/95.jpg",
+    "bio": "现任美团项目经理，专注教育领域13年。相信技术改变世界，乐于分享实战经验。",
+    "role": "vendor",
+    "vendorLevel": "normal",
+    "joinDate": "2025-12-12",
+    "stats": {
+      "totalSkills": 7,
+      "totalSales": 4711,
+      "rating": 5
+    },
+    "location": "广州",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_016",
+    "username": "蒋.ai",
+    "displayName": "糖醋排骨",
+    "nickname": "糖醋排骨",
+    "realName": "蒋欣",
+    "gender": "female",
+    "avatar": "https://randomuser.me/api/portraits/women/8.jpg",
+    "bio": "技术布道师，电商领域专家。B站前高级前端工程师，现专注于云原生技术研究与实践。",
+    "role": "vendor",
+    "vendorLevel": "gold",
+    "joinDate": "2026-01-11",
+    "stats": {
+      "totalSkills": 20,
+      "totalSales": 36036,
+      "rating": 4.3
+    },
+    "location": "广州",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_017",
+    "username": "huang_96",
+    "displayName": "轩",
+    "nickname": "轩",
+    "realName": "黄浩",
+    "gender": "male",
+    "avatar": "https://randomuser.me/api/portraits/men/89.jpg",
+    "bio": "京东云高级联合创始人，娱乐领域深耕3年。擅长自动化测试，追求极致用户体验。",
+    "role": "vendor",
+    "vendorLevel": "gold",
+    "joinDate": "2024-12-03",
+    "stats": {
+      "totalSkills": 2,
+      "totalSales": 53993,
+      "rating": 4.5
+    },
+    "location": "深圳",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.699Z"
+  },
+  {
+    "id": "user_018",
+    "username": "宋_design",
+    "displayName": "小兰",
+    "nickname": "小兰",
+    "realName": "宋天",
+    "gender": "male",
+    "avatar": "https://randomuser.me/api/portraits/men/6.jpg",
+    "bio": "技术布道师，制造领域专家。Amazon前移动端开发，现专注于自动化测试研究与实践。",
+    "role": "vendor",
+    "vendorLevel": "normal",
+    "joinDate": "2025-05-23",
+    "stats": {
+      "totalSkills": 10,
+      "totalSales": 3293,
+      "rating": 4.2
+    },
+    "location": "西安",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.700Z"
+  },
+  {
+    "id": "user_019",
+    "username": "wu1982",
+    "displayName": "绫波丽",
+    "nickname": "绫波丽",
+    "realName": "吴勇",
+    "gender": "male",
+    "avatar": "https://randomuser.me/api/portraits/men/23.jpg",
+    "bio": "技术布道师，制造领域专家。远程工作前技术总监，现专注于用户体验设计研究与实践。",
+    "role": "vendor",
+    "vendorLevel": "gold",
+    "joinDate": "2025-09-29",
+    "stats": {
+      "totalSkills": 2,
+      "totalSales": 29985,
+      "rating": 4.7
+    },
+    "location": "北京",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.700Z"
+  },
+  {
+    "id": "user_020",
+    "username": "蔡802",
+    "displayName": "如故",
+    "nickname": "如故",
+    "realName": "蔡勇",
+    "gender": "male",
+    "avatar": "https://randomuser.me/api/portraits/men/40.jpg",
+    "bio": "独立开发者高级DevOps工程师，教育领域深耕13年。擅长云原生技术，追求极致用户体验。",
+    "role": "vendor",
+    "vendorLevel": "premium",
+    "joinDate": "2024-03-27",
+    "stats": {
+      "totalSkills": 16,
+      "totalSales": 18016,
+      "rating": 5
+    },
+    "location": "上海",
+    "isMock": true,
+    "createdAt": "2026-02-01T02:49:34.700Z"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "ali-oss": "^6.23.0",
+    "axios": "^1.14.0",
+    "ocr-api": "^1.0.2",
+    "sharp": "^0.34.5",
+    "tesseract.js": "^4.1.4"
+  },
+  "devDependencies": {
+    "xlsx": "^0.18.5"
+  }
+}

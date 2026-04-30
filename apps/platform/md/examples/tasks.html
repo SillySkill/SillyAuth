@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务中心 - SillyMD</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #667eea;
+        }
+
+        /* 签到区域 */
+        .sign-in-area {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .sign-in-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .sign-in-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .sign-in-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .sign-in-info {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #8B4513;
+        }
+
+        .consecutive-badge {
+            display: inline-block;
+            background: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin: 0 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 任务列表 */
+        .task-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: background 0.3s;
+        }
+
+        .task-item:hover {
+            background: #e9ecef;
+        }
+
+        .task-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .task-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .task-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .task-reward {
+            text-align: right;
+            min-width: 100px;
+        }
+
+        .reward-points {
+            font-size: 18px;
+            font-weight: bold;
+            color: #faad14;
+            margin-bottom: 3px;
+        }
+
+        .claim-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .claim-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .task-completed .task-icon {
+            background: #52c41a;
+        }
+
+        .task-completed .task-title {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        /* 成就列表 */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .achievement-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .achievement-card.locked {
+            filter: grayscale(1);
+            opacity: 0.7;
+        }
+
+        .achievement-card .badge {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 28px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievement-card .achievement-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .achievement-card .achievement-description {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .achievement-progress {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .achievement-reward {
+            font-size: 14px;
+            font-weight: 600;
+            color: #faad14;
+        }
+
+        .achievement-card.unlocked .badge {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast.success { border-left: 4px solid #52c41a; }
+        .toast.error { border-left: 4px solid #ff4d4f; }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🎯 任务中心</h1>
+            <p>完成任务获得积分，解锁成就赢得奖励</p>
+        </div>
+
+        <!-- 统计数据 -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="value" id="todayPoints">0</div>
+                <div class="label">今日积分</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="completedTasks">0/4</div>
+                <div class="label">今日任务</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="currentStreak">0</div>
+                <div class="label">连续签到</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="unlockedAchievements">0</div>
+                <div class="label">已解锁成就</div>
+            </div>
+        </div>
+
+        <!-- 签到区域 -->
+        <div class="section">
+            <div class="sign-in-area">
+                <div style="font-size: 48px; margin-bottom: 15px;">📅</div>
+                <div id="signInBtn">
+                    <button class="sign-in-btn" onclick="signIn()">立即签到</button>
+                </div>
+                <div class="sign-in-info" id="signInInfo">
+                    点击按钮完成签到，获得积分奖励
+                </div>
+            </div>
+        </div>
+
+        <!-- 标签切换 -->
+        <div class="section">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('tasks')">📋 每日任务</button>
+                <button class="tab-btn" onclick="switchTab('achievements')">🏆 成就系统</button>
+            </div>
+
+            <!-- 每日任务 -->
+            <div id="tasksTab">
+                <div class="task-list" id="taskList">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+
+            <!-- 成就系统 -->
+            <div id="achievementsTab" style="display: none;">
+                <div class="achievement-grid" id="achievementList">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API 基础 URL
+        const API_BASE = 'http://47.96.133.238:8000/api';
+
+        // 从 localStorage 获取 token
+        function getAuthToken() {
+            return localStorage.getItem('auth_token');
+        }
+
+        // 显示提示
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // 加载统计数据
+        async function loadStats() {
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    console.error('未登录');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/tasks/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('todayPoints').textContent = data.data.total_points_earned_today;
+                    document.getElementById('currentStreak').textContent = data.data.current_streak;
+                    document.getElementById('unlockedAchievements').textContent = data.data.total_achievements_unlocked;
+                }
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+            }
+        }
+
+        // 签到
+        async function signIn() {
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    showToast('请先登录', 'error');
+                    return;
+                }
+
+                const btn = document.querySelector('.sign-in-btn');
+                btn.disabled = true;
+                btn.textContent = '签到中...';
+
+                const response = await fetch(`${API_BASE}/tasks/sign-in`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.data.already_signed_in) {
+                        showToast('今日已签到', 'success');
+                        updateSignInStatus(data.data);
+                    } else {
+                        showToast(`签到成功！获得 ${data.data.points_earned} 积分`, 'success');
+                        updateSignInStatus(data.data);
+                        loadStats(); // 刷新统计
+                    }
+                } else {
+                    showToast(data.message || '签到失败', 'error');
+                }
+
+                btn.disabled = false;
+                btn.textContent = '立即签到';
+            } catch (error) {
+                console.error('签到失败:', error);
+                showToast('签到失败，请稍后重试', 'error');
+                const btn = document.querySelector('.sign-in-btn');
+                btn.disabled = false;
+                btn.textContent = '立即签到';
+            }
+        }
+
+        // 更新签到状态显示
+        async function updateSignInStatus(signInData) {
+            const infoDiv = document.getElementById('signInInfo');
+
+            if (signInData.already_signed_in || signInData.consecutive_days > 0) {
+                infoDiv.innerHTML = `
+                    <span class="consecutive-badge">🔥 连续签到 ${signInData.consecutive_days} 天</span>
+                    <span>今日已获得 ${signInData.points_earned} 积分</span>
+                `;
+            }
+        }
+
+        // 加载签到状态
+        async function loadSignInStatus() {
+            try {
+                const token = getAuthToken();
+                if (!token) return;
+
+                const response = await fetch(`${API_BASE}/tasks/sign-in/status`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data.signed_in_today) {
+                    document.querySelector('.sign-in-btn').textContent = '已签到';
+                    document.querySelector('.sign-in-btn').disabled = true;
+                    updateSignInStatus(data.data);
+                }
+            } catch (error) {
+                console.error('加载签到状态失败:', error);
+            }
+        }
+
+        // 加载每日任务
+        async function loadDailyTasks() {
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    showEmptyState('请先登录');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/tasks/daily`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    renderTasks(data.data.tasks);
+
+                    // 更新任务完成数
+                    const completedCount = data.data.stats.completed_count;
+                    document.getElementById('completedTasks').textContent =
+                        `${completedCount}/${data.data.tasks.length}`;
+                }
+            } catch (error) {
+                console.error('加载任务失败:', error);
+                document.getElementById('taskList').innerHTML =
+                    '<div class="empty-state">加载失败，请刷新重试</div>';
+            }
+        }
+
+        // 渲染任务列表
+        function renderTasks(tasks) {
+            const taskList = document.getElementById('taskList');
+
+            if (!tasks || tasks.length === 0) {
+                taskList.innerHTML = '<div class="empty-state"><i class="ri-task-line"></i><p>暂无任务</p></div>';
+                return;
+            }
+
+            taskList.innerHTML = tasks.map(task => {
+                const progress = task.progress;
+                const percentage = Math.min((progress / task.target) * 100, 100);
+                const isCompleted = task.is_completed;
+                const canClaim = isCompleted && !task.is_rewarded;
+
+                return `
+                    <div class="task-item ${isCompleted ? 'task-completed' : ''}">
+                        <div class="task-icon" style="background: ${task.color || '#667eea'}">
+                            <i class="${task.icon || 'ri-task-line'}"></i>
+                        </div>
+                        <div class="task-content">
+                            <div class="task-title">${task.task_name}</div>
+                            <div class="task-description">${task.task_description}</div>
+                            <div class="task-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${percentage}%"></div>
+                                </div>
+                                <span style="font-size: 13px; color: #999; margin-left: 10px;">
+                                    ${progress}/${task.target}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="task-reward">
+                            <div class="reward-points">+${task.reward_points} 积分</div>
+                            ${canClaim ? `<button class="claim-btn" onclick="claimReward(${task.id})">领取</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 领取任务奖励
+        async function claimReward(taskId) {
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    showToast('请先登录', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/tasks/daily/${taskId}/claim`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    loadDailyTasks();
+                    loadStats();
+                } else {
+                    showToast(data.message || '领取失败', 'error');
+                }
+            } catch (error) {
+                console.error('领取奖励失败:', error);
+                showToast('领取失败，请稍后重试', 'error');
+            }
+        }
+
+        // 加载成就列表
+        async function loadAchievements() {
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    showEmptyState('请先登录');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/tasks/achievements`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    renderAchievements(data.data);
+                }
+            } catch (error) {
+                console.error('加载成就失败:', error);
+                document.getElementById('achievementList').innerHTML =
+                    '<div class="empty-state">加载失败，请刷新重试</div>';
+            }
+        }
+
+        // 渲染成就列表
+        function renderAchievements(achievements) {
+            const achievementList = document.getElementById('achievementList');
+
+            if (!achievements || achievements.length === 0) {
+                achievementList.innerHTML = '<div class="empty-state"><i class="ri-trophy-line"></i><p>暂无成就</p></div>';
+                return;
+            }
+
+            achievementList.innerHTML = achievements.map(achievement => {
+                const progress = achievement.progress;
+                const percentage = Math.min((progress / achievement.target) * 100, 100);
+                const isUnlocked = achievement.is_unlocked;
+
+                return `
+                    <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
+                        <div class="badge" style="background: ${achievement.color || '#999'}">
+                            <i class="${achievement.icon || 'ri-trophy-line'}"></i>
+                        </div>
+                        <div class="achievement-name">${achievement.achievement_name}</div>
+                        <div class="achievement-description">${achievement.description || ''}</div>
+                        <div class="achievement-progress">
+                            进度: ${progress}/${achievement.target} (${percentage.toFixed(0)}%)
+                        </div>
+                        ${isUnlocked ? `
+                            <div class="achievement-reward">
+                                ✅ 已解锁 (+${achievement.reward_points} 积分)
+                            </div>
+                        ` : `
+                            <div class="achievement-reward" style="color: #999;">
+                                🔒 未解锁 (+${achievement.reward_points} 积分)
+                            </div>
+                        `}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 切换标签
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(t => t.classList.remove('active'));
+
+            const tasksTab = document.getElementById('tasksTab');
+            const achievementsTab = document.getElementById('achievementsTab');
+
+            if (tab === 'tasks') {
+                tabs[0].classList.add('active');
+                tasksTab.style.display = 'block';
+                achievementsTab.style.display = 'none';
+            } else {
+                tabs[1].classList.add('active');
+                tasksTab.style.display = 'none';
+                achievementsTab.style.display = 'block';
+            }
+        }
+
+        // 显示空状态
+        function showEmptyState(message) {
+            document.getElementById('taskList').innerHTML = `
+                <div class="empty-state">
+                    <i class="ri-inbox-line"></i>
+                    <p>${message}</p>
+                </div>
+            `;
+            document.getElementById('achievementList').innerHTML = `
+                <div class="empty-state">
+                    <i class="ri-trophy-line"></i>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+            loadSignInStatus();
+            loadDailyTasks();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+package com.jcoding.aiactivity.utils;
+
+import android.content.Context;
+import android.util.Log;
+
+import com.google.gson.Gson;
+import com.jcoding.aiactivity.entity.Candidate;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 候选人Excel解析工具类
+ * 用于解析 assets/lottery/prizeDate.xlsx 文件
+ *
+ * Excel 格式：
+ * - 第1列：候选人ID（必填）
+ * - 第2列：候选人姓名（必填）
+ * - 第3列：部门名称（必填）
+ * - 第4列：备注（可选）
+ */
+public class CandidateExcelParser {
+
+    private static final String TAG = "CandidateExcelParser";
+    private static final String EXCEL_FILE_PATH = "lottery/prizeDate.xlsx";
+
+    /**
+     * 从assets中解析候选人Excel文件
+     *
+     * @param context 上下文
+     * @return 候选人列表
+     */
+    public static List<Candidate> parseCandidateExcel(Context context) {
+        List<Candidate> candidateList = new ArrayList<>();
+        InputStream inputStream = null;
+        Workbook workbook = null;
+
+        try {
+            // 打开assets中的Excel文件
+            inputStream = context.getAssets().open(EXCEL_FILE_PATH);
+            workbook = WorkbookFactory.create(inputStream);
+
+            // 获取第一个工作表
+            Sheet sheet = workbook.getSheetAt(0);
+
+            // 遍历行（从第1行开始，跳过标题行）
+            for (int i = sheet.getFirstRowNum() + 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) {
+                    continue;
+                }
+
+                Candidate candidate = parseRow(row);
+                if (candidate != null && candidate.getName() != null && !candidate.getName().isEmpty()) {
+                    candidateList.add(candidate);
+                }
+            }
+
+            Log.i(TAG, "成功解析候选人数据，共 " + candidateList.size() + " 条");
+            return candidateList;
+
+        } catch (IOException e) {
+            Log.e(TAG, "读取Excel文件失败", e);
+            // 降级：尝试从JSON读取
+            Log.i(TAG, "尝试从JSON文件读取候选人数据");
+            return parseCandidateFromJson(context);
+        } catch (Exception e) {
+            Log.e(TAG, "解析Excel文件失败", e);
+            // 降级：尝试从JSON读取
+            Log.i(TAG, "尝试从JSON文件读取候选人数据");
+            return parseCandidateFromJson(context);
+        } finally {
+            // 关闭资源
+            try {
+                if (workbook != null) {
+                    workbook.close();
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "关闭资源失败", e);
+            }
+        }
+    }
+
+    /**
+     * 解析单行数据
+     *
+     * @param row Excel行
+     * @return 候选人数据
+     */
+    private static Candidate parseRow(Row row) {
+        if (row == null) {
+            return null;
+        }
+
+        try {
+            // 读取候选人ID（第1列）
+            String id = getCellValueAsString(row.getCell(0));
+            if (id == null || id.trim().isEmpty()) {
+                // 如果没有ID，生成一个
+                id = "CANDIDATE_" + row.getRowNum();
+            }
+
+            // 读取候选人姓名（第2列，必填）
+            String name = getCellValueAsString(row.getCell(1));
+            if (name == null || name.trim().isEmpty()) {
+                Log.w(TAG, "第 " + row.getRowNum() + " 行：姓名为空，跳过");
+                return null;
+            }
+
+            // 读取部门名称（第3列）
+            String department = getCellValueAsString(row.getCell(2));
+            if (department == null || department.trim().isEmpty()) {
+                department = "未知部门";
+            }
+
+            // 读取备注（第4列，可选）
+            String remarks = getCellValueAsString(row.getCell(3));
+
+            // 创建候选人对象
+            Candidate candidate = new Candidate();
+            candidate.setId(id.trim());
+            candidate.setName(name.trim());
+            candidate.setDepartment(department.trim());
+
+            return candidate;
+
+        } catch (Exception e) {
+            Log.e(TAG, "解析行数据失败: " + row.getRowNum(), e);
+            return null;
+        }
+    }
+
+    /**
+     * 获取单元格值并转换为字符串
+     *
+     * @param cell 单元格
+     * @return 单元格值的字符串表示
+     */
+    private static String getCellValueAsString(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        CellType cellType = cell.getCellType();
+        switch (cellType) {
+            case STRING:
+                return cell.getStringCellValue();
+
+            case NUMERIC:
+                // 数字类型，转换为字符串
+                double numericValue = cell.getNumericCellValue();
+                // 判断是否为整数
+                if (numericValue == (long) numericValue) {
+                    return String.valueOf((long) numericValue);
+                } else {
+                    return String.valueOf(numericValue);
+                }
+
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+
+            case FORMULA:
+                // 公式类型，获取计算后的值
+                try {
+                    return String.valueOf(cell.getNumericCellValue());
+                } catch (Exception e) {
+                    return cell.getStringCellValue();
+                }
+
+            case BLANK:
+                return null;
+
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * 从JSON文件解析候选人（降级方案）
+     *
+     * @param context 上下文
+     * @return 候选人列表
+     */
+    private static List<Candidate> parseCandidateFromJson(Context context) {
+        try {
+            String jsonStr = readAssetFile(context, "lottery/candidates.json");
+            if (jsonStr == null || jsonStr.isEmpty()) {
+                Log.e(TAG, "无法读取候选人JSON文件");
+                return new ArrayList<>();
+            }
+
+            Gson gson = new Gson();
+            com.google.gson.JsonObject jsonObject = gson.fromJson(jsonStr, com.google.gson.JsonObject.class);
+
+            if (jsonObject != null && jsonObject.has("candidates")) {
+                com.google.gson.JsonArray candidatesArray = jsonObject.getAsJsonArray("candidates");
+                java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<List<Candidate>>() {}.getType();
+                List<Candidate> candidates = gson.fromJson(candidatesArray, listType);
+
+                Log.i(TAG, "从JSON加载候选人数据，共 " + candidates.size() + " 条");
+                return candidates;
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "从JSON解析候选人失败", e);
+        }
+
+        return new ArrayList<>();
+    }
+
+    /**
+     * 读取assets文件
+     *
+     * @param context 上下文
+     * @param filePath 文件路径
+     * @return 文件内容
+     */
+    private static String readAssetFile(Context context, String filePath) {
+        try {
+            InputStream is = context.getAssets().open(filePath);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            return new String(buffer, java.nio.charset.StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            Log.e(TAG, "读取assets文件失败: " + filePath, e);
+            return null;
+        }
+    }
+
+    /**
+     * 获取候选人列表（直接返回解析结果）
+     *
+     * @param context 上下文
+     * @return 候选人列表
+     */
+    public static List<Candidate> getCandidates(Context context) {
+        return parseCandidateExcel(context);
+    }
+}

@@ -1,0 +1,17 @@
+id: tasks
+name: 任务系统模块
+version: 1.0.0
+description: 提供签到、成就、日常任务功能
+dependencies: [auth, points]
+
+config:
+  sign_in:
+    enabled: true
+    base_points: 10
+    streak_bonus: 2
+    max_streak_days: 30
+  daily_reset_hour: 0  # UTC
+
+routes:
+  prefix: /api/tasks
+  tags: [任务系统]

@@ -1,0 +1,96 @@
+{
+  "candidates": [
+    {
+      "id": "U100156001",
+      "name": "七分甜",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156002",
+      "name": "胖哥俩",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156003",
+      "name": "华为",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156004",
+      "name": "小菜园",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156005",
+      "name": "丝界",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156006",
+      "name": "新白鹿",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156007",
+      "name": "红凯星影城",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156008",
+      "name": "海王",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156009",
+      "name": "巴拉巴拉",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156010",
+      "name": "红豆居家",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156011",
+      "name": "接吻猫",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156012",
+      "name": "爱琳娜",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156013",
+      "name": "老庙黄金",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156014",
+      "name": "山处橄榄煲鲜鸡煲",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156015",
+      "name": "未来视界",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156016",
+      "name": "乐刻",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156017",
+      "name": "京东家电",
+      "department": "开元商铺"
+    },
+    {
+      "id": "U100156018",
+      "name": "周大生",
+      "department": "开元商铺"
+    }
+  ],
+  "default_winner_count": 3,
+  "allow_duplicate_winners": false
+}

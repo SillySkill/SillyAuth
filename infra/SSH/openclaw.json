@@ -1,0 +1,241 @@
+{
+  "$schema": "https://raw.githubusercontent.com/openclaw/openclaw/main/docs/.openclaw-schema.json",
+  "meta": {
+    "lastTouchedVersion": "2026.3.28",
+    "lastTouchedAt": "2026-04-11T09:42:31.439Z"
+  },
+  "wizard": {
+    "lastRunAt": "2026-04-11T08:50:37.269Z",
+    "lastRunVersion": "2026.3.28",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "browser": {
+    "enabled": true,
+    "defaultProfile": "default",
+    "ssrfPolicy": {
+      "dangerouslyAllowPrivateNetwork": false
+    }
+  },
+  "auth": {
+    "profiles": {
+      "minimax:cn": {
+        "provider": "minimax",
+        "mode": "api_key"
+      },
+      "deepseek:default": {
+        "provider": "deepseek",
+        "mode": "api_key"
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "minimax": {
+        "baseUrl": "https://api.minimaxi.com/anthropic",
+        "api": "anthropic-messages",
+        "authHeader": true,
+        "models": [
+          {
+            "id": "MiniMax-M2.7",
+            "name": "MiniMax M2.7",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0.3,
+              "output": 1.2,
+              "cacheRead": 0.06,
+              "cacheWrite": 0.375
+            },
+            "contextWindow": 204800,
+            "maxTokens": 131072
+          }
+        ]
+      },
+      "deepseek": {
+        "baseUrl": "https://api.deepseek.com",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "deepseek-chat",
+            "name": "DeepSeek Chat",
+            "api": "openai-completions",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0.28,
+              "output": 0.42,
+              "cacheRead": 0.028,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 8192,
+            "compat": {
+              "supportsUsageInStreaming": true
+            }
+          },
+          {
+            "id": "deepseek-reasoner",
+            "name": "DeepSeek Reasoner",
+            "api": "openai-completions",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0.28,
+              "output": 0.42,
+              "cacheRead": 0.028,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 65536,
+            "compat": {
+              "supportsUsageInStreaming": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "minimax/MiniMax-M2.7-highspeed"
+      },
+      "models": {
+        "minimax/MiniMax-M2.7": {
+          "alias": "Minimax"
+        },
+        "deepseek/deepseek-chat": {
+          "alias": "DeepSeek"
+        },
+        "minimax-cn/MiniMax-M2.7-highspeed": {}
+      },
+      "workspace": "~/SillyClaw/workspace",
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "timeoutSeconds": 72000,
+      "maxConcurrent": 3
+    }
+  },
+  "tools": {
+    "profile": "coding",
+    "web": {
+      "search": {
+        "enabled": true
+      }
+    }
+  },
+  "messages": {
+    "queue": {
+      "mode": "followup"
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "session": {
+    "dmScope": "main",
+    "reset": {
+      "mode": "idle",
+      "idleMinutes": 525600
+    },
+    "maintenance": {
+      "pruneAfter": "365d",
+      "maxEntries": 1000000,
+      "rotateBytes": "1gb",
+      "resetArchiveRetention": false
+    }
+  },
+  "channels": {
+    "wecom": {
+      "botId": "aibtJNWUaeZ95yNjj_J7HEezZzwmac4FfTv",
+      "secret": "aMkamNJn4e6NTJxbizx0ZYxP5X55WIhh5jSg58PoSOh",
+      "enabled": true
+    },
+    "openclaw-weixin": {
+      "channelConfigUpdatedAt": "2026-04-11T09:09:40.629Z"
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "controlUi": {
+      "allowedOrigins": [
+        "null",
+        "http://127.0.0.1:*",
+        "http://localhost:*"
+      ],
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true
+    },
+    "auth": {
+      "mode": "token",
+      "token": "ceb8212fb93ee43b198c097d75c96d070c96b3437ad8e76f"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    }
+  },
+  "skills": {
+    "load": {
+      "extraDirs": []
+    }
+  },
+  "plugins": {
+    "allow": [
+      "openclaw-weixin",
+      "wecom-openclaw-plugin"
+    ],
+    "entries": {
+      "wecom-openclaw-plugin": {
+        "enabled": true,
+        "config": {}
+      },
+      "openclaw-weixin": {
+        "enabled": true,
+        "config": {}
+      }
+    },
+    "installs": {
+      "wecom-openclaw-plugin": {
+        "source": "npm",
+        "spec": "@wecom/wecom-openclaw-plugin@latest",
+        "installPath": "F:\\SillyClaw\\.openclaw\\extensions\\wecom-openclaw-plugin",
+        "version": "2026.4.3",
+        "resolvedName": "@wecom/wecom-openclaw-plugin",
+        "resolvedVersion": "2026.4.3",
+        "resolvedSpec": "@wecom/wecom-openclaw-plugin@2026.4.3",
+        "integrity": "sha512-+ppWVq+MrIctPuYv+Qy6H4T1FK0hWyT97A0M1pLPNu+kNRia1BmnuDlKPqMbkR8qy+ArtshOyau0R7L+Zg1y9w==",
+        "shasum": "10db35bfbec56b4f1792a0928d4360e67b37b0c8",
+        "resolvedAt": "2026-04-06T11:54:42.797Z",
+        "installedAt": "2026-04-06T11:54:53.505Z"
+      },
+      "openclaw-weixin": {
+        "source": "npm",
+        "spec": "@tencent-weixin/openclaw-weixin",
+        "installPath": "E:\\SillyClaw\\.openclaw\\extensions\\openclaw-weixin",
+        "version": "2.1.7",
+        "resolvedName": "@tencent-weixin/openclaw-weixin",
+        "resolvedVersion": "2.1.7",
+        "resolvedSpec": "@tencent-weixin/openclaw-weixin@2.1.7",
+        "integrity": "sha512-2x5/mbO2IVAsN4aUA41g6i8O84WIJCeFj8kwmB2pGjuxIBVy5FnEI5n52Pc5xroOLbxzW5FXN4cDtc/PvvKghg==",
+        "shasum": "94487d55a4e9e5e091e0997deaf4598f9c79bdba",
+        "resolvedAt": "2026-04-08T01:40:29.693Z",
+        "installedAt": "2026-04-08T01:40:53.684Z"
+      }
+    }
+  }
+}

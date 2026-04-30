@@ -1,0 +1,726 @@
+"""
+积分商城API路由
+提供积分商品管理、购物车、兑换等功能
+"""
+
+import sys
+import os
+from datetime import datetime
+from typing import List, Optional
+
+from fastapi import APIRouter, HTTPException, Depends, Query
+from pydantic import BaseModel, Field
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from database import get_db
+from psycopg2.extras import RealDictCursor
+from models import (
+    PointsProduct, PointsProductDetail, PointsCategory,
+    ShoppingCartItem, ExchangeRecord, PointsBalance,
+    ExchangeRequest, CartRequest, ProductCreate, ProductUpdate
+)
+
+router = APIRouter(prefix="/api/points", tags=["积分商城"])
+
+# 数据库配置（从主应用导入）
+DB_CONFIG = None
+
+
+def get_db_config():
+    """获取数据库配置"""
+    global DB_CONFIG
+    if DB_CONFIG is None:
+        DB_CONFIG = {
+            "host": os.getenv("DB_HOST"),
+            "port": int(os.getenv("DB_PORT")),
+            "database": os.getenv("DB_NAME"),
+            "user": os.getenv("DB_USER"),
+            "password": os.getenv("DB_PASSWORD")
+        }
+    return DB_CONFIG
+
+
+# ==================== 商品分类 ====================
+
+@router.get("/categories", response_model=List[PointsCategory])
+async def get_categories():
+    """获取所有商品分类"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT id, category_key, name_en, name_zh, description, icon, sort_order, is_active
+                    FROM points_categories
+                    WHERE is_active = TRUE
+                    ORDER BY sort_order ASC
+                """)
+                rows = cur.fetchall()
+                return [PointsCategory(**row) for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==================== 积分商品 ====================
+
+@router.get("/products", response_model=List[PointsProductDetail])
+async def get_products(
+    category: Optional[str] = Query(None, description="分类筛选"),
+    is_featured: Optional[bool] = Query(None, description="是否精选"),
+    is_active: bool = Query(True, description="是否上架"),
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0)
+):
+    """获取积分商品列表"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                query = """
+                    SELECT
+                        p.*,
+                        c.name_zh as category_name,
+                        c.icon as category_icon,
+                        CASE
+                            WHEN p.stock_count = -1 THEN TRUE
+                            WHEN p.stock_count > 0 THEN TRUE
+                            ELSE FALSE
+                        END as available
+                    FROM points_products p
+                    LEFT JOIN points_categories c ON p.category_key = c.category_key
+                    WHERE 1=1
+                """
+                params = []
+
+                if category:
+                    query += " AND p.category_key = %s"
+                    params.append(category)
+
+                if is_featured is not None:
+                    query += " AND p.is_featured = %s"
+                    params.append(is_featured)
+
+                if is_active:
+                    query += " AND p.is_active = TRUE"
+
+                query += " ORDER BY p.sort_order ASC, p.created_at DESC LIMIT %s OFFSET %s"
+                params.extend([limit, offset])
+
+                cur.execute(query, params)
+                rows = cur.fetchall()
+                return [PointsProductDetail(**row) for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/products/{product_id}", response_model=PointsProductDetail)
+async def get_product_detail(product_id: int):
+    """获取商品详情"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT
+                        p.*,
+                        c.name_zh as category_name,
+                        c.icon as category_icon,
+                        CASE
+                            WHEN p.stock_count = -1 THEN TRUE
+                            WHEN p.stock_count > 0 THEN TRUE
+                            ELSE FALSE
+                        END as available
+                    FROM points_products p
+                    LEFT JOIN points_categories c ON p.category_key = c.category_key
+                    WHERE p.id = %s
+                """, (product_id,))
+
+                row = cur.fetchone()
+                if not row:
+                    raise HTTPException(status_code=404, detail="商品不存在")
+
+                return PointsProductDetail(**row)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/products")
+async def create_product(product: ProductCreate):
+    """创建积分商品（管理员功能）"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 检查分类是否存在
+                cur.execute("SELECT id FROM points_categories WHERE category_key = %s", (product.category_key,))
+                if not cur.fetchone():
+                    raise HTTPException(status_code=400, detail="分类不存在")
+
+                # 检查product_key是否已存在
+                cur.execute("SELECT id FROM points_products WHERE product_key = %s", (product.product_key,))
+                if cur.fetchone():
+                    raise HTTPException(status_code=400, detail="商品标识已存在")
+
+                # 创建商品
+                cur.execute("""
+                    INSERT INTO points_products (
+                        product_key, category_key, name_en, name_zh,
+                        description_en, description_zh, image_url,
+                        points_required, stock_count, is_featured, sort_order, valid_days
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING *
+                """, (
+                    product.product_key, product.category_key, product.name_en, product.name_zh,
+                    product.description_en, product.description_zh, product.image_url,
+                    product.points_required, product.stock_count, product.is_featured, product.sort_order, product.valid_days
+                ))
+
+                conn.commit()
+                row = cur.fetchone()
+                return {"message": "商品创建成功", "product_id": row['id']}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/products/{product_id}")
+async def update_product(product_id: int, product: ProductUpdate):
+    """更新积分商品（管理员功能）"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 检查商品是否存在
+                cur.execute("SELECT id FROM points_products WHERE id = %s", (product_id,))
+                if not cur.fetchone():
+                    raise HTTPException(status_code=404, detail="商品不存在")
+
+                # 构建更新字段
+                update_fields = []
+                params = []
+
+                if product.name_en is not None:
+                    update_fields.append("name_en = %s")
+                    params.append(product.name_en)
+                if product.name_zh is not None:
+                    update_fields.append("name_zh = %s")
+                    params.append(product.name_zh)
+                if product.description_en is not None:
+                    update_fields.append("description_en = %s")
+                    params.append(product.description_en)
+                if product.description_zh is not None:
+                    update_fields.append("description_zh = %s")
+                    params.append(product.description_zh)
+                if product.image_url is not None:
+                    update_fields.append("image_url = %s")
+                    params.append(product.image_url)
+                if product.points_required is not None:
+                    update_fields.append("points_required = %s")
+                    params.append(product.points_required)
+                if product.stock_count is not None:
+                    update_fields.append("stock_count = %s")
+                    params.append(product.stock_count)
+                if product.is_active is not None:
+                    update_fields.append("is_active = %s")
+                    params.append(product.is_active)
+                if product.is_featured is not None:
+                    update_fields.append("is_featured = %s")
+                    params.append(product.is_featured)
+                if product.sort_order is not None:
+                    update_fields.append("sort_order = %s")
+                    params.append(product.sort_order)
+                if product.valid_days is not None:
+                    update_fields.append("valid_days = %s")
+                    params.append(product.valid_days)
+
+                if not update_fields:
+                    raise HTTPException(status_code=400, detail="没有要更新的字段")
+
+                params.append(product_id)
+                query = f"UPDATE points_products SET {', '.join(update_fields)} WHERE id = %s"
+
+                cur.execute(query, params)
+                conn.commit()
+
+                return {"message": "商品更新成功"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/products/{product_id}")
+async def delete_product(product_id: int):
+    """删除积分商品（管理员功能）"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("DELETE FROM points_products WHERE id = %s", (product_id,))
+                conn.commit()
+
+                if cur.rowcount == 0:
+                    raise HTTPException(status_code=404, detail="商品不存在")
+
+                return {"message": "商品删除成功"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==================== 购物车 ====================
+
+@router.get("/cart", response_model=List[ShoppingCartItem])
+async def get_cart(user_id: int = Query(..., description="用户ID")):
+    """获取购物车"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT
+                        c.id,
+                        c.user_id,
+                        c.product_id,
+                        c.quantity,
+                        p.product_key,
+                        p.name_zh as product_name,
+                        p.image_url as product_image,
+                        p.points_required,
+                        p.points_required * c.quantity as total_points,
+                        CASE
+                            WHEN p.stock_count = -1 THEN TRUE
+                            WHEN p.stock_count >= c.quantity THEN TRUE
+                            ELSE FALSE
+                        END as stock_available
+                    FROM points_shopping_cart c
+                    LEFT JOIN points_products p ON c.product_id = p.id
+                    WHERE c.user_id = %s AND p.is_active = TRUE
+                    ORDER BY c.created_at DESC
+                """, (user_id,))
+
+                rows = cur.fetchall()
+                return [ShoppingCartItem(**row) for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/cart")
+async def add_to_cart(cart: CartRequest):
+    """添加到购物车"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 检查商品是否存在且可用
+                cur.execute("""
+                    SELECT id, is_active, stock_count
+                    FROM points_products
+                    WHERE id = %s
+                """, (cart.product_id,))
+
+                product = cur.fetchone()
+                if not product:
+                    raise HTTPException(status_code=404, detail="商品不存在")
+
+                if not product['is_active']:
+                    raise HTTPException(status_code=400, detail="商品已下架")
+
+                if product['stock_count'] != -1 and product['stock_count'] < cart.quantity:
+                    raise HTTPException(status_code=400, detail="库存不足")
+
+                # 添加或更新购物车
+                cur.execute("""
+                    INSERT INTO points_shopping_cart (user_id, product_id, quantity)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (user_id, product_id)
+                    DO UPDATE SET quantity = points_shopping_cart.quantity + %s,
+                                  updated_at = CURRENT_TIMESTAMP
+                    RETURNING id
+                """, (cart.user_id, cart.product_id, cart.quantity, cart.quantity))
+
+                conn.commit()
+                return {"message": "已添加到购物车"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/cart/{cart_id}")
+async def update_cart_item(cart_id: int, quantity: int = Query(..., ge=1, le=99)):
+    """更新购物车项数量"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    UPDATE points_shopping_cart
+                    SET quantity = %s, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = %s
+                """, (quantity, cart_id))
+
+                conn.commit()
+                if cur.rowcount == 0:
+                    raise HTTPException(status_code=404, detail="购物车项不存在")
+
+                return {"message": "购物车已更新"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/cart/{cart_id}")
+async def remove_from_cart(cart_id: int):
+    """从购物车移除"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("DELETE FROM points_shopping_cart WHERE id = %s", (cart_id,))
+                conn.commit()
+
+                if cur.rowcount == 0:
+                    raise HTTPException(status_code=404, detail="购物车项不存在")
+
+                return {"message": "已从购物车移除"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/cart")
+async def clear_cart(user_id: int = Query(..., description="用户ID")):
+    """清空购物车"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("DELETE FROM points_shopping_cart WHERE user_id = %s", (user_id,))
+                conn.commit()
+
+                return {"message": "购物车已清空"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==================== 积分兑换 ====================
+
+@router.post("/exchange")
+async def exchange_product(exchange: ExchangeRequest):
+    """兑换商品"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 开始事务
+                conn.autocommit = False
+
+                try:
+                    # 检查用户积分
+                    cur.execute("SELECT id, username, ai_points FROM users WHERE id = %s FOR UPDATE", (exchange.user_id,))
+                    user = cur.fetchone()
+                    if not user:
+                        raise HTTPException(status_code=404, detail="用户不存在")
+
+                    # 检查商品
+                    cur.execute("""
+                        SELECT id, product_key, name_zh, points_required, stock_count, is_active
+                        FROM points_products
+                        WHERE id = %s FOR UPDATE
+                    """, (exchange.product_id,))
+
+                    product = cur.fetchone()
+                    if not product:
+                        raise HTTPException(status_code=404, detail="商品不存在")
+
+                    if not product['is_active']:
+                        raise HTTPException(status_code=400, detail="商品已下架")
+
+                    if product['stock_count'] != -1 and product['stock_count'] < exchange.quantity:
+                        raise HTTPException(status_code=400, detail="库存不足")
+
+                    total_points = product['points_required'] * exchange.quantity
+
+                    if user['ai_points'] < total_points:
+                        raise HTTPException(status_code=400, detail=f"积分不足，需要 {total_points} 积分")
+
+                    # 扣除积分
+                    cur.execute("""
+                        UPDATE users
+                        SET ai_points = ai_points - %s
+                        WHERE id = %s
+                    """, (total_points, exchange.user_id))
+
+                    # 更新库存
+                    if product['stock_count'] != -1:
+                        cur.execute("""
+                            UPDATE points_products
+                            SET stock_count = stock_count - %s,
+                                sold_count = sold_count + %s
+                            WHERE id = %s
+                        """, (exchange.quantity, exchange.quantity, exchange.product_id))
+                    else:
+                        cur.execute("""
+                            UPDATE points_products
+                            SET sold_count = sold_count + %s
+                            WHERE id = %s
+                        """, (exchange.quantity, exchange.product_id))
+
+                    # 生成兑换号
+                    exchange_no = f"EX{datetime.now().strftime('%Y%m%d%H%M%S')}{exchange.user_id}"
+
+                    # 创建兑换记录
+                    cur.execute("""
+                        INSERT INTO points_exchange_records (
+                            exchange_no, user_id, product_id, product_name,
+                            points_used, quantity, status, metadata
+                        ) VALUES (%s, %s, %s, %s, %s, %s, 'completed', %s)
+                    """, (
+                        exchange_no, exchange.user_id, exchange.product_id, product['name_zh'],
+                        total_points, exchange.quantity, '{}'
+                    ))
+
+                    # 清除购物车中的该商品
+                    cur.execute("""
+                        DELETE FROM points_shopping_cart
+                        WHERE user_id = %s AND product_id = %s
+                    """, (exchange.user_id, exchange.product_id))
+
+                    conn.commit()
+                    return {
+                        "message": "兑换成功",
+                        "exchange_no": exchange_no,
+                        "points_used": total_points
+                    }
+
+                except Exception as e:
+                    conn.rollback()
+                    raise e
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/exchanges", response_model=List[ExchangeRecord])
+async def get_exchanges(
+    user_id: int = Query(..., description="用户ID"),
+    status: Optional[str] = Query(None, description="状态筛选"),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0)
+):
+    """获取用户的兑换记录"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                query = """
+                    SELECT id, exchange_no, user_id, product_id, product_name,
+                           points_used, quantity, status, metadata, created_at
+                    FROM points_exchange_records
+                    WHERE user_id = %s
+                """
+                params = [user_id]
+
+                if status:
+                    query += " AND status = %s"
+                    params.append(status)
+
+                query += " ORDER BY created_at DESC LIMIT %s OFFSET %s"
+                params.extend([limit, offset])
+
+                cur.execute(query, params)
+                rows = cur.fetchall()
+                return [ExchangeRecord(**row) for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/balance", response_model=PointsBalance)
+async def get_points_balance(user_id: int = Query(..., description="用户ID")):
+    """获取用户积分余额"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT
+                        u.id as user_id,
+                        u.username,
+                        u.ai_points,
+                        COALESCE(COUNT(e.id), 0) as total_exchanges,
+                        COALESCE(SUM(e.points_used), 0) as total_points_used
+                    FROM users u
+                    LEFT JOIN points_exchange_records e ON u.id = e.user_id AND e.status = 'completed'
+                    WHERE u.id = %s
+                    GROUP BY u.id, u.username, u.ai_points
+                """, (user_id,))
+
+                row = cur.fetchone()
+                if not row:
+                    raise HTTPException(status_code=404, detail="用户不存在")
+
+                return PointsBalance(**row)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==================== 统计数据 ====================
+
+@router.get("/stats")
+async def get_mall_stats():
+    """获取商城统计数据"""
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 总商品数
+                cur.execute("SELECT COUNT(*) as count FROM points_products WHERE is_active = TRUE")
+                total_products = cur.fetchone()['count']
+
+                # 总兑换数
+                cur.execute("SELECT COUNT(*) as count FROM points_exchange_records WHERE status = 'completed'")
+                total_exchanges = cur.fetchone()['count']
+
+                # 总积分消耗
+                cur.execute("SELECT COALESCE(SUM(points_used), 0) as total FROM points_exchange_records WHERE status = 'completed'")
+                total_points_used = cur.fetchone()['total'] or 0
+
+                # 今日兑换数
+                cur.execute("""
+                    SELECT COUNT(*) as count FROM points_exchange_records
+                    WHERE status = 'completed'
+                    AND DATE(created_at) = CURRENT_DATE
+                """)
+                today_exchanges = cur.fetchone()['count']
+
+                return {
+                    "total_products": total_products,
+                    "total_exchanges": total_exchanges,
+                    "total_points_used": total_points_used,
+                    "today_exchanges": today_exchanges
+                }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==================== 积分交易记录 ====================
+
+@router.get("/transactions")
+async def get_point_transactions(
+    user_id: int = Query(..., description="用户ID"),
+    page: int = Query(1, ge=1, description="页码"),
+    page_size: int = Query(20, ge=1, le=100, description="每页数量"),
+    transaction_type: Optional[str] = Query(None, description="交易类型筛选")
+):
+    """
+    获取用户积分交易记录
+
+    参数:
+    - user_id: 用户ID（必需，实际应从JWT token获取）
+    - page: 页码
+    - page_size: 每页数量
+    - transaction_type: 交易类型筛选 (earn, spend, transfer, etc.)
+    """
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 构建查询
+                query = """
+                    SELECT
+                        id,
+                        user_id,
+                        transaction_type,
+                        transaction_source,
+                        amount,
+                        balance_before,
+                        balance_after,
+                        description,
+                        created_at
+                    FROM point_transactions
+                    WHERE user_id = %s
+                """
+                params = [user_id]
+
+                # 添加类型筛选
+                if transaction_type:
+                    query += " AND transaction_type = %s"
+                    params.append(transaction_type)
+
+                # 添加排序和分页
+                query += " ORDER BY created_at DESC LIMIT %s OFFSET %s"
+                params.extend([page_size, (page - 1) * page_size])
+
+                cur.execute(query, params)
+                rows = cur.fetchall()
+
+                # 获取总数
+                count_query = "SELECT COUNT(*) as total FROM point_transactions WHERE user_id = %s"
+                count_params = [user_id]
+                if transaction_type:
+                    count_query += " AND transaction_type = %s"
+                    count_params.append(transaction_type)
+
+                cur.execute(count_query, count_params)
+                total = cur.fetchone()['total']
+
+                return {
+                    "success": True,
+                    "data": {
+                        "items": rows,
+                        "total": total,
+                        "page": page,
+                        "page_size": page_size
+                    }
+                }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/stats/user")
+async def get_user_point_stats(
+    user_id: int = Query(..., description="用户ID")
+):
+    """
+    获取用户积分统计信息
+
+    参数:
+    - user_id: 用户ID（必需，实际应从JWT token获取）
+    """
+    try:
+        with get_db(get_db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 获取用户积分信息
+                cur.execute("""
+                    SELECT
+                        user_id,
+                        balance,
+                        total_earned,
+                        total_spent,
+                        level,
+                        experience
+                    FROM user_points
+                    WHERE user_id = %s
+                """, (user_id,))
+
+                row = cur.fetchone()
+
+                if not row:
+                    # 如果没有记录，返回默认值
+                    return {
+                        "success": True,
+                        "data": {
+                            "totalPoints": 0,
+                            "level": 1,
+                            "experience": 0
+                        }
+                    }
+
+                return {
+                    "success": True,
+                    "data": {
+                        "totalPoints": row['balance'],
+                        "totalEarned": row['total_earned'],
+                        "totalSpent": row['total_spent'],
+                        "level": row['level'],
+                        "experience": row['experience']
+                    }
+                }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -1,0 +1,203 @@
+package com.jcoding.aiactivity.utils;
+
+import android.content.Context;
+import android.util.Log;
+
+import com.jcoding.aiactivity.entity.PrizeData;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 奖品Excel解析工具类
+ * 用于解析assets/lottery/prizeDate.xls文件
+ */
+public class PrizeExcelParser {
+
+    private static final String TAG = "PrizeExcelParser";
+    private static final String EXCEL_FILE_PATH = "lottery/prizeDate.xls";
+
+    /**
+     * 从assets中解析奖品Excel文件
+     *
+     * @param context 上下文
+     * @return 奖品数据列表
+     */
+    public static List<PrizeData> parsePrizeExcel(Context context) {
+        List<PrizeData> prizeList = new ArrayList<>();
+        InputStream inputStream = null;
+        Workbook workbook = null;
+
+        try {
+            // 打开assets中的Excel文件
+            inputStream = context.getAssets().open(EXCEL_FILE_PATH);
+            workbook = WorkbookFactory.create(inputStream);
+
+            // 获取第一个工作表
+            Sheet sheet = workbook.getSheetAt(0);
+
+            // 遍历行（从第1行开始，跳过标题行）
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) {
+                    continue;
+                }
+
+                PrizeData prize = parseRow(row);
+                if (prize != null && prize.getName() != null && !prize.getName().isEmpty()) {
+                    prizeList.add(prize);
+                }
+            }
+
+            Log.i(TAG, "成功解析奖品数据，共 " + prizeList.size() + " 条");
+            return prizeList;
+
+        } catch (IOException e) {
+            Log.e(TAG, "读取Excel文件失败", e);
+            return new ArrayList<>();
+        } catch (Exception e) {
+            Log.e(TAG, "解析Excel文件失败", e);
+            return new ArrayList<>();
+        } finally {
+            // 关闭资源
+            try {
+                if (workbook != null) {
+                    workbook.close();
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "关闭资源失败", e);
+            }
+        }
+    }
+
+    /**
+     * 解析单行数据
+     * 预期格式：
+     * - 第1列：奖品名称
+     * - 第2列：商家信息
+     * - 第3列：奖品描述（可选）
+     * - 第4列：总数量（可选，默认为1）
+     *
+     * @param row Excel行
+     * @return 奖品数据
+     */
+    private static PrizeData parseRow(Row row) {
+        if (row == null) {
+            return null;
+        }
+
+        try {
+            // 读取奖品名称（第1列）
+            String name = getCellValueAsString(row.getCell(0));
+            if (name == null || name.trim().isEmpty()) {
+                return null;
+            }
+
+            // 读取商家信息（第2列）
+            String merchant = getCellValueAsString(row.getCell(1));
+            if (merchant == null || merchant.trim().isEmpty()) {
+                merchant = "未知商家";
+            }
+
+            // 读取奖品描述（第3列，可选）
+            String description = getCellValueAsString(row.getCell(2));
+            if (description == null || description.trim().isEmpty()) {
+                description = "";
+            }
+
+            // 读取总数量（第4列，可选，默认为1）
+            int totalCount = 1;
+            try {
+                String countStr = getCellValueAsString(row.getCell(3));
+                if (countStr != null && !countStr.trim().isEmpty()) {
+                    totalCount = Integer.parseInt(countStr.trim());
+                }
+            } catch (NumberFormatException e) {
+                Log.w(TAG, "解析数量失败，使用默认值1");
+                totalCount = 1;
+            }
+
+            return new PrizeData(name.trim(), merchant.trim(), description.trim(), totalCount);
+
+        } catch (Exception e) {
+            Log.e(TAG, "解析行数据失败: " + row.getRowNum(), e);
+            return null;
+        }
+    }
+
+    /**
+     * 获取单元格值并转换为字符串
+     *
+     * @param cell 单元格
+     * @return 单元格值的字符串表示
+     */
+    private static String getCellValueAsString(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        CellType cellType = cell.getCellType();
+        switch (cellType) {
+            case STRING:
+                return cell.getStringCellValue();
+
+            case NUMERIC:
+                // 数字类型，转换为字符串
+                double numericValue = cell.getNumericCellValue();
+                // 判断是否为整数
+                if (numericValue == (long) numericValue) {
+                    return String.valueOf((long) numericValue);
+                } else {
+                    return String.valueOf(numericValue);
+                }
+
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+
+            case FORMULA:
+                // 公式类型，获取计算后的值
+                try {
+                    return String.valueOf(cell.getNumericCellValue());
+                } catch (Exception e) {
+                    return cell.getStringCellValue();
+                }
+
+            case BLANK:
+                return null;
+
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * 获取可用的奖品列表（剩余数量大于0的奖品）
+     *
+     * @param context 上下文
+     * @return 可用奖品列表
+     */
+    public static List<PrizeData> getAvailablePrizes(Context context) {
+        List<PrizeData> allPrizes = parsePrizeExcel(context);
+        List<PrizeData> availablePrizes = new ArrayList<>();
+
+        for (PrizeData prize : allPrizes) {
+            if (prize.hasRemaining()) {
+                availablePrizes.add(prize);
+            }
+        }
+
+        return availablePrizes;
+    }
+}

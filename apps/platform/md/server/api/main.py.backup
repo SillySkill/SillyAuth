@@ -1,0 +1,646 @@
+"""
+SillyMD API 服务
+从数据库获取真实数据供前端页面使用
+"""
+
+import sys
+import os
+
+# 添加当前目录到 Python 路径
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response, StreamingResponse
+from typing import List, Optional
+from datetime import datetime
+import requests
+from urllib.parse import unquote
+
+from database import get_db
+from psycopg2.extras import RealDictCursor
+from models import (
+    SkillListResponse, SkillDetail, UserListResponse, UserDetail,
+    TeamListResponse, TeamDetail, MarketStats
+)
+
+# 导入积分商城路由
+from routes.points_mall import router as points_router
+
+# 导入任务系统路由
+from routes.tasks import router as tasks_router
+
+# 导入教程和资源路由
+from routes.tutorials import router as tutorials_router
+from routes.downloads import router as downloads_router
+
+# 导入支付相关路由
+from routes.payment import router as payment_router
+from routes.payment_accounts import router as payment_accounts_router
+
+# 导入用户相关路由
+from routes.users import router as users_router
+
+# 导入认证相关路由
+from routes.auth import router as auth_router
+
+# 导入消息系统路由
+from routes.messages import router as messages_router
+
+# 导入上传功能路由
+from routes.upload import router as upload_router
+
+# 导入仪表板、设置和分析路由
+from routes.dashboard import router as dashboard_router
+from routes.user_settings import router as user_settings_router
+from routes.analytics import router as analytics_router
+
+# 导入配置同步路由
+from routes.config_sync import router as config_sync_router
+
+# 导入商城路由
+from routes.store import router as store_router, admin_router as store_admin_router
+
+app = FastAPI(
+    title="SillyMD API",
+    description="从数据库获取真实数据的 API 服务",
+    version="1.0.0"
+)
+
+# CORS 配置
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 数据库配置
+# 安全要求: 所有数据库凭证必须通过环境变量设置，不允许硬编码
+required_env_vars = ["DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD"]
+missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+
+if missing_vars:
+    raise RuntimeError(
+        f"缺少必要的环境变量: {', '.join(missing_vars)}。"
+        f"请在环境变量中设置 {', '.join(required_env_vars)}"
+    )
+
+DB_CONFIG = {
+    "host": os.getenv("DB_HOST"),
+    "port": int(os.getenv("DB_PORT")),
+    "database": os.getenv("DB_NAME"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD")
+}
+
+
+@app.get("/")
+async def root():
+    """API 根路径"""
+    return {
+        "service": "SillyMD API",
+        "version": "1.0.0",
+        "status": "running",
+        "timestamp": datetime.now().isoformat()
+    }
+
+
+@app.get("/api/health")
+async def health_check():
+    """健康检查"""
+    try:
+        with get_db(DB_CONFIG) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("SELECT 1")
+                return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/debug/routes")
+async def list_routes():
+    """列出所有注册的路由（调试用）"""
+    routes = []
+    for route in app.routes:
+        if hasattr(route, 'path') and hasattr(route, 'methods'):
+            routes.append({
+                "path": route.path,
+                "methods": list(route.methods),
+                "name": route.name
+            })
+    return {
+        "total_routes": len(routes),
+        "routes": routes
+    }
+
+
+@app.get("/api/file")
+async def proxy_file(path: str):
+    """
+    代理OSS文件，避免CORS问题
+
+    参数:
+    - path: OSS文件路径，例如 /sillymd/hero/lay-1080.mp4
+
+    使用示例:
+    - /api/file?path=/sillymd/hero/lay-1080.mp4
+    """
+    if not path:
+        raise HTTPException(status_code=400, detail="Path parameter is required")
+
+    # Decode URL encoding
+    path = unquote(path)
+
+    # Remove leading slash if present
+    if path.startswith('/'):
+        path = path[1:]
+
+    # Construct OSS URL (using custom domain)
+    oss_url = f"https://file.jcoding.chat/{path}"
+
+    try:
+        # Fetch from OSS with streaming
+        response = requests.get(oss_url, stream=True, timeout=30)
+
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Failed to fetch file from OSS: {response.status_code}"
+            )
+
+        # Get content type
+        content_type = response.headers.get('Content-Type', 'application/octet-stream')
+
+        # Determine cache time based on file type
+        if path.endswith(('.mp4', '.webm', '.ogg')):
+            cache_max_age = 86400  # 1 day for videos
+        elif path.endswith(('.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp')):
+            cache_max_age = 31536000  # 1 year for images
+        elif path.endswith(('.js', '.css')):
+            cache_max_age = 31536000  # 1 year for static assets
+        else:
+            cache_max_age = 3600  # 1 hour default
+
+        # Stream response back to client
+        def iterfile():
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    yield chunk
+
+        return StreamingResponse(
+            iterfile(),
+            media_type=content_type,
+            headers={
+                'Cache-Control': f'public, max-age={cache_max_age}, immutable',
+                'Access-Control-Allow-Origin': '*',
+            }
+        )
+
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=502, detail=f"Error fetching from OSS: {str(e)}")
+
+
+# 注册积分商城路由
+app.include_router(points_router)
+
+# 注册任务系统路由
+app.include_router(tasks_router)
+
+# 注册教程和资源路由
+app.include_router(tutorials_router)
+app.include_router(downloads_router)
+
+# 注册支付相关路由
+app.include_router(payment_router)
+app.include_router(payment_accounts_router)
+
+# 注册用户相关路由
+app.include_router(users_router)
+
+# 注册认证相关路由
+app.include_router(auth_router)
+
+# 注册仪表板、设置和分析路由
+# 设置DB_CONFIG
+from routes.dashboard import set_db_config as dashboard_set_config
+from routes.user_settings import set_db_config as settings_set_config
+from routes.analytics import set_db_config as analytics_set_config
+from routes.tutorials import set_db_config as tutorials_set_config
+from routes.downloads import set_db_config as downloads_set_config
+
+dashboard_set_config(DB_CONFIG)
+settings_set_config(DB_CONFIG)
+analytics_set_config(DB_CONFIG)
+tutorials_set_config(DB_CONFIG)
+downloads_set_config(DB_CONFIG)
+
+app.include_router(dashboard_router)
+app.include_router(user_settings_router)
+app.include_router(analytics_router)
+
+# 注册配置同步路由
+app.include_router(config_sync_router, prefix="/api/config", tags=["config_sync"])
+
+# 注册商城路由
+app.include_router(store_router)
+
+# 注册商城管理路由
+app.include_router(store_admin_router)
+
+# 注册消息系统路由
+app.include_router(messages_router)
+
+# 注册上传功能路由（带/application前缀，匹配Android客户端请求）
+app.include_router(upload_router, prefix="/application", tags=["upload"])
+
+
+@app.get("/api/skills", response_model=List[SkillListResponse])
+async def get_skills(
+    category: Optional[str] = None,
+    type: Optional[str] = None,
+    status: str = "approved",
+    is_featured: Optional[bool] = None,
+    limit: int = 50,
+    offset: int = 0
+):
+    """
+    获取 Skills 列表
+
+    参数:
+    - category: 分类筛选
+    - type: 类型筛选 (free/commercial)
+    - status: 状态筛选
+    - is_featured: 是否精选
+    - limit: 返回数量
+    - offset: 偏移量
+    """
+    try:
+        with get_db(DB_CONFIG) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 构建查询
+                query = """
+                    SELECT
+                        s.id,
+                        s.skill_id,
+                        s.name,
+                        s.description,
+                        s.category,
+                        s.type,
+                        s.version,
+                        s.status,
+                        s.price,
+                        s.is_featured,
+                        s.view_count,
+                        s.download_count,
+                        s.favorite_count,
+                        s.rating_avg,
+                        s.rating_count,
+                        s.published_at,
+                        u.username as author_username,
+                        u.avatar_url as author_avatar,
+                        u.vendor_level as author_level,
+                        u.bio as author_bio
+                    FROM skills s
+                    LEFT JOIN users u ON s.author_id = u.id
+                    WHERE s.status = %s
+                      AND s.is_deleted = FALSE
+                """
+                params = [status]
+
+                if category:
+                    query += " AND s.category = %s"
+                    params.append(category)
+
+                if type:
+                    query += " AND s.type = %s"
+                    params.append(type)
+
+                if is_featured is not None:
+                    query += " AND s.is_featured = %s"
+                    params.append(is_featured)
+
+                query += " ORDER BY s.published_at DESC, s.created_at DESC LIMIT %s OFFSET %s"
+                params.extend([limit, offset])
+
+                cur.execute(query, params)
+
+                rows = cur.fetchall()
+
+                results = []
+                for row in rows:
+                    results.append(SkillListResponse(**row))
+
+                return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/skills/{skill_id}", response_model=SkillDetail)
+async def get_skill_detail(skill_id: str):
+    """获取 Skill 详情"""
+    try:
+        with get_db(DB_CONFIG) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                query = """
+                    SELECT
+                        s.*,
+                        u.username as author_username,
+                        u.email as author_email,
+                        u.avatar_url as author_avatar,
+                        u.vendor_level as author_level,
+                        u.bio as author_bio
+                    FROM skills s
+                    LEFT JOIN users u ON s.author_id = u.id
+                    WHERE s.skill_id = %s
+                """
+
+                cur.execute(query, (skill_id,))
+                row = cur.fetchone()
+
+                if not row:
+                    raise HTTPException(status_code=404, detail="Skill not found")
+
+                return SkillDetail(**row)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/users", response_model=List[UserListResponse])
+async def get_users(
+    role: Optional[str] = None,
+    vendor_level: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0
+):
+    """获取用户列表"""
+    try:
+        with get_db(DB_CONFIG) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                query = """
+                    SELECT
+                        u.id,
+                        u.username,
+                        u.email,
+                        u.avatar_url,
+                        u.bio,
+                        u.role,
+                        u.vendor_level,
+                        u.created_at,
+                        (SELECT COUNT(*) FROM skills s WHERE s.author_id = u.id AND s.is_deleted = FALSE) as skill_count
+                    FROM users u
+                    WHERE u.is_active = TRUE
+                      AND u.email NOT LIKE '%%@seed.local'
+                """
+                params = []
+
+                if role:
+                    query += " AND u.role = %s"
+                    params.append(role)
+
+                if vendor_level:
+                    query += " AND u.vendor_level = %s"
+                    params.append(vendor_level)
+
+                query += " ORDER BY u.created_at DESC LIMIT %s OFFSET %s"
+                params.extend([limit, offset])
+
+                cur.execute(query, params)
+                rows = cur.fetchall()
+
+                results = []
+                for row in rows:
+                    results.append(UserListResponse(**row))
+
+                return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/users/{username}", response_model=UserDetail)
+async def get_user_detail(username: str):
+    """获取用户详情"""
+    try:
+        with get_db(DB_CONFIG) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                query = """
+                    SELECT
+                        u.id,
+                        u.username,
+                        u.email,
+                        u.avatar_url,
+                        u.bio,
+                        u.role,
+                        u.vendor_level,
+                        u.ai_points,
+                        u.preferred_language,
+                        u.theme_preference,
+                        u.is_active,
+                        u.is_verified,
+                        u.created_at,
+                        u.updated_at,
+                        (SELECT COUNT(*) FROM skills s WHERE s.author_id = u.id AND s.is_deleted = FALSE) as skill_count,
+                        (SELECT COALESCE(SUM(s.download_count), 0) FROM skills s WHERE s.author_id = u.id AND s.is_deleted = FALSE) as total_downloads,
+                        (SELECT COALESCE(AVG(s.rating_avg), 0) FROM skills s WHERE s.author_id = u.id AND s.is_deleted = FALSE AND s.rating_avg > 0) as avg_rating
+                    FROM users u
+                    WHERE u.username = %s
+                      AND u.email NOT LIKE '%%@seed.local'
+                """
+
+                cur.execute(query, (username,))
+                row = cur.fetchone()
+
+                if not row:
+                    raise HTTPException(status_code=404, detail="User not found")
+
+                return UserDetail(**row)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/teams", response_model=List[TeamListResponse])
+async def get_teams(limit: int = 50, offset: int = 0):
+    """获取团队列表"""
+    try:
+        with get_db(DB_CONFIG) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                query = """
+                    SELECT
+                        t.id,
+                        t.team_name,
+                        t.team_slug,
+                        t.description,
+                        t.avatar_url,
+                        t.member_count,
+                        t.created_at,
+                        u.username as owner_username,
+                        (SELECT COUNT(*) FROM team_projects p WHERE p.team_id = t.id) as project_count
+                    FROM teams t
+                    LEFT JOIN users u ON t.owner_id = u.id
+                    WHERE t.is_active = TRUE
+                    ORDER BY t.created_at DESC
+                    LIMIT %s OFFSET %s
+                """
+
+                cur.execute(query, (limit, offset))
+                rows = cur.fetchall()
+
+                results = []
+                for row in rows:
+                    results.append(TeamListResponse(**row))
+
+                return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/market/stats", response_model=MarketStats)
+async def get_market_stats():
+    """获取市场统计数据"""
+    try:
+        with get_db(DB_CONFIG) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 总用户数（不含种子用户）
+                cur.execute("""
+                    SELECT COUNT(*) as count FROM users
+                    WHERE is_active = TRUE AND email NOT LIKE '%%@seed.local'
+                """)
+                total_users = cur.fetchone()['count']
+
+                # 总 Skills 数（不含种子）
+                cur.execute("""
+                    SELECT COUNT(*) as count FROM skills
+                    WHERE is_deleted = FALSE AND skill_id NOT LIKE 'seed_%%'
+                """)
+                total_skills = cur.fetchone()['count']
+
+                # 供应商数
+                cur.execute("""
+                    SELECT COUNT(*) as count FROM users
+                    WHERE role = 'vendor' AND is_active = TRUE AND email NOT LIKE '%%@seed.local'
+                """)
+                total_vendors = cur.fetchone()['count']
+
+                # 免费 Skills
+                cur.execute("""
+                    SELECT COUNT(*) as count FROM skills
+                    WHERE type = 'free' AND is_deleted = FALSE AND skill_id NOT LIKE 'seed_%'
+                """)
+                free_skills = cur.fetchone()['count']
+
+                # 付费 Skills
+                cur.execute("""
+                    SELECT COUNT(*) as count FROM skills
+                    WHERE type = 'commercial' AND is_deleted = FALSE AND skill_id NOT LIKE 'seed_%'
+                """)
+                paid_skills = cur.fetchone()['count']
+
+                # 团队数
+                cur.execute("SELECT COUNT(*) as count FROM teams WHERE is_active = TRUE")
+                total_teams = cur.fetchone()['count']
+
+                return MarketStats(
+                    total_users=total_users,
+                    total_skills=total_skills,
+                    total_vendors=total_vendors,
+                    free_skills=free_skills,
+                    paid_skills=paid_skills,
+                    total_teams=total_teams
+                )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/admin/import-social-seeds")
+async def import_social_seeds():
+    """导入社交化种子数据"""
+    try:
+        with get_db(DB_CONFIG) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 插入用户
+                users = [
+                    ('阿杰Code', 'ajiecode@seed.local', 'vendor', 'gold', 'https://randomuser.me/api/portraits/men/32.jpg', '前端架构师，10年开发经验，开源社区活跃贡献者'),
+                    ('小雨设计', 'xiaoyu@seed.local', 'vendor', 'gold', 'https://randomuser.me/api/portraits/women/44.jpg', 'UI/UX设计师，曾任职知名互联网公司'),
+                    ('大鹏AI', 'dapeng@seed.local', 'vendor', 'gold', 'https://randomuser.me/api/portraits/men/75.jpg', 'AI算法工程师，专注机器学习和深度学习'),
+                    ('酷酷的磊', 'kuku_lei@seed.local', 'vendor', 'premium', 'https://randomuser.me/api/portraits/men/46.jpg', '全栈工程师，擅长Node.js和Python'),
+                    ('静静数据', 'jingjing@seed.local', 'vendor', 'premium', 'https://randomuser.me/api/portraits/women/17.jpg', '数据分析师，专注大数据和可视化'),
+                    ('老张Dev', 'oldzhang@seed.local', 'vendor', 'premium', 'https://randomuser.me/api/portraits/men/22.jpg', '资深后端工程师，15年架构经验'),
+                    ('程序员小周', 'xiaozhou@seed.local', 'vendor', 'normal', 'https://randomuser.me/api/portraits/men/85.jpg', '独立开发者，喜欢分享技术心得'),
+                    ('设计师露露', 'lulu_design@seed.local', 'vendor', 'normal', 'https://randomuser.me/api/portraits/women/28.jpg', '自由设计师，擅长品牌设计和插画'),
+                    ('测试大师老孙', 'sun_test@seed.local', 'vendor', 'normal', 'https://randomuser.me/api/portraits/men/67.jpg', '测试工程师，自动化测试专家'),
+                    ('产品小姐姐', 'pm_lady@seed.local', 'vendor', 'normal', 'https://randomuser.me/api/portraits/women/65.jpg', '产品经理，专注B端产品设计'),
+                    ('运维小哥', 'ops_guy@seed.local', 'vendor', 'normal', 'https://randomuser.me/api/portraits/men/91.jpg', '运维工程师，DevOps实践者'),
+                    ('数据姐姐', 'data_sister@seed.local', 'vendor', 'normal', 'https://randomuser.me/api/portraits/women/42.jpg', '数据科学家，AI领域研究者'),
+                    ('小白学编程', 'xiaobai@seed.local', 'user', 'normal', 'https://randomuser.me/api/portraits/men/12.jpg', '编程初学者，正在努力学习中'),
+                ]
+
+                created_users = []
+                for username, email, role, level, avatar, bio in users:
+                    cur.execute("""
+                        INSERT INTO users (username, email, password_hash, role, vendor_level, avatar_url, bio, is_active, is_verified, preferred_language, theme_preference)
+                        VALUES (%s, %s, md5('demo123456'), %s, %s, %s, %s, true, true, 'zh-CN', 'tech-blue')
+                        ON CONFLICT (username) DO NOTHING
+                        RETURNING id, username
+                    """, (username, email, role, level, avatar, bio))
+                    result = cur.fetchone()
+                    if result:
+                        created_users.append(result)
+
+                # 插入Skills
+                skills = [
+                    ('jwt_auth_master', 'JWT认证系统完整版', '完整的JWT认证解决方案，支持用户注册、登录、密码重置、权限管理等核心功能。包含访问令牌和刷新令牌机制，确保系统安全。内置RBAC权限控制模型，可灵活配置用户角色和权限。', '阿杰Code', 'tech', 'free', '2.1.0', 0, True, 15234, 5678, 4.9, 1234),
+                    ('react_dashboard_kit', 'React管理后台模板', '基于React18 + TypeScript + Ant Design的现代化管理后台模板，包含20+常用组件，支持动态路由、权限管理、主题切换等功能。开箱即用，快速搭建企业级后台系统。', '小雨设计', 'tech', 'free', '1.5.0', 0, True, 12345, 4567, 4.8, 987),
+                    ('python_data_toolkit', 'Python数据分析工具集', '专业级Python数据分析工具包，集成Pandas、NumPy、Matplotlib等主流库。提供数据清洗、转换、可视化等50+实用函数，适用于数据分析、机器学习预处理等场景。', '大鹏AI', 'tech', 'free', '3.2.0', 0, True, 9876, 3456, 4.7, 765),
+                    ('code_review_ai', 'AI代码审查助手', '基于AI的智能代码审查工具，支持Python、JavaScript、Java等多种语言。自动检测代码质量问题、安全漏洞、性能优化点，并提供详细的改进建议。集成Git Hooks，在提交代码前自动检查。', '程序员小周', 'tech', 'free', '1.0.0', 0, True, 8765, 2345, 4.6, 543),
+                    ('ai_trading_bot_pro', 'AI量化交易机器人Pro', '专业级AI交易机器人，支持多种交易策略，适用于股票、期货、数字货币等市场。内置智能风控系统，回测功能完善，已帮助500+用户实现稳定盈利。提供完整的API接口和详细文档。', '阿杰Code', 'tech', 'commercial', '2.5.0', 2999, True, 23456, 1234, 4.9, 456),
+                    ('enterprise_crm_system', '企业级CRM客户管理系统', '完整的企业CRM解决方案，包含客户管理、销售漏斗、合同管理、数据分析等模块。支持多租户、权限细化、自定义字段等功能。已服务于100+中小企业。', '老张Dev', 'business', 'commercial', '1.8.0', 5999, True, 18765, 890, 4.8, 321),
+                    ('smart_marketing_platform', '智能营销自动化平台', '一站式营销自动化解决方案，支持邮件营销、短信营销、社交媒体管理、营销自动化等功能。集成主流营销平台API，提供详细的营销数据分析和报表。', '酷酷的磊', 'business', 'commercial', '3.0.0', 8999, True, 15678, 678, 4.7, 234),
+                    ('design_system_kit', '企业级设计系统组件库', '完整的企业级设计系统，包含100+UI组件、设计规范、图标库、配色方案等。支持Figma、Sketch等设计工具，提供React/Vue等多框架组件库。帮助团队统一设计语言，提升开发效率。', '小雨设计', 'design', 'commercial', '2.0.0', 4999, True, 14320, 1234, 4.9, 567),
+                    ('data_visualization_suite', '大数据可视化套件', '基于D3.js和ECharts的数据可视化解决方案，提供50+种图表类型，支持实时数据更新、交互式图表、大屏展示等功能。适用于数据分析、运营监控、智慧城市等场景。', '静静数据', 'tech', 'commercial', '1.5.0', 3999, True, 12123, 987, 4.8, 432),
+                ]
+
+                created_skills = []
+                for skill_id, name, desc, author, category, type_, version, price, featured, views, downloads, rating, reviews in skills:
+                    cur.execute("""
+                        INSERT INTO skills (
+                            skill_id, name, description, author_id,
+                            category, type, version, status,
+                            price, is_featured, view_count, download_count,
+                            rating_avg, rating_count, published_at
+                        )
+                        VALUES (
+                            %s, %s, %s,
+                            (SELECT id FROM users WHERE username = %s LIMIT 1),
+                            %s, %s, %s, 'approved',
+                            %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP
+                        )
+                        ON CONFLICT (skill_id) DO NOTHING
+                        RETURNING id, name
+                    """, (skill_id, name, desc, author, category, type_, version, price, featured, views, downloads, rating, reviews))
+
+                    result = cur.fetchone()
+                    if result:
+                        created_skills.append(result)
+
+                conn.commit()
+
+                return {
+                    "status": "success",
+                    "message": "社交化种子数据导入完成",
+                    "created_users": len(created_users),
+                    "created_skills": len(created_skills),
+                    "users": [u["username"] for u in created_users],
+                    "skills": [s["name"] for s in created_skills]
+                }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

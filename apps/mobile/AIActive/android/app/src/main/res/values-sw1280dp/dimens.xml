@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 65寸大屏尺寸 (≥ 1280dp) -->
+    <dimen name="text_size_title">52sp</dimen>
+    <dimen name="text_size_subtitle">40sp</dimen>
+    <dimen name="text_size_body">32sp</dimen>
+    <dimen name="text_size_caption">28sp</dimen>
+
+    <dimen name="spacing_tiny">10dp</dimen>
+    <dimen name="spacing_small">20dp</dimen>
+    <dimen name="spacing_medium">40dp</dimen>
+    <dimen name="spacing_large">60dp</dimen>
+    <dimen name="spacing_xlarge">80dp</dimen>
+
+    <dimen name="button_height">90dp</dimen>
+    <dimen name="touch_target_size">110dp</dimen>
+</resources>

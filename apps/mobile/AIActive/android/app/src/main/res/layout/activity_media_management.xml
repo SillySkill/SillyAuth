@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <!-- 标题栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="@color/colorPrimary"
+        android:elevation="4dp">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_arrow_back"
+            android:tint="@android:color/white"
+            android:contentDescription="返回" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="媒体资源管理"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:gravity="center" />
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+
+    </LinearLayout>
+
+    <!-- 筛选栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:elevation="2dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="筛选: "
+            android:textSize="14sp"
+            android:textColor="@color/textPrimary"
+            android:gravity="center_vertical" />
+
+        <Button
+            android:id="@+id/btn_filter_all"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="全部"
+            android:textSize="12sp"
+            android:background="@drawable/btn_filter_active"
+            android:layout_marginEnd="8dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:minWidth="0dp" />
+
+        <Button
+            android:id="@+id/btn_filter_warmup"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="暖场秀"
+            android:textSize="12sp"
+            android:background="@drawable/btn_filter_inactive"
+            android:layout_marginEnd="8dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:minWidth="0dp" />
+
+        <Button
+            android:id="@+id/btn_filter_hosting"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="主持秀"
+            android:textSize="12sp"
+            android:background="@drawable/btn_filter_inactive"
+            android:layout_marginEnd="8dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:minWidth="0dp" />
+
+        <Button
+            android:id="@+id/btn_filter_teabreak"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="茶歇秀"
+            android:textSize="12sp"
+            android:background="@drawable/btn_filter_inactive"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:minWidth="0dp" />
+
+    </LinearLayout>
+
+    <!-- 媒体列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp"
+        android:clipToPadding="false" />
+
+    <!-- 上传按钮 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:elevation="4dp">
+
+        <Button
+            android:id="@+id/btn_upload"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="上传新媒体"
+            android:textSize="16sp"
+            android:background="@drawable/btn_primary"
+            android:textColor="@android:color/white"
+            android:drawableStart="@drawable/ic_upload"
+            android:drawablePadding="8dp"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+</LinearLayout>

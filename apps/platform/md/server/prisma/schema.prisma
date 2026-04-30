@@ -1,0 +1,500 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户模型
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  username  String     @unique
+  password  String
+  role      UserRole   @default(EDITOR)
+  avatar    String?
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // 关联
+  contentVersions   ContentVersion[]
+  activityLogs      ActivityLog[]
+  ShrimpGroupMember ShrimpGroupMember[]
+  QRCodeSession     QRCodeSession[]
+  SkillLicense      SkillLicense[]
+  UserPoints        UserPoints?
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN // 管理员 - 所有权限
+  EDITOR // 编辑 - 内容管理
+  VIEWER // 查看者 - 只读权限
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+}
+
+// 内容管理模型
+model Content {
+  id        String        @id @default(uuid())
+  key       String        @unique
+  type      ContentType
+  title     String
+  content   String        @db.Text
+  metadata  Json? // 存储额外的元数据
+  language  String        @default("zh") // 语言代码
+  status    ContentStatus @default(DRAFT)
+  seo       Json? // SEO 配置
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  createdBy String?
+  updatedBy String?
+
+  // 关联
+  versions ContentVersion[]
+
+  @@map("contents")
+}
+
+enum ContentType {
+  PAGE // 页面
+  SECTION // 页面区块
+  COMPONENT // 组件
+  TEXT // 纯文本
+  HTML // HTML内容
+  MARKDOWN // Markdown内容
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// 内容版本历史
+model ContentVersion {
+  id          String   @id @default(uuid())
+  contentId   String
+  version     Int
+  contentData String   @db.Text
+  metadata    Json?
+  changeLog   String?  @db.Text
+  createdAt   DateTime @default(now())
+  createdBy   String
+
+  // 关联
+  content Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  creator User    @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@unique([contentId, version])
+  @@index([contentId])
+  @@map("content_versions")
+}
+
+// 导航菜单模型
+model Navigation {
+  id          String   @id @default(uuid())
+  title       String
+  key         String   @unique
+  url         String
+  icon        String?
+  parentId    String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  isNewWindow Boolean  @default(false)
+  language    String   @default("zh")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 自关联
+  parent   Navigation?  @relation("NavigationHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children Navigation[] @relation("NavigationHierarchy")
+
+  @@index([parentId])
+  @@index([order])
+  @@map("navigations")
+}
+
+// 轮播图模型
+model Carousel {
+  id          String       @id @default(uuid())
+  title       String
+  description String?      @db.Text
+  mediaType   CarouselType
+  mediaUrl    String
+  linkUrl     String?
+  linkTitle   String?
+  order       Int          @default(0)
+  isActive    Boolean      @default(true)
+  language    String       @default("zh")
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([order])
+  @@index([isActive])
+  @@map("carousels")
+}
+
+enum CarouselType {
+  IMAGE
+  VIDEO
+}
+
+// 技能/技能栈模型
+model Skill {
+  id           String         @id @default(uuid())
+  name         String
+  category     String // 前端、后端、工具等
+  level        Int            @default(0) // 0-100 熟练度
+  icon         String?
+  description  String?        @db.Text
+  order        Int            @default(0)
+  isActive     Boolean        @default(true)
+  language     String         @default("zh")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  SkillLicense SkillLicense[]
+
+  @@index([category])
+  @@index([order])
+  @@map("skills")
+}
+
+// 供应商/合作商模型
+model Vendor {
+  id          String   @id @default(uuid())
+  name        String
+  logo        String?
+  website     String?
+  description String?  @db.Text
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  language    String   @default("zh")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+  @@map("vendors")
+}
+
+// SEO配置模型
+model SEOSettings {
+  id          String   @id @default(uuid())
+  page        String   @unique
+  title       String
+  description String?  @db.Text
+  keywords    String?
+  ogImage     String?
+  ogType      String?
+  twitterCard String?
+  schema      Json? // Schema.org 数据
+  canonical   String?
+  robots      String?
+  language    String   @default("zh")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("seo_settings")
+}
+
+// 多语言翻译模型
+model Translation {
+  id        String   @id @default(uuid())
+  key       String
+  language  String
+  value     String   @db.Text
+  namespace String? // 命名空间，用于分组
+  context   String? // 上下文信息
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([key, language])
+  @@index([key])
+  @@index([language])
+  @@map("translations")
+}
+
+// 操作日志模型
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  entity    String // 操作的实体类型
+  entityId  String? // 操作的实体ID
+  details   Json? // 详细信息
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  // 关联
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+// 系统配置模型
+model SystemConfig {
+  id          String     @id @default(uuid())
+  key         String     @unique
+  value       String     @db.Text
+  type        ConfigType @default(STRING)
+  category    String?
+  description String?
+  isPublic    Boolean    @default(false) // 是否可以公开访问
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([category])
+  @@map("system_configs")
+}
+
+enum ConfigType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+  TEXT
+}
+
+// 媒体文件模型
+model Media {
+  id           String   @id @default(uuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  path         String
+  width        Int?
+  height       Int?
+  alt          String?
+  category     String?
+  createdAt    DateTime @default(now())
+
+  @@index([category])
+  @@index([createdAt])
+  @@map("media")
+}
+
+// ==================== SillyMD 新功能模型 ====================
+
+// 傻福虾群组模型
+model ShrimpGroup {
+  id             String   @id @default(uuid())
+  name           String // 群组名称，如"傻福一群"、"大虾塘二组"
+  groupKey       String   @unique // 群组标识，如 "group_001"
+  description    String?  @db.Text // 群组描述
+  maxMembers     Int      @default(100) // 最大成员数
+  currentMembers Int      @default(0) // 当前成员数
+  icon           String? // 群组图标
+  color          String? // 群组主题色
+  isActive       Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // 关联
+  members ShrimpGroupMember[]
+
+  @@index([groupKey])
+  @@index([sortOrder])
+  @@map("shrimp_groups")
+}
+
+// 傻福虾群组成员模型
+model ShrimpGroupMember {
+  id       String   @id @default(uuid())
+  userId   String
+  groupId  String
+  nickname String? // 群内昵称
+  joinTime DateTime @default(now())
+  isActive Boolean  @default(true)
+
+  // 关联
+  group ShrimpGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@index([groupId])
+  @@index([userId])
+  @@map("shrimp_group_members")
+}
+
+// 二维码登录会话模型
+model QRCodeSession {
+  id          String    @id @default(uuid())
+  code        String    @unique // 二维码对应的随机码
+  userId      String? // 关联的用户ID（扫码后）
+  status      QRStatus  @default(PENDING)
+  expiresAt   DateTime // 过期时间
+  createdAt   DateTime  @default(now())
+  scannedAt   DateTime? // 扫码时间
+  confirmedAt DateTime? // 确认时间
+
+  // 关联
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([code])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("qr_code_sessions")
+}
+
+enum QRStatus {
+  PENDING // 待扫描
+  SCANNED // 已扫描待确认
+  CONFIRMED // 已确认
+  EXPIRED // 已过期
+  CANCELLED // 已取消
+}
+
+// 付费技能许可证模型（防盗版）
+model SkillLicense {
+  id             String    @id @default(uuid())
+  licenseKey     String    @unique // 许可证密钥
+  userId         String // 拥有者
+  skillId        String // 关联的技能ID
+  deviceId       String? // 设备ID（用于多设备验证）
+  deviceName     String? // 设备名称
+  activatedAt    DateTime  @default(now()) // 激活时间
+  expiresAt      DateTime? // 过期时间（null表示永久）
+  lastVerifiedAt DateTime? // 最后验证时间
+  isActive       Boolean   @default(true)
+  maxDevices     Int       @default(3) // 最大设备数
+
+  // 关联
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill   Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  devices LicensedDevice[]
+
+  @@index([licenseKey])
+  @@index([userId])
+  @@index([skillId])
+  @@map("skill_licenses")
+}
+
+// 已授权设备模型
+model LicensedDevice {
+  id           String   @id @default(uuid())
+  licenseId    String
+  deviceId     String // 设备唯一标识
+  deviceName   String? // 设备名称
+  deviceType   String? // 设备类型 (Windows/Mac/Android/iOS)
+  lastActiveAt DateTime @default(now())
+  isActive     Boolean  @default(true)
+
+  // 关联
+  license SkillLicense @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+
+  @@unique([licenseId, deviceId])
+  @@index([deviceId])
+  @@map("licensed_devices")
+}
+
+// 应用版本信息模型
+model AppVersion {
+  id                 String   @id @default(uuid())
+  appKey             String // 应用标识 (sillyclaw-desktop, openclaw-gateway等)
+  version            String // 版本号 (如 1.0.0)
+  buildNumber        Int? // 构建号
+  releaseDate        DateTime @default(now())
+  releaseNotes       String?  @db.Text // 发布说明
+  downloadUrl        String? // 下载地址
+  checksum           String? // 文件校验和
+  fileSize           Int? // 文件大小(字节)
+  isMandatory        Boolean  @default(false) // 是否强制更新
+  isActive           Boolean  @default(true)
+  minRequiredVersion String? // 最低要求版本
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([appKey, version])
+  @@index([appKey])
+  @@index([isActive])
+  @@map("app_versions")
+}
+
+// 傻福虾盘产品模型
+model SillyClawDrive {
+  id           String      @id @default(uuid())
+  serialNumber String      @unique // 产品序列号 (18位)
+  capacity     String // 容量 (128GB, 256GB, 512GB, 1TB)
+  color        String // 颜色 (银色, 枪灰银)
+  batchNumber  String // 生产批次
+  status       DriveStatus @default(UNACTIVATED)
+  activatedAt  DateTime? // 激活时间
+  activatedBy  String? // 激活用户
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([serialNumber])
+  @@index([status])
+  @@map("sillyclaw_drives")
+}
+
+enum DriveStatus {
+  UNACTIVATED // 未激活
+  ACTIVATED // 已激活
+  SUSPENDED // 已停用
+  LOST // 已丢失
+}
+
+// 用户积分/经验值模型
+model UserPoints {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  points      Int      @default(0) // 积分
+  experience  Int      @default(0) // 经验值
+  level       Int      @default(1) // 等级
+  totalEarned Int      @default(0) // 总获得积分
+  totalSpent  Int      @default(0) // 总消耗积分
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_points")
+}
+
+// 积分交易记录
+model PointTransaction {
+  id          String          @id @default(uuid())
+  userId      String
+  type        TransactionType
+  amount      Int // 正数为获得，负数为消耗
+  balance     Int // 交易后余额
+  reason      String // 交易原因
+  referenceId String? // 关联的业务ID
+  createdAt   DateTime        @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("point_transactions")
+}
+
+enum TransactionType {
+  SIGN_IN // 每日签到
+  TASK_REWARD // 任务奖励
+  PURCHASE // 购买商品
+  SKILL_PURCHASE // 技能购买
+  REFERRAL_BONUS // 推荐奖励
+  ADMIN_GRANT // 管理员发放
+  EXPIRY // 积分过期
+  OTHER // 其他
+}

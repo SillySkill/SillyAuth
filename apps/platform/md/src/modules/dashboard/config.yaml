@@ -1,0 +1,10 @@
+id: dashboard
+name: 仪表盘模块
+version: "1.0.0"
+description: 提供仪表板数据概览、最近活动和用户统计功能
+dependencies:
+  - auth
+config:
+  default_days: 7
+  max_days: 90
+  default_activity_limit: 10

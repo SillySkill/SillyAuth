@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="tech-blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SillyMD - Skills 市场（真实数据）</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="icon" href="../image/logo-1.png" type="image/png">
+    <style>
+        /* 基础样式（从 index.html 复用） */
+        :root {
+            --primary: #0066FF;
+            --primary-dark: #0052CC;
+            --secondary: #00D4FF;
+            --accent: #00FF88;
+            --bg-dark: #0A1628;
+            --bg-dark-secondary: #111D2E;
+            --bg-dark-tertiary: #1A2842;
+            --text-primary: #1A2842;
+            --text-secondary: #5A6A7A;
+            --text-light: #8A9AAA;
+            --text-white: #FFFFFF;
+            --border-light: rgba(0, 102, 255, 0.2);
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-dark);
+            color: var(--text-white);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .stat-card {
+            background: var(--bg-dark-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0, 102, 255, 0.3);
+        }
+
+        .stat-value {
+            font-size: 48px;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: var(--text-light);
+        }
+
+        /* Skills 网格 */
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 32px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .skill-card {
+            background: var(--bg-dark-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 102, 255, 0.4);
+        }
+
+        .skill-type-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .skill-card[data-type="free"] .skill-type-badge {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--accent);
+        }
+
+        .skill-card[data-type="commercial"] .skill-type-badge {
+            background: rgba(0, 102, 255, 0.2);
+            color: var(--primary);
+        }
+
+        .skill-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .skill-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(0, 102, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .skill-title-group {
+            flex: 1;
+        }
+
+        .skill-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-white);
+            margin-bottom: 8px;
+        }
+
+        .skill-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tag-category {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--secondary);
+        }
+
+        .tag-featured {
+            background: rgba(255, 193, 7, 0.2);
+            color: #FFC107;
+        }
+
+        .skill-description {
+            color: var(--text-light);
+            margin-bottom: 16px;
+            min-height: 60px;
+        }
+
+        .skill-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-light);
+            margin-bottom: 16px;
+        }
+
+        .skill-author img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .author-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .author-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-white);
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-gold {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+        }
+
+        .badge-premium {
+            background: linear-gradient(135deg, #A78BFA, #7C3AED);
+            color: #fff;
+        }
+
+        .badge-normal {
+            background: var(--bg-dark-tertiary);
+            color: var(--text-light);
+        }
+
+        .skill-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .skill-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .download-count {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .loading i {
+            font-size: 48px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 错误状态 */
+        .error-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; margin-bottom: 48px;">
+            <i class="fas fa-rocket" style="color: var(--primary);"></i>
+            SillyMD Skills 市场
+        </h1>
+
+        <!-- 统计数据 -->
+        <div class="stats-grid" data-stats>
+            <div class="stat-card">
+                <div class="stat-value" data-stat="users">0</div>
+                <div class="stat-label">活跃用户</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" data-stat="skills">0</div>
+                <div class="stat-label">Skills 资产</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" data-stat="vendors">0</div>
+                <div class="stat-label">认证供应商</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" data-stat="free-skills">0</div>
+                <div class="stat-label">免费 Skills</div>
+            </div>
+        </div>
+
+        <!-- Skills 列表 -->
+        <h2 class="section-title">
+            <i class="fas fa-fire" style="color: #FF6B6B;"></i>
+            热门 Skills
+        </h2>
+        <div class="skills-grid" data-skills-container data-limit="12">
+            <div class="loading">
+                <i class="fas fa-spinner"></i>
+                <p>从数据库加载中...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 数据加载器 -->
+    <script src="js/sillymd-realdata.js"></script>
+    <script>
+        // 页面加载完成后初始化数据加载器
+        document.addEventListener('DOMContentLoaded', async function() {
+            // console.log('📱 页面加载完成，开始加载真实数据...');
+
+            // 初始化真实数据加载器
+            await SillyMDRealData.init({
+                apiBaseUrl: 'http://47.96.133.238:8000'
+            });
+
+            // console.log('✅ 数据加载完成！');
+        });
+
+        // 监听数据加载完成事件
+        window.addEventListener('sillymd-data-loaded', function(event) {
+            // console.log('📊 收到数据加载完成事件:', event.detail);
+        });
+    </script>
+    <script src="js/mobile-menu.js"></script>
+</body>
+</html>

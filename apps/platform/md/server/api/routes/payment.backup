@@ -1,0 +1,1223 @@
+"""
+Payment API Routes
+支付和订阅 API 路由
+
+提供内容购买、支付、订阅等功能
+"""
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Request, Form
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_, or_, func
+from typing import List, Optional
+from pydantic import BaseModel, Field
+from datetime import datetime, timedelta
+import random
+import string
+import logging
+import os
+
+from ..database import get_db
+from ..models.orders import Order, PaymentRecord
+from ..models.content_unlocks import ContentUnlock
+from ..models.tutorials import Tutorial
+from ..models.downloads import Download
+from ..models.paid_products import PaidProduct
+from ..models.user_submissions import UserSubmission
+from ..models.users import User
+from ..services.ai_moderation import ai_moderation_service
+from ..middleware.auth import get_current_user, get_current_admin, get_client_ip
+from ..utils.payment_security import (
+    verify_payment_callback,
+    validate_payment_amount,
+    check_order_idempotency,
+    WeChatPaySignature,
+    AlipaySignature,
+    PayPalSignature
+)
+from ..services.paypal_client import PayPalClient, get_paypal_client, PayPalError
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/payment", tags=["支付和订阅"])
+
+
+# ============================================
+# Schema Definitions
+# ============================================
+
+class CreateOrderRequest(BaseModel):
+    """创建订单请求"""
+    content_type: str = Field(..., description="内容类型: tutorial, download")
+    content_id: int = Field(..., description="内容ID")
+    purchase_type: str = Field(default="one_time", description="购买类型: one_time, subscription")
+
+
+class PaymentRequest(BaseModel):
+    """支付请求"""
+    order_number: str
+    payment_method: str  # wechat, alipay
+    payment_channel: str  # wechat_app, wechat_web, alipay_app, alipay_web
+
+
+# ============================================
+# Helper Functions
+# ============================================
+
+def generate_order_number() -> str:
+    """生成订单号"""
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    random_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    return f"ORD{timestamp}{random_str}"
+
+
+async def check_content_access(
+    user_id: int,
+    content_type: str,
+    content_id: int,
+    db: AsyncSession
+) -> bool:
+    """检查用户是否有权访问内容"""
+    # 检查是否有解锁记录
+    unlock = await db.execute(
+        select(ContentUnlock).where(
+            and_(
+                ContentUnlock.user_id == user_id,
+                ContentUnlock.content_type == content_type,
+                ContentUnlock.content_id == content_id,
+                or_(
+                    ContentUnlock.expires_at.is_(None),
+                    ContentUnlock.expires_at > datetime.utcnow()
+                )
+            )
+        )
+    )
+    if unlock.first():
+        return True
+
+    # 检查内容是否免费
+    if content_type == "tutorial":
+        tutorial = await db.get(Tutorial, content_id)
+        return tutorial and (not tutorial.is_paid or tutorial.price == 0)
+    elif content_type == "download":
+        download = await db.get(Download, content_id)
+        return download and (not download.is_paid or download.price == 0)
+
+    return False
+
+
+# ============================================
+# Public API Endpoints
+# ============================================
+
+@router.post("/orders", response_model=dict)
+async def create_order(
+    request: CreateOrderRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    创建购买订单
+
+    1. 验证内容存在且为付费内容
+    2. 检查用户是否已购买
+    3. 创建订单
+    4. 返回支付信息
+    """
+    user_id = current_user.id
+
+    # 检查订单幂等性：防止重复创建订单
+    if await check_order_idempotency(
+        f"{request.content_type}_{request.content_id}",
+        user_id,
+        db
+    ):
+        # 查询已有订单
+        existing_order = await db.execute(
+            select(Order).where(
+                and_(
+                    Order.user_id == user_id,
+                    Order.content_type == request.content_type,
+                    Order.content_id == request.content_id,
+                    Order.payment_status == "pending"
+                )
+            ).order_by(Order.created_at.desc())
+        )
+        existing_order = existing_order.scalar_one_or_none()
+        if existing_order:
+            return {
+                "success": True,
+                "data": {
+                    "order_number": existing_order.order_number,
+                    "message": "订单已存在，请继续支付"
+                }
+            }
+
+    # 获取内容
+    if request.content_type == "tutorial":
+        content = await db.get(Tutorial, request.content_id)
+    elif request.content_type == "download":
+        content = await db.get(Download, request.content_id)
+    else:
+        raise HTTPException(status_code=400, detail="无效的内容类型")
+
+    if not content:
+        raise HTTPException(status_code=404, detail="内容不存在")
+
+    # 检查是否为付费内容
+    if not content.is_paid or content.price == 0:
+        raise HTTPException(status_code=400, detail="该内容为免费内容，无需购买")
+
+    # 检查是否已购买
+    has_access = await check_content_access(user_id, request.content_type, request.content_id, db)
+    if has_access:
+        return {
+            "success": True,
+            "already_purchased": True,
+            "message": "您已拥有该内容"
+        }
+
+    # 获取付费产品信息
+    product = await db.execute(
+        select(PaidProduct).where(
+            and_(
+                PaidProduct.content_type == request.content_type,
+                PaidProduct.content_id == request.content_id,
+                PaidProduct.is_active == True
+            )
+        )
+    )
+    product = product.scalar_one_or_none()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="产品信息不存在")
+
+    # 计算价格
+    final_price = product.price
+
+    # 检查折扣
+    if product.has_discount:
+        now = datetime.utcnow()
+        if product.discount_start <= now <= product.discount_end:
+            if product.discount_type == "percentage":
+                final_price = product.price * (1 - product.discount_value / 100)
+            else:  # fixed
+                final_price = product.price - product.discount_value
+
+    # 创建订单
+    order_number = generate_order_number()
+    order = Order(
+        order_number=order_number,
+        user_id=user_id,
+        content_type=request.content_type,
+        content_id=request.content_id,
+        product_id=product.id,
+        product_name=product.product_name,
+        original_price=product.price,
+        discount_amount=product.price - final_price,
+        final_price=final_price,
+        currency=product.currency,
+        purchase_type=request.purchase_type
+    )
+    db.add(order)
+    await db.commit()
+    await db.refresh(order)
+
+    return {
+        "success": True,
+        "data": {
+            "order_number": order.order_number,
+            "product_name": product.product_name,
+            "original_price": float(product.price),
+            "discount_amount": float(product.price - final_price),
+            "final_price": float(final_price),
+            "currency": product.currency,
+            "created_at": order.created_at.isoformat()
+        }
+    }
+
+
+@router.post("/pay", response_model=dict)
+async def create_payment(
+    request: PaymentRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    创建支付
+
+    调用微信/支付宝支付接口，返回支付参数
+    """
+    user_id = current_user.id
+
+    # 获取订单
+    order = await db.execute(
+        select(Order).where(Order.order_number == request.order_number)
+    )
+    order = order.scalar_one_or_none()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="订单不存在")
+
+    # 验证订单所属用户
+    if order.user_id != user_id:
+        logger.warning(f"用户 {user_id} 尝试支付他人订单 {order.order_number}")
+        raise HTTPException(status_code=403, detail="无权操作此订单")
+
+    # 检查订单状态
+    if order.payment_status == "paid":
+        raise HTTPException(status_code=400, detail="订单已支付")
+
+    # 调用支付接口（示例代码，实际需要对接微信/支付宝 SDK）
+    payment_params = await _create_payment_params(order, request)
+
+    # 创建支付记录
+    payment = PaymentRecord(
+        order_id=order.id,
+        user_id=user_id,
+        order_number=order.order_number,
+        payment_method=request.payment_method,
+        payment_channel=request.payment_channel,
+        amount=order.final_price,
+        currency=order.currency
+    )
+    db.add(payment)
+    await db.commit()
+
+    return {
+        "success": True,
+        "data": payment_params
+    }
+
+
+async def _create_payment_params(order: Order, request: PaymentRequest) -> dict:
+    """创建支付参数（实际对接微信/支付宝/PayPal）"""
+    if request.payment_method == "wechat":
+        # 微信支付
+        if request.payment_channel == "wechat_app":
+            # 微信 APP 支付
+            return {
+                "payment_method": "wechat_app",
+                "params": {
+                    "appid": "your_appid",
+                    "partnerid": "your_partnerid",
+                    "prepayid": "prepay_id_placeholder",
+                    "package": "Sign=WXPay",
+                    "noncestr": "random_string",
+                    "timestamp": int(datetime.now().timestamp()),
+                    "sign": "signature"
+                }
+            }
+        else:  # wechat_web
+            # 微信 H5 支付
+            return {
+                "payment_method": "wechat_web",
+                "mweb_url": "https://wxpay.wxutil.com/mch/pay/..."  # 微信 H5 支付链接
+            }
+
+    elif request.payment_method == "alipay":
+        # 支付宝支付
+        if request.payment_channel == "alipay_app":
+            # 支付宝 APP 支付
+            return {
+                "payment_method": "alipay_app",
+                "order_string": "alipay_sdk_order_string_placeholder"
+            }
+        else:  # alipay_web
+            # 支付宝网页支付
+            return {
+                "payment_method": "alipay_web",
+                "form_action": "https://openapi.alipay.com/gateway.do"  # 支付宝网关地址
+            }
+
+    elif request.payment_method == "paypal":
+        # PayPal 支付 - 集成真实 SDK
+        try:
+            paypal_client = get_paypal_client()
+
+            # 构建 return 和 cancel URL
+            # 这些 URL 应该在前端配置，这里使用默认值
+            base_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+            return_url = f"{base_url}/payment/success"
+            cancel_url = f"{base_url}/payment/cancel"
+
+            # 创建 PayPal 订单
+            paypal_order = await paypal_client.create_order(
+                amount=float(order.final_price),
+                currency=order.currency,
+                order_number=order.order_number,
+                description=order.product_name,
+                return_url=return_url,
+                cancel_url=cancel_url
+            )
+
+            logger.info(f"PayPal 订单创建成功: {paypal_order['paypal_order_id']}")
+
+            if request.payment_channel == "paypal_web":
+                # PayPal 网页支付
+                return {
+                    "payment_method": "paypal_web",
+                    "paypal_order_id": paypal_order["paypal_order_id"],
+                    "approval_url": paypal_order["approval_url"],
+                    "order_number": order.order_number
+                }
+            else:  # paypal_app
+                # PayPal APP 支付
+                return {
+                    "payment_method": "paypal_app",
+                    "paypal_order_id": paypal_order["paypal_order_id"],
+                    "client_id": os.getenv("PAYPAL_CLIENT_ID", "YOUR_PAYPAL_CLIENT_ID"),
+                    "order_number": order.order_number
+                }
+
+        except PayPalError as e:
+            logger.error(f"PayPal 订单创建失败: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"创建 PayPal 订单失败: {str(e)}"
+            )
+        except Exception as e:
+            logger.error(f"PayPal 支付异常: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"PayPal 支付异常: {str(e)}"
+            )
+
+    else:
+        raise HTTPException(status_code=400, detail="不支持的支付方式")
+
+
+@router.post("/callback/wechat", response_model=dict)
+async def wechat_payment_callback(
+    background_tasks: BackgroundTasks,
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    微信支付回调
+
+    验证签名，更新订单状态
+    """
+    # 获取回调数据
+    import xml.etree.ElementTree as ET
+    body = await request.body()
+    root = ET.fromstring(body)
+
+    data = {}
+    for child in root:
+        data[child.tag] = child.text
+
+    logger.info(f"收到微信支付回调: {data.get('out_trade_no')}")
+
+    # 验证签名（关键安全检查）
+    if not WeChatPaySignature.verify_callback(data):
+        logger.error(f"微信支付签名验证失败: {data.get('out_trade_no')}")
+        return {"return_code": "FAIL", "return_msg": "签名验证失败"}
+
+    order_number = data.get("out_trade_no")
+    transaction_id = data.get("transaction_id")
+    total_amount = float(data.get("total_fee")) / 100  # 转换为元
+
+    # 获取订单
+    order = await db.execute(
+        select(Order).where(Order.order_number == order_number)
+    )
+    order = order.scalar_one_or_none()
+
+    if not order:
+        logger.warning(f"微信回调：订单不存在 {order_number}")
+        return {"return_code": "FAIL", "return_msg": "订单不存在"}
+
+    # 验证金额（防止金额篡改）
+    if not validate_payment_amount(order.final_price, total_amount, tolerance=0.01):
+        logger.error(f"微信回调：金额不匹配 订单:{order.final_price} 回调:{total_amount}")
+        return {"return_code": "FAIL", "return_msg": "金额不匹配"}
+
+    # 更新支付记录
+    payment = await db.execute(
+        select(PaymentRecord).where(
+            and_(
+                PaymentRecord.order_id == order.id,
+                PaymentRecord.status == "pending"
+            )
+        )
+    )
+    payment = payment.scalar_one_or_none()
+
+    if payment:
+        payment.transaction_id = transaction_id
+        payment.status = "success"
+        payment.notified_at = datetime.utcnow()
+        payment.callback_data = data
+        await db.commit()
+
+    # 更新订单状态
+    if order.payment_status != "paid":
+        order.payment_status = "paid"
+        order.status = "paid"
+        order.paid_at = datetime.utcnow()
+
+        # 计算订阅到期时间
+        if order.purchase_type == "subscription":
+            if order.subscription_period == "month":
+                order.expires_at = datetime.utcnow() + timedelta(days=30)
+            elif order.subscription_period == "year":
+                order.expires_at = datetime.utcnow() + timedelta(days=365)
+
+        await db.commit()
+
+        # 解锁内容
+        await _unlock_content(order, db)
+
+        # 更新产品统计
+        await _update_product_stats(order, db)
+
+        # 通知用户（异步）
+        background_tasks.add_task(notify_user_payment_success, order.id)
+
+    return {"return_code": "SUCCESS", "return_msg": "OK"}
+
+
+@router.post("/callback/alipay", response_model=dict)
+async def alipay_payment_callback(
+    background_tasks: BackgroundTasks,
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    支付宝支付回调
+    """
+    from fastapi import Form
+    # 支付宝使用 form data
+    form_data = await request.form()
+    data = dict(form_data)
+
+    logger.info(f"收到支付宝支付回调: {data.get('out_trade_no')}")
+
+    # 验证签名（关键安全检查）
+    if not AlipaySignature.verify_callback(data):
+        logger.error(f"支付宝签名验证失败: {data.get('out_trade_no')}")
+        return {"success": False, "message": "签名验证失败"}
+
+    order_number = data.get("out_trade_no")
+    trade_no = data.get("trade_no")
+    total_amount = float(data.get("total_amount"))
+
+    # 获取订单
+    order = await db.execute(
+        select(Order).where(Order.order_number == order_number)
+    )
+    order = order.scalar_one_or_none()
+
+    if not order:
+        logger.warning(f"支付宝回调：订单不存在 {order_number}")
+        return {"success": False, "message": "订单不存在"}
+
+    # 验证金额（防止金额篡改）
+    if not validate_payment_amount(order.final_price, total_amount, tolerance=0.01):
+        logger.error(f"支付宝回调：金额不匹配 订单:{order.final_price} 回调:{total_amount}")
+        return {"success": False, "message": "金额不匹配"}
+
+    # 更新支付记录
+    payment = await db.execute(
+        select(PaymentRecord).where(
+            and_(
+                PaymentRecord.order_id == order.id,
+                PaymentRecord.status == "pending"
+            )
+        )
+    )
+    payment = payment.scalar_one_or_none()
+
+    if payment:
+        payment.transaction_id = trade_no
+        payment.status = "success"
+        payment.notified_at = datetime.utcnow()
+        payment.callback_data = data
+        await db.commit()
+
+    # 更新订单状态
+    if order.payment_status != "paid":
+        order.payment_status = "paid"
+        order.status = "paid"
+        order.paid_at = datetime.utcnow()
+
+        # 计算订阅到期时间
+        if order.purchase_type == "subscription":
+            if order.subscription_period == "month":
+                order.expires_at = datetime.utcnow() + timedelta(days=30)
+            elif order.subscription_period == "year":
+                order.expires_at = datetime.utcnow() + timedelta(days=365)
+
+        await db.commit()
+
+        # 解锁内容
+        await _unlock_content(order, db)
+
+        # 更新产品统计
+        await _update_product_stats(order, db)
+
+        # 通知用户（异步）
+        background_tasks.add_task(notify_user_payment_success, order.id)
+
+    return {"success": True, "message": "OK"}
+
+
+@router.post("/paypal/capture/{paypal_order_id}", response_model=dict)
+async def capture_paypal_payment(
+    paypal_order_id: str,
+    order_number: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    捕获 PayPal 支付
+
+    前端用户在 PayPal 页面批准支付后调用此接口
+    """
+    try:
+        # 获取订单
+        order = await db.execute(
+            select(Order).where(Order.order_number == order_number)
+        )
+        order = order.scalar_one_or_none()
+
+        if not order:
+            raise HTTPException(status_code=404, detail="订单不存在")
+
+        # 验证订单所属用户
+        if order.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="无权操作此订单")
+
+        # 检查订单状态
+        if order.payment_status == "paid":
+            return {
+                "success": True,
+                "message": "订单已支付",
+                "order_number": order_number
+            }
+
+        # 捕获支付
+        paypal_client = get_paypal_client()
+        capture_result = await paypal_client.capture_payment(paypal_order_id)
+
+        logger.info(f"PayPal 支付捕获成功: {capture_result}")
+
+        # 更新支付记录
+        payment = await db.execute(
+            select(PaymentRecord).where(
+                and_(
+                    PaymentRecord.order_id == order.id,
+                    PaymentRecord.status == "pending"
+                )
+            )
+        )
+        payment = payment.scalar_one_or_none()
+
+        if payment:
+            payment.transaction_id = capture_result.get("transaction_id")
+            payment.status = "success"
+            payment.notified_at = datetime.utcnow()
+            payment.callback_data = capture_result.get("capture_data")
+            await db.commit()
+
+        # 更新订单状态
+        if order.payment_status != "paid":
+            order.payment_status = "paid"
+            order.status = "paid"
+            order.paid_at = datetime.utcnow()
+
+            # 计算订阅到期时间
+            if order.purchase_type == "subscription":
+                if order.subscription_period == "month":
+                    order.expires_at = datetime.utcnow() + timedelta(days=30)
+                elif order.subscription_period == "year":
+                    order.expires_at = datetime.utcnow() + timedelta(days=365)
+
+            await db.commit()
+
+            # 解锁内容
+            await _unlock_content(order, db)
+
+            # 更新产品统计
+            await _update_product_stats(order, db)
+
+        return {
+            "success": True,
+            "message": "支付成功",
+            "order_number": order_number,
+            "transaction_id": capture_result.get("transaction_id")
+        }
+
+    except PayPalError as e:
+        logger.error(f"PayPal 支付捕获失败: {e}")
+        raise HTTPException(status_code=500, detail=f"支付捕获失败: {str(e)}")
+    except Exception as e:
+        logger.error(f"PayPal 支付处理异常: {e}")
+        raise HTTPException(status_code=500, detail=f"支付处理异常: {str(e)}")
+
+
+@router.post("/callback/paypal", response_model=dict)
+async def paypal_payment_callback(
+    background_tasks: BackgroundTasks,
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    PayPal 支付回调（Webhook）
+
+    处理 PayPal Webhook 通知
+    """
+    # 获取 PayPal 验证头
+    headers = dict(request.headers)
+
+    # 获取请求体
+    body = await request.body()
+    data = await request.json()
+
+    logger.info(f"收到 PayPal Webhook: {data.get('event_type')}")
+
+    # 使用真实的 PayPal Webhook 验证
+    paypal_client = get_paypal_client()
+    is_valid, webhook_data = await paypal_client.verify_webhook(headers, body.decode())
+
+    if not is_valid:
+        logger.error("PayPal webhook 签名验证失败")
+        raise HTTPException(status_code=401, detail="签名验证失败")
+
+    # 处理不同类型的 Webhook 事件
+    event_type = data.get("event_type")
+    resource = data.get("resource", {})
+
+    if event_type == "PAYMENT.CAPTURE.COMPLETED":
+        # 支付完成
+        order_number = resource.get("custom_id") or resource.get("purchase_units", [{}])[0].get("custom_id")
+
+        # 获取订单
+        order = await db.execute(
+            select(Order).where(Order.order_number == order_number)
+        )
+        order = order.scalar_one_or_none()
+
+        if not order:
+            logger.warning(f"PayPal 回调：订单不存在 {order_number}")
+            return {"success": False, "message": "订单不存在"}
+
+        # 获取金额
+        total_amount = float(resource.get("amount", {}).get("value", "0"))
+
+        # 验证金额（防止金额篡改）
+        if not validate_payment_amount(order.final_price, total_amount, tolerance=0.01):
+            logger.error(f"PayPal 回调：金额不匹配 订单:{order.final_price} 回调:{total_amount}")
+            return {"success": False, "message": "金额不匹配"}
+
+        # 获取 PayPal 交易 ID
+        paypal_transaction_id = resource.get("id") or resource.get("purchase_units", [{}])[0].get("payments", {}).get("captures", [{}])[0].get("id")
+
+        # 更新支付记录
+        payment = await db.execute(
+            select(PaymentRecord).where(
+                and_(
+                    PaymentRecord.order_id == order.id,
+                    PaymentRecord.status == "pending"
+                )
+            )
+        )
+        payment = payment.scalar_one_or_none()
+
+        if payment:
+            payment.transaction_id = paypal_transaction_id
+            payment.status = "success"
+            payment.notified_at = datetime.utcnow()
+            payment.callback_data = data
+            await db.commit()
+
+        # 更新订单状态
+        if order.payment_status != "paid":
+            order.payment_status = "paid"
+            order.status = "paid"
+            order.paid_at = datetime.utcnow()
+
+            # 计算订阅到期时间
+            if order.purchase_type == "subscription":
+                if order.subscription_period == "month":
+                    order.expires_at = datetime.utcnow() + timedelta(days=30)
+                elif order.subscription_period == "year":
+                    order.expires_at = datetime.utcnow() + timedelta(days=365)
+
+            await db.commit()
+
+            # 解锁内容
+            await _unlock_content(order, db)
+
+            # 更新产品统计
+            await _update_product_stats(order, db)
+
+            # 通知用户（异步）
+            background_tasks.add_task(notify_user_payment_success, order.id)
+
+        return {"success": True, "message": "OK"}
+
+    elif event_type == "PAYMENT.CAPTURE.DENIED":
+        # 支付被拒绝
+        logger.warning(f"PayPal 支付被拒绝: {resource}")
+        return {"success": False, "message": "支付被拒绝"}
+
+    elif event_type == "PAYMENT.CAPTURE.PENDING":
+        # 支付待处理
+        logger.info(f"PayPal 支付待处理: {resource}")
+        return {"success": True, "message": "支付待处理"}
+
+    else:
+        # 其他事件类型
+        logger.info(f"PayPal 收到未处理的事件类型: {event_type}")
+        return {"success": True, "message": "事件已记录"}
+
+
+async def _unlock_content(order: Order, db: AsyncSession):
+    """解锁内容"""
+    unlock = ContentUnlock(
+        user_id=order.user_id,
+        content_type=order.content_type,
+        content_id=order.content_id,
+        unlock_source="purchase",
+        order_id=order.id,
+        order_number=order.order_number,
+        unlocked_at=datetime.utcnow(),
+        expires_at=order.expires_at
+    )
+    db.add(unlock)
+    await db.commit()
+
+
+async def _update_product_stats(order: Order, db: AsyncSession):
+    """更新产品统计"""
+    product = await db.get(PaidProduct, order.product_id)
+    if product:
+        product.total_purchases += 1
+        product.total_revenue += order.final_price
+
+        # 计算创作者收益
+        if product.creator_id:
+            creator_revenue = order.final_price * (product.creator_share_percentage / 100)
+            platform_revenue = order.final_price * (product.platform_share_percentage / 100)
+            product.net_revenue += creator_revenue
+        else:
+            platform_revenue = order.final_price
+
+        await db.commit()
+
+
+async def notify_user_payment_success(order_id: int):
+    """通知用户支付成功（异步任务）"""
+    # TODO: 发送邮件通知
+    # TODO: 发送站内消息通知
+    # TODO: 发送微信/短信通知（可选）
+    pass
+
+
+@router.get("/orders", response_model=dict)
+async def get_user_orders(
+    current_user: User = Depends(get_current_user),
+    status: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取用户订单列表
+    """
+    user_id = current_user.id
+    query = select(Order).where(Order.user_id == user_id)
+
+    if status:
+        query = query.where(Order.status == status)
+
+    # 统计总数
+    count_query = select(func.count(Order.id)).where(Order.user_id == user_id)
+    if status:
+        count_query = count_query.where(Order.status == status)
+
+    from sqlalchemy import func
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    # 分页
+    offset = (page - 1) * page_size
+    orders = await db.execute(
+        query.order_by(Order.created_at.desc())
+        .offset(offset)
+        .limit(page_size)
+    )
+    orders = orders.scalars().all()
+
+    results = []
+    for order in orders:
+        results.append({
+            "id": order.id,
+            "order_number": order.order_number,
+            "product_name": order.product_name,
+            "content_type": order.content_type,
+            "content_id": order.content_id,
+            "original_price": float(order.original_price),
+            "discount_amount": float(order.discount_amount),
+            "final_price": float(order.final_price),
+            "currency": order.currency,
+            "status": order.status,
+            "payment_status": order.payment_status,
+            "purchase_type": order.purchase_type,
+            "created_at": order.created_at.isoformat(),
+            "paid_at": order.paid_at.isoformat() if order.paid_at else None,
+            "expires_at": order.expires_at.isoformat() if order.expires_at else None
+        })
+
+    return {
+        "success": True,
+        "data": {
+            "items": results,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size
+        }
+    }
+
+
+@router.get("/my-purchases", response_model=dict)
+async def get_my_purchases(
+    current_user: User = Depends(get_current_user),
+    content_type: Optional[str] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取用户已购买的内容
+    """
+    user_id = current_user.id
+    query = select(ContentUnlock).where(ContentUnlock.user_id == user_id)
+
+    # 过滤有效解锁记录
+    query = query.where(
+        or_(
+            ContentUnlock.expires_at.is_(None),
+            ContentUnlock.expires_at > datetime.utcnow()
+        )
+    )
+
+    if content_type:
+        query = query.where(ContentUnlock.content_type == content_type)
+
+    unlocks = await db.execute(
+        query.order_by(ContentUnlock.unlocked_at.desc())
+    )
+    unlocks = unlocks.scalars().all()
+
+    results = []
+    for unlock in unlocks:
+        # 获取内容信息
+        if unlock.content_type == "tutorial":
+            content = await db.get(Tutorial, unlock.content_id)
+        elif unlock.content_type == "download":
+            content = await db.get(Download, unlock.content_id)
+        else:
+            continue
+
+        if content:
+            results.append({
+                "content_type": unlock.content_type,
+                "content_id": unlock.content_id,
+                "title": content.title_zh_CN,
+                "description": content.description_zh_CN,
+                "thumbnail": content.thumbnail,
+                "unlock_source": unlock.unlock_source,
+                "unlocked_at": unlock.unlocked_at.isoformat(),
+                "expires_at": unlock.expires_at.isoformat() if unlock.expires_at else None
+            })
+
+    return {
+        "success": True,
+        "data": results
+    }
+
+
+# ============================================
+# User Submission API
+# ============================================
+
+@router.post("/submissions", response_model=dict)
+async def create_submission(
+    background_tasks: BackgroundTasks,
+    request: dict,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    创建用户提交
+
+    创建后自动触发 AI 审核
+    """
+    # 提取参数
+    title_zh_CN = request.get("title_zh_CN")
+    description_zh_CN = request.get("description_zh_CN")
+    content_zh_CN = request.get("content_zh_CN")
+    content_type = request.get("content_type")
+    category = request.get("category")
+    subcategory = request.get("subcategory")
+    is_paid = request.get("is_paid", False)
+    price = request.get("price")
+
+    # 输入验证
+    if not all([title_zh_CN, description_zh_CN, content_zh_CN, content_type, category]):
+        raise HTTPException(status_code=400, detail="缺少必要字段")
+
+    # 文件上传安全检查
+    file_url = request.get("file_url")
+    if file_url:
+        # 检查 URL 协议
+        if not file_url.startswith(("http://", "https://", "/")):
+            raise HTTPException(status_code=400, detail="文件 URL 格式无效")
+        # TODO: 添加文件大小限制、类型检查、病毒扫描
+
+    # 创建提交记录
+    submission = UserSubmission(
+        user_id=current_user.id,
+        username=current_user.username,
+        content_type=content_type,
+        title_zh_CN=title_zh_CN,
+        title_en=request.get("title_en"),
+        description_zh_CN=description_zh_CN,
+        description_en=request.get("description_en"),
+        content_zh_CN=content_zh_CN,
+        content_en=request.get("content_en"),
+        category=category,
+        subcategory=subcategory,
+        difficulty=request.get("difficulty"),
+        platform=request.get("platform"),
+        version=request.get("version"),
+        thumbnail=request.get("thumbnail"),
+        video_url=request.get("video_url"),
+        video_type=request.get("video_type"),
+        video_duration=request.get("video_duration"),
+        file_name=request.get("file_name"),
+        file_url=file_url,
+        file_size=request.get("file_size"),
+        file_type=request.get("file_type"),
+        file_checksum=request.get("file_checksum"),
+        github_url=request.get("github_url"),
+        is_paid=is_paid,
+        price=price or 0,
+        status="pending"
+    )
+    db.add(submission)
+    await db.commit()
+    await db.refresh(submission)
+
+    # 异步触发 AI 审核
+    background_tasks.add_task(
+        ai_moderation_service.review_submission,
+        submission.id,
+        db
+    )
+
+    return {
+        "success": True,
+        "data": {
+            "submission_id": submission.id,
+            "status": "pending",
+            "message": "提交成功，AI 正在审核中..."
+        }
+    }
+
+
+@router.get("/submissions", response_model=dict)
+async def get_my_submissions(
+    current_user: User = Depends(get_current_user),
+    status: Optional[str] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取我的提交列表
+    """
+    user_id = current_user.id
+    query = select(UserSubmission).where(UserSubmission.user_id == user_id)
+
+    if status:
+        query = query.where(UserSubmission.status == status)
+
+    submissions = await db.execute(
+        query.order_by(UserSubmission.submitted_at.desc())
+    )
+    submissions = submissions.scalars().all()
+
+    results = []
+    for submission in submissions:
+        results.append({
+            "id": submission.id,
+            "content_type": submission.content_type,
+            "title_zh_CN": submission.title_zh_CN,
+            "description_zh_CN": submission.description_zh_CN,
+            "category": submission.category,
+            "subcategory": submission.subcategory,
+            "is_paid": submission.is_paid,
+            "price": float(submission.price) if submission.price else 0,
+            "thumbnail": submission.thumbnail,
+            "status": submission.status,
+            "ai_review_status": submission.ai_review_status,
+            "ai_review_score": float(submission.ai_review_score) if submission.ai_review_score else None,
+            "submitted_at": submission.submitted_at.isoformat(),
+            "reviewed_at": submission.reviewed_at.isoformat() if submission.reviewed_at else None,
+            "published_content_id": submission.published_content_id,
+            "published_at": submission.published_at.isoformat() if submission.published_at else None
+        })
+
+    return {
+        "success": True,
+        "data": results
+    }
+
+
+# ============================================
+# Admin API Endpoints
+# ============================================
+
+@router.get("/admin/pending-submissions", response_model=dict)
+async def get_pending_submissions(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    current_admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取待审核的提交列表（管理员）
+    """
+    # 使用视图查询
+    from ..database import conn
+    query = """
+        SELECT * FROM v_pending_submissions
+        ORDER BY submitted_at DESC
+        LIMIT :limit OFFSET :offset
+    """
+
+    total_query = "SELECT COUNT(*) FROM v_pending_submissions"
+
+    total = await db.fetch_val(total_query)
+    offset = (page - 1) * page_size
+
+    rows = await db.fetch_all(query, {"limit": page_size, "offset": offset})
+
+    return {
+        "success": True,
+        "data": {
+            "items": [dict(row) for row in rows],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size
+        }
+    }
+
+
+@router.put("/admin/submissions/{submission_id}/approve", response_model=dict)
+async def approve_submission(
+    submission_id: int,
+    current_admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    人工审核通过（管理员）
+    """
+    submission = await db.get(UserSubmission, submission_id)
+    if not submission:
+        raise HTTPException(status_code=404, detail="提交记录不存在")
+
+    # 更新状态
+    submission.status = "approved"
+    submission.reviewed_by = current_admin.id
+    submission.reviewed_at = datetime.utcnow()
+
+    # 自动发布内容
+    await ai_moderation_service._auto_publish_submission(submission, db)
+
+    return {
+        "success": True,
+        "message": "审核通过，内容已发布"
+    }
+
+
+@router.put("/admin/submissions/{submission_id}/reject", response_model=dict)
+async def reject_submission(
+    submission_id: int,
+    reason: str,
+    current_admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    人工审核拒绝（管理员）
+    """
+    submission = await db.get(UserSubmission, submission_id)
+    if not submission:
+        raise HTTPException(status_code=404, detail="提交记录不存在")
+
+    # 更新状态
+    submission.status = "rejected"
+    submission.rejection_reason = reason
+    submission.reviewed_by = current_admin.id
+    submission.reviewed_at = datetime.utcnow()
+
+    await db.commit()
+
+    return {
+        "success": True,
+        "message": "已拒绝该提交"
+    }
+
+
+@router.get("/admin/revenue/stats", response_model=dict)
+async def get_revenue_stats(
+    days: int = Query(30, ge=1, le=365),
+    current_admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取收入统计（管理员）
+    """
+    from ..database import conn
+
+    query = """
+        SELECT * FROM v_revenue_stats
+        WHERE date >= CURRENT_DATE - INTERVAL ':days days'
+        ORDER BY date DESC
+    """
+
+    rows = await db.fetch_all(query, {"days": days})
+
+    # 计算汇总
+    total_orders = sum(row['paid_orders'] for row in rows)
+    total_revenue = sum(row['total_revenue'] for row in rows)
+
+    return {
+        "success": True,
+        "data": {
+            "period_days": days,
+            "total_orders": total_orders,
+            "total_revenue": float(total_revenue),
+            "daily_stats": [dict(row) for row in rows]
+        }
+    }
+
+
+@router.get("/admin/creator/earnings", response_model=dict)
+async def get_creator_earnings(
+    current_admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取创作者收益统计（管理员）
+    """
+    from ..database import conn
+
+    query = "SELECT * FROM v_creator_earnings ORDER BY total_earnings DESC"
+
+    rows = await db.fetch_all(query)
+
+    return {
+        "success": True,
+        "data": [dict(row) for row in rows]
+    }

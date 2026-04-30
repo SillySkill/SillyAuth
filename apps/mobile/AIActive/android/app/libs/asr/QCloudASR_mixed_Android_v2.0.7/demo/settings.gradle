@@ -1,0 +1,22 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "ASRMixedDemo"
+include ':app'
+if(file('../../platforms/android').exists() && file('../../platforms/android/libs/asr-online').exists()) {
+    include ':qcloudasr-mixed'
+    project(':qcloudasr-mixed').projectDir = file('../../platforms/android')
+    include ':asr-online'
+    project(':asr-online').projectDir = file('../../platforms/android/libs/asr-online')
+}

@@ -1,0 +1,18 @@
+id: storage
+name: TOS 对象存储模块
+version: 1.0.0
+description: 提供 TOS 对象存储服务
+dependencies: []
+
+config:
+  tos:
+    endpoint: tos-cn-shanghai.volces.com
+    region: cn-shanghai
+    bucket: sillymd
+    access_key: ${TOS_ACCESS_KEY}
+    secret_key: ${TOS_SECRET_KEY}
+    custom_domain: skills.sillymd.com
+  default_folder: webs
+  upload:
+    max_file_size_mb: 500
+    allowed_types: [image, video, audio, document, archive]

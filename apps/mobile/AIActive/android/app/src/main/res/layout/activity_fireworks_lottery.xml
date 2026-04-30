@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- 背景图片 -->
+    <ImageView
+        android:id="@+id/iv_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="背景" />
+
+    <!-- 顶部标题栏 -->
+    <LinearLayout
+        android:id="@+id/header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="@color/primary"
+        android:layout_alignParentTop="true">
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/back"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:textColor="@color/text_on_primary" />
+
+        <TextView
+            android:id="@+id/tv_program_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="礼花抽奖"
+            android:textSize="20sp"
+            android:textColor="@color/text_on_primary"
+            android:gravity="center"
+            android:layout_gravity="center_vertical" />
+
+        <TextView
+            android:id="@+id/tv_offline_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/offline_mode"
+            android:textColor="@color/offline_text"
+            android:background="@color/offline_bg"
+            android:padding="4dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- 状态信息栏 -->
+    <LinearLayout
+        android:id="@+id/status_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@id/header_layout">
+
+        <TextView
+            android:id="@+id/tv_remaining_count"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="剩余候选人：18/18"
+            android:textSize="16sp"
+            android:textAlignment="center"
+            android:padding="8dp"
+            android:background="@color/background" />
+
+        <!-- 试抽模式指示器 -->
+        <TextView
+            android:id="@+id/tv_test_mode_indicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🧪 试抽模式已开启"
+            android:textSize="14sp"
+            android:textAlignment="center"
+            android:padding="4dp"
+            android:background="#FF9800"
+            android:textColor="#FFFFFF"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- 主要内容区域 -->
+    <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/status_layout"
+        android:layout_above="@id/control_layout">
+
+        <!-- 礼花动画View（满屏散开的礼物） -->
+        <com.jcoding.aiactivity.view.FireworksView
+            android:id="@+id/fireworks_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- 礼物盒View（居中显示，弹出奖品） -->
+        <com.jcoding.aiactivity.view.GiftBoxView
+            android:id="@+id/gift_box_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- 中央开始抽奖按钮 -->
+        <Button
+            android:id="@+id/btn_start_center"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:text="开始\n抽奖"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_lottery_start_button"
+            android:elevation="8dp"
+            android:visibility="visible" />
+
+        <!-- 准备抽奖提示（仅在未开始时显示） -->
+        <TextView
+            android:id="@+id/tv_ready_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="🎁 点击开始抽奖 🎁"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+    <!-- 底部控制栏 -->
+    <LinearLayout
+        android:id="@+id/control_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@color/primary"
+        android:layout_alignParentBottom="true">
+
+        <!-- 第一行：试抽模式切换 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btn_toggle_test_mode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🧪 开启试抽模式"
+                android:textSize="16sp"
+                android:padding="8dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        </LinearLayout>
+
+        <!-- 第二行：辅助控制按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btn_reset"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1"
+                android:text="重置抽奖"
+                android:textSize="18sp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="4dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btn_cancel_test"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1"
+                android:text="作废\n重抽"
+                android:textSize="16sp"
+                android:background="#FF5252"
+                android:layout_marginStart="4dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 数字人显示区域（右下角） -->
+    <com.jcoding.aiactivity.widget.DigitalHumanView
+        android:id="@+id/digital_human_view"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_above="@id/control_layout"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:visibility="visible" />
+
+</RelativeLayout>

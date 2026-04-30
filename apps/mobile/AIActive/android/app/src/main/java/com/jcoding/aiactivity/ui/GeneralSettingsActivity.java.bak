@@ -1,0 +1,771 @@
+package com.jcoding.aiactivity.ui;
+
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.jcoding.aiactivity.R;
+import com.jcoding.aiactivity.manager.ConfigManager;
+import com.jcoding.aiactivity.utils.NetworkUtils;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * 通用设置页
+ */
+public class GeneralSettingsActivity extends BaseActivity {
+
+    private Switch switchShowGenerationTime;
+    private Switch switchOfflineMode;
+    private TextView tvNetworkStatus;
+    private Button btnSaveSettings;
+    private Button btnBack;
+
+    // 敏感配置输入框
+    private EditText etLlmApiKey;
+    private EditText etLlmModelId;
+    private EditText etTtsLicenseId;
+    private EditText etTtsLicenseKey;
+    private EditText etTtsLicensePk;
+    private EditText etAsrLicenseId;
+    private EditText etAsrLicenseKey;
+    private EditText etAsrLicensePk;
+    private EditText etMiniMaxApiKey;
+    private EditText etMiniMaxGroupId;
+    private EditText etMiniMaxVoiceId;
+
+    // 解锁按钮
+    private Button btnUnlockLlm;
+    private Button btnUnlockModelId;
+    private Button btnUnlockTts;
+    private Button btnUnlockAsr;
+    private Button btnUnlockMiniMax;
+    private Button btnUploadConfig;
+    private Button btnInitModules;
+    private Button btnVoiceTest;
+
+    private ConfigManager configManager;
+
+    // 锁定状态
+    private boolean isLlmUnlocked = false;
+    private boolean isModelIdUnlocked = false;
+    private boolean isTtsUnlocked = false;
+    private boolean isAsrUnlocked = false;
+    private boolean isMiniMaxUnlocked = false;
+
+    private static final int REQUEST_CODE_PICK_FILE = 1001;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_general_settings);
+
+        configManager = ConfigManager.getInstance(this);
+
+        initViews();
+        loadSettings();
+        setupListeners();
+        updateNetworkStatus();
+    }
+
+    private void initViews() {
+        switchShowGenerationTime = findViewById(R.id.switch_show_generation_time);
+        switchOfflineMode = findViewById(R.id.switch_offline_mode);
+        tvNetworkStatus = findViewById(R.id.tv_network_status);
+        btnSaveSettings = findViewById(R.id.btn_save_settings);
+        btnBack = findViewById(R.id.btn_back);
+
+        // 敏感配置输入框
+        etLlmApiKey = findViewById(R.id.et_llm_api_key);
+        etLlmModelId = findViewById(R.id.et_llm_model_id);
+        etTtsLicenseId = findViewById(R.id.et_tts_license_id);
+        etTtsLicenseKey = findViewById(R.id.et_tts_license_key);
+        etTtsLicensePk = findViewById(R.id.et_tts_license_pk);
+        etAsrLicenseId = findViewById(R.id.et_asr_license_id);
+        etAsrLicenseKey = findViewById(R.id.et_asr_license_key);
+        etAsrLicensePk = findViewById(R.id.et_asr_license_pk);
+        etMiniMaxApiKey = findViewById(R.id.et_minimax_api_key);
+        etMiniMaxGroupId = findViewById(R.id.et_minimax_group_id);
+        etMiniMaxVoiceId = findViewById(R.id.et_minimax_voice_id);
+
+        // 解锁按钮
+        btnUnlockLlm = findViewById(R.id.btn_unlock_llm);
+        btnUnlockModelId = findViewById(R.id.btn_unlock_model_id);
+        btnUnlockTts = findViewById(R.id.btn_unlock_tts);
+        btnUnlockAsr = findViewById(R.id.btn_unlock_asr);
+        btnUnlockMiniMax = findViewById(R.id.btn_unlock_minimax);
+        btnUploadConfig = findViewById(R.id.btn_upload_config);
+        btnInitModules = findViewById(R.id.btn_init_modules);
+        btnVoiceTest = findViewById(R.id.btn_voice_test);
+
+        btnBack.setOnClickListener(v -> finish());
+    }
+
+    private void loadSettings() {
+        // 加载显示生成时间设置
+        switchShowGenerationTime.setChecked(configManager.isShowGenerationTimeEnabled());
+
+        // 加载离线模式设置
+        switchOfflineMode.setChecked(configManager.isOfflineModeEnabled());
+
+        // 加载敏感配置（如果已解锁，显示隐藏值）
+        loadSensitiveConfigs();
+    }
+
+    private void loadSensitiveConfigs() {
+        // 加载LLM API Key
+        if (isLlmUnlocked) {
+            etLlmApiKey.setText(configManager.getLlmApiKey());
+        } else {
+            etLlmApiKey.setText(maskValue(configManager.getLlmApiKey()));
+        }
+
+        // 加载LLM模型ID
+        if (isModelIdUnlocked) {
+            etLlmModelId.setText(configManager.getLlmModelId());
+        } else {
+            etLlmModelId.setText(maskValue(configManager.getLlmModelId()));
+        }
+
+        // 加载TTS配置
+        if (isTtsUnlocked) {
+            etTtsLicenseId.setText(configManager.getTtsLicenseId());
+            etTtsLicenseKey.setText(configManager.getTtsLicenseKey());
+            etTtsLicensePk.setText(configManager.getTtsLicensePk());
+        } else {
+            etTtsLicenseId.setText(maskValue(configManager.getTtsLicenseId()));
+            etTtsLicenseKey.setText(maskValue(configManager.getTtsLicenseKey()));
+            etTtsLicensePk.setText(maskValue(configManager.getTtsLicensePk()));
+        }
+
+        // 加载ASR配置
+        if (isAsrUnlocked) {
+            etAsrLicenseId.setText(configManager.getAsrLicenseId());
+            etAsrLicenseKey.setText(configManager.getAsrLicenseKey());
+            etAsrLicensePk.setText(configManager.getAsrLicensePk());
+        } else {
+            etAsrLicenseId.setText(maskValue(configManager.getAsrLicenseId()));
+            etAsrLicenseKey.setText(maskValue(configManager.getAsrLicenseKey()));
+            etAsrLicensePk.setText(maskValue(configManager.getAsrLicensePk()));
+        }
+
+        // 加载MiniMax配置
+        if (isMiniMaxUnlocked) {
+            etMiniMaxApiKey.setText(configManager.getMiniMaxApiKey());
+            etMiniMaxGroupId.setText(configManager.getMiniMaxGroupId());
+            etMiniMaxVoiceId.setText(configManager.getMiniMaxVoiceId());
+        } else {
+            etMiniMaxApiKey.setText(maskValue(configManager.getMiniMaxApiKey()));
+            etMiniMaxGroupId.setText(maskValue(configManager.getMiniMaxGroupId()));
+            String voiceId = configManager.getMiniMaxVoiceId();
+            etMiniMaxVoiceId.setText(TextUtils.isEmpty(voiceId) ? "" : maskValue(voiceId));
+        }
+    }
+
+    private String maskValue(String value) {
+        if (value == null || value.isEmpty()) {
+            return "";
+        }
+        if (value.length() <= 8) {
+            return "********";
+        }
+        return value.substring(0, 4) + "****" + value.substring(value.length() - 4);
+    }
+
+    private void setupListeners() {
+        // 显示生成时间开关监听
+        switchShowGenerationTime.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            configManager.setShowGenerationTimeEnabled(isChecked);
+        });
+
+        // 离线模式开关监听
+        switchOfflineMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            configManager.setOfflineModeEnabled(isChecked);
+            if (isChecked) {
+                showToast("已启用离线模式，部分功能可能受限");
+            } else {
+                showToast("已关闭离线模式");
+            }
+            updateNetworkStatus();
+        });
+
+        // 解锁大模型配置
+        btnUnlockLlm.setOnClickListener(v -> unlockLlmConfig());
+
+        // 解锁模型ID
+        btnUnlockModelId.setOnClickListener(v -> unlockModelIdConfig());
+
+        // 解锁TTS配置
+        btnUnlockTts.setOnClickListener(v -> unlockTtsConfig());
+
+        // 解锁ASR配置
+        btnUnlockAsr.setOnClickListener(v -> unlockAsrConfig());
+
+        // 解锁MiniMax配置
+        btnUnlockMiniMax.setOnClickListener(v -> unlockMiniMaxConfig());
+
+        // 上传配置文件
+        btnUploadConfig.setOnClickListener(v -> pickConfigFile());
+
+        // 初始化语音模块
+        btnInitModules.setOnClickListener(v -> initializeVoiceModules());
+
+        // 语音功能测试
+        btnVoiceTest.setOnClickListener(v -> {
+            Intent intent = new Intent(this, VoiceTestActivity.class);
+            startActivity(intent);
+        });
+
+        // 保存设置按钮监听
+        btnSaveSettings.setOnClickListener(v -> saveAllSettings());
+
+        // 为每个敏感输入框添加监听，点击时如果未锁定则提示解锁
+        setupSensitiveFieldListeners();
+    }
+
+    private void setupSensitiveFieldListeners() {
+        // LLM API_KEY
+        etLlmApiKey.setOnClickListener(v -> {
+            if (!isLlmUnlocked) {
+                unlockLlmConfig();
+            }
+        });
+
+        // LLM模型ID
+        etLlmModelId.setOnClickListener(v -> {
+            if (!isModelIdUnlocked) {
+                unlockModelIdConfig();
+            }
+        });
+
+        // TTS字段
+        etTtsLicenseId.setOnClickListener(v -> {
+            if (!isTtsUnlocked) {
+                unlockTtsConfig();
+            }
+        });
+        etTtsLicenseKey.setOnClickListener(v -> {
+            if (!isTtsUnlocked) {
+                unlockTtsConfig();
+            }
+        });
+        etTtsLicensePk.setOnClickListener(v -> {
+            if (!isTtsUnlocked) {
+                unlockTtsConfig();
+            }
+        });
+
+        // ASR字段
+        etAsrLicenseId.setOnClickListener(v -> {
+            if (!isAsrUnlocked) {
+                unlockAsrConfig();
+            }
+        });
+        etAsrLicenseKey.setOnClickListener(v -> {
+            if (!isAsrUnlocked) {
+                unlockAsrConfig();
+            }
+        });
+        etAsrLicensePk.setOnClickListener(v -> {
+            if (!isAsrUnlocked) {
+                unlockAsrConfig();
+            }
+        });
+
+        // MiniMax字段
+        etMiniMaxApiKey.setOnClickListener(v -> {
+            if (!isMiniMaxUnlocked) {
+                unlockMiniMaxConfig();
+            }
+        });
+        etMiniMaxGroupId.setOnClickListener(v -> {
+            if (!isMiniMaxUnlocked) {
+                unlockMiniMaxConfig();
+            }
+        });
+        etMiniMaxVoiceId.setOnClickListener(v -> {
+            if (!isMiniMaxUnlocked) {
+                unlockMiniMaxConfig();
+            }
+        });
+    }
+
+    private void unlockLlmConfig() {
+        if (isLlmUnlocked) {
+            // 已经解锁，执行锁定
+            isLlmUnlocked = false;
+            etLlmApiKey.setFocusable(false);
+            etLlmApiKey.setFocusableInTouchMode(false);
+            etLlmApiKey.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            loadSensitiveConfigs();
+            btnUnlockLlm.setText("🔓");
+            showToast("已锁定大模型配置");
+        } else {
+            // 未解锁，验证密码
+            showPasswordDialog("大模型配置", success -> {
+                if (success) {
+                    isLlmUnlocked = true;
+                    etLlmApiKey.setFocusable(true);
+                    etLlmApiKey.setFocusableInTouchMode(true);
+                    etLlmApiKey.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                    etLlmApiKey.setText(configManager.getLlmApiKey());
+                    btnUnlockLlm.setText("🔒");
+                    showToast("大模型配置已解锁");
+                }
+            });
+        }
+    }
+
+    private void unlockModelIdConfig() {
+        if (isModelIdUnlocked) {
+            // 已经解锁，执行锁定
+            isModelIdUnlocked = false;
+            etLlmModelId.setFocusable(false);
+            etLlmModelId.setFocusableInTouchMode(false);
+            etLlmModelId.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
+            loadSensitiveConfigs();
+            btnUnlockModelId.setText("🔓");
+            showToast("已锁定模型ID配置");
+        } else {
+            // 未解锁，验证密码
+            showPasswordDialog("模型ID配置", success -> {
+                if (success) {
+                    isModelIdUnlocked = true;
+                    etLlmModelId.setFocusable(true);
+                    etLlmModelId.setFocusableInTouchMode(true);
+                    etLlmModelId.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
+                    etLlmModelId.setText(configManager.getLlmModelId());
+                    btnUnlockModelId.setText("🔒");
+                    showToast("模型ID配置已解锁");
+                }
+            });
+        }
+    }
+
+    private void unlockTtsConfig() {
+        if (isTtsUnlocked) {
+            isTtsUnlocked = false;
+            lockEditText(etTtsLicenseId);
+            lockEditText(etTtsLicenseKey);
+            lockEditText(etTtsLicensePk);
+            loadSensitiveConfigs();
+            btnUnlockTts.setText("🔓");
+            showToast("已锁定TTS配置");
+        } else {
+            showPasswordDialog("TTS配置", success -> {
+                if (success) {
+                    isTtsUnlocked = true;
+                    unlockEditText(etTtsLicenseId, configManager.getTtsLicenseId());
+                    unlockEditText(etTtsLicenseKey, configManager.getTtsLicenseKey());
+                    unlockEditText(etTtsLicensePk, configManager.getTtsLicensePk());
+                    btnUnlockTts.setText("🔒");
+                    showToast("TTS配置已解锁");
+                }
+            });
+        }
+    }
+
+    private void unlockAsrConfig() {
+        if (isAsrUnlocked) {
+            isAsrUnlocked = false;
+            lockEditText(etAsrLicenseId);
+            lockEditText(etAsrLicenseKey);
+            lockEditText(etAsrLicensePk);
+            loadSensitiveConfigs();
+            btnUnlockAsr.setText("🔓");
+            showToast("已锁定ASR配置");
+        } else {
+            showPasswordDialog("ASR配置", success -> {
+                if (success) {
+                    isAsrUnlocked = true;
+                    unlockEditText(etAsrLicenseId, configManager.getAsrLicenseId());
+                    unlockEditText(etAsrLicenseKey, configManager.getAsrLicenseKey());
+                    unlockEditText(etAsrLicensePk, configManager.getAsrLicensePk());
+                    btnUnlockAsr.setText("🔒");
+                    showToast("ASR配置已解锁");
+                }
+            });
+        }
+    }
+
+    private void unlockMiniMaxConfig() {
+        if (isMiniMaxUnlocked) {
+            isMiniMaxUnlocked = false;
+            lockEditText(etMiniMaxApiKey);
+            lockEditText(etMiniMaxGroupId);
+            etMiniMaxVoiceId.setFocusable(false);
+            etMiniMaxVoiceId.setFocusableInTouchMode(false);
+            loadSensitiveConfigs();
+            btnUnlockMiniMax.setText("🔓");
+            showToast("已锁定MiniMax配置");
+        } else {
+            showPasswordDialog("MiniMax配置", success -> {
+                if (success) {
+                    isMiniMaxUnlocked = true;
+                    unlockEditText(etMiniMaxApiKey, configManager.getMiniMaxApiKey());
+                    unlockEditText(etMiniMaxGroupId, configManager.getMiniMaxGroupId());
+                    etMiniMaxVoiceId.setFocusable(true);
+                    etMiniMaxVoiceId.setFocusableInTouchMode(true);
+                    etMiniMaxVoiceId.setText(configManager.getMiniMaxVoiceId());
+                    btnUnlockMiniMax.setText("🔒");
+                    showToast("MiniMax配置已解锁");
+                }
+            });
+        }
+    }
+
+    private void lockEditText(EditText editText) {
+        editText.setFocusable(false);
+        editText.setFocusableInTouchMode(false);
+        editText.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+    }
+
+    private void unlockEditText(EditText editText, String value) {
+        editText.setFocusable(true);
+        editText.setFocusableInTouchMode(true);
+        editText.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+        editText.setText(value);
+    }
+
+    private void showPasswordDialog(String configName, PasswordCallback callback) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("验证管理员密码");
+        builder.setMessage("请输入管理员密码以解锁" + configName);
+
+        // 设置输入框
+        final EditText input = new EditText(this);
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        input.setHint("请输入密码（默认：123456）");
+        builder.setView(input);
+
+        builder.setPositiveButton("确定", (dialog, which) -> {
+            String password = input.getText().toString();
+            String adminPassword = configManager.getAdminPassword();
+
+            if (password.equals(adminPassword)) {
+                callback.onSuccess(true);
+            } else {
+                showToast("密码错误");
+                callback.onSuccess(false);
+            }
+        });
+
+        builder.setNegativeButton("取消", (dialog, which) -> {
+            dialog.cancel();
+            callback.onSuccess(false);
+        });
+
+        builder.show();
+    }
+
+    interface PasswordCallback {
+        void onSuccess(boolean success);
+    }
+
+    private void pickConfigFile() {
+        // 使用文件选择器
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("text/plain");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        try {
+            startActivityForResult(Intent.createChooser(intent, "选择配置文件"), REQUEST_CODE_PICK_FILE);
+        } catch (Exception e) {
+            showToast("没有找到文件管理器");
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_PICK_FILE && resultCode == RESULT_OK && data != null) {
+            if (data.getData() != null) {
+                importConfigFromFile(data.getData());
+            }
+        }
+    }
+
+    private void importConfigFromFile(android.net.Uri uri) {
+        try {
+            // 读取文件内容
+            StringBuilder content = new StringBuilder();
+            FileInputStream fis = (FileInputStream) getContentResolver().openInputStream(uri);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+
+            reader.close();
+            fis.close();
+
+            // 解析配置
+            Map<String, String> configMap = parseConfigFile(content.toString());
+
+            if (configMap.isEmpty()) {
+                showToast("未找到有效的配置项");
+                return;
+            }
+
+            // 显示解析结果
+            showImportResultDialog(configMap);
+
+        } catch (IOException e) {
+            showToast("文件读取失败: " + e.getMessage());
+        }
+    }
+
+    private Map<String, String> parseConfigFile(String content) {
+        Map<String, String> configMap = new HashMap<>();
+
+        // 支持的key映射
+        Map<String, String> keyMapping = new HashMap<>();
+        keyMapping.put("llm_api_key", "llm_api_key");
+        keyMapping.put("llmApiKey", "llm_api_key");
+        keyMapping.put("tts_license_id", "tts_license_id");
+        keyMapping.put("ttsLicenseId", "tts_license_id");
+        keyMapping.put("tts_license_key", "tts_license_key");
+        keyMapping.put("ttsLicenseKey", "tts_license_key");
+        keyMapping.put("tts_license_pk", "tts_license_pk");
+        keyMapping.put("ttsLicensePk", "tts_license_pk");
+        keyMapping.put("asr_license_id", "asr_license_id");
+        keyMapping.put("asrLicenseId", "asr_license_id");
+        keyMapping.put("asr_license_key", "asr_license_key");
+        keyMapping.put("asrLicenseKey", "asr_license_key");
+        keyMapping.put("asr_license_pk", "asr_license_pk");
+        keyMapping.put("asrLicensePk", "asr_license_pk");
+
+        String[] lines = content.split("\n");
+
+        for (String line : lines) {
+            line = line.trim();
+            if (line.isEmpty() || line.startsWith("#")) {
+                continue; // 跳过空行和注释
+            }
+
+            // 支持中文冒号和英文冒号
+            String[] parts = line.split("：|:");
+
+            if (parts.length == 2) {
+                String key = parts[0].trim().toLowerCase();
+                String value = parts[1].trim();
+
+                // 查找对应的配置key
+                if (keyMapping.containsKey(key)) {
+                    configMap.put(keyMapping.get(key), value);
+                }
+            }
+        }
+
+        return configMap;
+    }
+
+    private void showImportResultDialog(Map<String, String> configMap) {
+        StringBuilder message = new StringBuilder();
+        message.append("检测到以下配置项：\n\n");
+
+        for (Map.Entry<String, String> entry : configMap.entrySet()) {
+            String displayName = getConfigDisplayName(entry.getKey());
+            String maskedValue = maskValue(entry.getValue());
+            message.append(displayName).append(": ").append(maskedValue).append("\n");
+        }
+
+        message.append("\n是否导入这些配置？");
+
+        new AlertDialog.Builder(this)
+                .setTitle("导入配置")
+                .setMessage(message.toString())
+                .setPositiveButton("导入", (dialog, which) -> {
+                    importConfigs(configMap);
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
+    private String getConfigDisplayName(String key) {
+        switch (key) {
+            case "llm_api_key": return "大模型API_KEY";
+            case "tts_license_id": return "TTS LicenseID";
+            case "tts_license_key": return "TTS LicenseKey";
+            case "tts_license_pk": return "TTS LicensePk";
+            case "asr_license_id": return "ASR LicenseID";
+            case "asr_license_key": return "ASR LicenseKey";
+            case "asr_license_pk": return "ASR LicensePk";
+            case "minimax_api_key": return "MiniMax API Key";
+            case "minimax_group_id": return "MiniMax Group ID";
+            case "minimax_voice_id": return "MiniMax Voice ID";
+            default: return key;
+        }
+    }
+
+    private void importConfigs(Map<String, String> configMap) {
+        // 保存配置
+        for (Map.Entry<String, String> entry : configMap.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            switch (key) {
+                case "llm_api_key":
+                    configManager.setLlmApiKey(value);
+                    break;
+                case "tts_license_id":
+                    configManager.setTtsLicenseId(value);
+                    break;
+                case "tts_license_key":
+                    configManager.setTtsLicenseKey(value);
+                    break;
+                case "tts_license_pk":
+                    configManager.setTtsLicensePk(value);
+                    break;
+                case "asr_license_id":
+                    configManager.setAsrLicenseId(value);
+                    break;
+                case "asr_license_key":
+                    configManager.setAsrLicenseKey(value);
+                    break;
+                case "asr_license_pk":
+                    configManager.setAsrLicensePk(value);
+                    break;
+                case "minimax_api_key":
+                    configManager.setMiniMaxApiKey(value);
+                    break;
+                case "minimax_group_id":
+                    configManager.setMiniMaxGroupId(value);
+                    break;
+                case "minimax_voice_id":
+                    configManager.setMiniMaxVoiceId(value);
+                    break;
+            }
+        }
+
+        showToast("成功导入 " + configMap.size() + " 项配置");
+        loadSensitiveConfigs();
+    }
+
+    private void saveAllSettings() {
+        // 如果已解锁，保存敏感配置
+        if (isLlmUnlocked) {
+            configManager.setLlmApiKey(etLlmApiKey.getText().toString().trim());
+        }
+
+        if (isModelIdUnlocked) {
+            configManager.setLlmModelId(etLlmModelId.getText().toString().trim());
+        }
+
+        if (isTtsUnlocked) {
+            configManager.setTtsLicenseId(etTtsLicenseId.getText().toString().trim());
+            configManager.setTtsLicenseKey(etTtsLicenseKey.getText().toString().trim());
+            configManager.setTtsLicensePk(etTtsLicensePk.getText().toString().trim());
+        }
+
+        if (isAsrUnlocked) {
+            configManager.setAsrLicenseId(etAsrLicenseId.getText().toString().trim());
+            configManager.setAsrLicenseKey(etAsrLicenseKey.getText().toString().trim());
+            configManager.setAsrLicensePk(etAsrLicensePk.getText().toString().trim());
+        }
+
+        if (isMiniMaxUnlocked) {
+            configManager.setMiniMaxApiKey(etMiniMaxApiKey.getText().toString().trim());
+            configManager.setMiniMaxGroupId(etMiniMaxGroupId.getText().toString().trim());
+            configManager.setMiniMaxVoiceId(etMiniMaxVoiceId.getText().toString().trim());
+        }
+
+        showToast("设置已保存");
+    }
+
+    /**
+     * 初始化语音模块
+     */
+    private void initializeVoiceModules() {
+        // 先保存当前配置
+        saveAllSettings();
+
+        // 获取配置
+        String ttsLicenseId = configManager.getTtsLicenseId();
+        String ttsLicenseKey = configManager.getTtsLicenseKey();
+        String ttsLicensePk = configManager.getTtsLicensePk();
+
+        String asrLicenseId = configManager.getAsrLicenseId();
+        String asrLicenseKey = configManager.getAsrLicenseKey();
+        String asrLicensePk = configManager.getAsrLicensePk();
+
+        // 检查配置完整性
+        boolean ttsConfigComplete = !ttsLicenseId.isEmpty() && !ttsLicenseKey.isEmpty() && !ttsLicensePk.isEmpty();
+        boolean asrConfigComplete = !asrLicenseId.isEmpty() && !asrLicenseKey.isEmpty() && !asrLicensePk.isEmpty();
+
+        if (!ttsConfigComplete && !asrConfigComplete) {
+            showToast("请先输入TTS或ASR配置信息");
+            return;
+        }
+
+        // 初始化TTS
+        if (ttsConfigComplete) {
+            try {
+                com.jcoding.aiactivity.manager.SpeechSynthesizerManager ttsManager =
+                    com.jcoding.aiactivity.manager.SpeechSynthesizerManager.getInstance(this);
+                ttsManager.setConfig(ttsLicenseId, ttsLicenseKey, ttsLicensePk);
+                showToast("TTS语音合成初始化成功");
+            } catch (Exception e) {
+                showToast("TTS初始化失败: " + e.getMessage());
+            }
+        } else {
+            showToast("TTS配置不完整，跳过初始化");
+        }
+
+        // 初始化ASR
+        if (asrConfigComplete) {
+            try {
+                com.jcoding.aiactivity.manager.SpeechRecognizerManager asrManager =
+                    com.jcoding.aiactivity.manager.SpeechRecognizerManager.getInstance(this);
+                asrManager.setConfig(asrLicenseId, asrLicenseKey, asrLicensePk);
+                showToast("ASR语音识别初始化成功");
+            } catch (Exception e) {
+                showToast("ASR初始化失败: " + e.getMessage());
+            }
+        } else {
+            showToast("ASR配置不完整，跳过初始化");
+        }
+
+        // 重新初始化VoiceManager以应用新配置
+        try {
+            com.jcoding.aiactivity.manager.VoiceManager voiceManager =
+                com.jcoding.aiactivity.manager.VoiceManager.getInstance(this);
+            voiceManager.reinitialize();
+            showToast("语音模块已激活");
+        } catch (Exception e) {
+            showToast("语音模块激活失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 更新网络状态显示
+     */
+    private void updateNetworkStatus() {
+        boolean isOnline = NetworkUtils.isOnline(this);
+        if (configManager.isOfflineModeEnabled()) {
+            tvNetworkStatus.setText("离线模式（已手动启用）");
+            tvNetworkStatus.setTextColor(getResources().getColor(R.color.offline_text));
+        } else if (isOnline) {
+            tvNetworkStatus.setText("在线");
+            tvNetworkStatus.setTextColor(getResources().getColor(R.color.text_secondary));
+        } else {
+            tvNetworkStatus.setText("离线（网络不可用）");
+            tvNetworkStatus.setTextColor(getResources().getColor(R.color.offline_text));
+        }
+    }
+}

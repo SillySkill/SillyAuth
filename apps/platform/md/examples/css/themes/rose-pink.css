@@ -1,0 +1,53 @@
+/* ==================== 玫瑰粉主题 ==================== */
+:root {
+    /* 主色调 */
+    --primary-color: #f43f5e;
+    --primary-dark: #e11d48;
+    --primary-light: #fb7185;
+    --secondary-color: #f472b6;
+    --accent-color: #db2777;
+    
+    /* 状态色 */
+    --success-color: #22c55e;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+    
+    /* 背景色 */
+    --bg-primary: #881337;
+    --bg-secondary: #9f1239;
+    --bg-tertiary: #be123c;
+    --bg-card: rgba(159, 18, 57, 0.8);
+    
+    /* 文字色 */
+    --text-primary: #fff1f2;
+    --text-secondary: #ffe4e6;
+    --text-muted: #fda4af;
+    
+    /* 边框和阴影 */
+    --border-color: rgba(244, 63, 94, 0.2);
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --glow-color: rgba(244, 63, 94, 0.5);
+    
+    /* 渐变 */
+    --gradient-primary: linear-gradient(135deg, #f43f5e, #f472b6);
+    --gradient-glow: radial-gradient(circle, rgba(244, 63, 94, 0.15), transparent);
+}
+
+/* 主题特定的发光效果 */
+.rose-pink-glow {
+    box-shadow: 0 0 30px rgba(244, 63, 94, 0.3);
+}
+
+/* 按钮渐变 */
+.btn-primary {
+    background: linear-gradient(135deg, #f43f5e, #f472b6);
+}
+
+/* 悬浮球 */
+.gradient-orb.orb-1 {
+    background: linear-gradient(135deg, #f43f5e, #f472b6);
+}
+
+.gradient-orb.orb-2 {
+    background: linear-gradient(135deg, #db2777, #f472b6);
+}

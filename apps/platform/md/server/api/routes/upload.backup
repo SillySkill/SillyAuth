@@ -1,0 +1,776 @@
+"""
+照片上传路由
+用于AI活动秀的照片上传功能
+域名: www.jcoding.chat
+路径: /application/upload
+上传到TOS路径: /application/包名/模块名/时间戳_UUID.ext
+
+修复内容：
+1. 数据库连接池 - 避免并发上传时连接耗尽
+2. 文件名添加UUID - 避免并发时文件名冲突
+3. TOS上传重试机制 - 提高上传成功率
+4. 修复异常处理代码 - 正确捕获异常对象
+"""
+
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Request
+from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
+from typing import Optional
+import os
+import sys
+import uuid
+import time
+import hashlib
+from datetime import datetime
+import shutil
+import psycopg2
+from psycopg2 import pool
+from psycopg2.extras import RealDictCursor
+from dotenv import load_dotenv
+
+# 确保可以导入 src 模块 (TOS client)
+_src_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if _src_dir not in sys.path:
+    sys.path.insert(0, _src_dir)
+
+from src.core.db_adapter import get_db_cursor
+
+# 确保在导入TOS配置之前加载.env
+_api_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+load_dotenv(os.path.join(_api_dir, ".env"))
+
+router = APIRouter(tags=["upload"])
+
+# 配置
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
+ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
+MAX_FILE_SIZE = 16 * 1024 * 1024  # 16MB
+
+# Android应用包名
+APP_PACKAGE_NAME = "com.jcoding.aiactivity"
+
+# 域名配置
+DOMAIN = "www.jcoding.chat"
+BASE_URL = f"https://{DOMAIN}"
+
+# TOS配置 (通过环境变量设置)
+TOS_ACCESS_KEY = os.getenv("TOS_ACCESS_KEY", "")
+TOS_SECRET_KEY = os.getenv("TOS_SECRET_KEY", "")
+TOS_BUCKET = os.getenv("TOS_BUCKET", "jc-st")
+TOS_ENDPOINT = os.getenv("TOS_ENDPOINT", "tos-cn-shanghai.volces.com")
+TOS_CUSTOM_DOMAIN = os.getenv("TOS_CUSTOM_DOMAIN", "")
+
+# 文件代理URL (使用TOS自定义域名)
+FILE_PROXY_URL = os.getenv("TOS_CUSTOM_DOMAIN", "https://www.jcoding.chat/api/file")
+
+# 数据库配置
+DB_CONFIG = {
+    "host": os.getenv("DB_HOST", "47.96.133.238"),
+    "port": int(os.getenv("DB_PORT", "5432")),
+    "database": os.getenv("DB_NAME", "sillymd"),
+    "user": os.getenv("DB_USER", "sillyAdmin"),
+    "password": os.getenv("DB_PASSWORD", "Jcoding2026")
+}
+
+# 确保上传目录存在
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# ============================================
+# 数据库连接池（核心修复）
+# ============================================
+_db_pool: Optional[pool.SimpleConnectionPool] = None
+
+
+def get_db_pool():
+    """
+    获取数据库连接池（单例模式）
+    使用连接池避免并发上传时连接耗尽
+    """
+    global _db_pool
+    if _db_pool is None:
+        try:
+            _db_pool = pool.SimpleConnectionPool(
+                minconn=2,          # 最小连接数
+                maxconn=50,         # 最大连接数，支持高并发
+                **DB_CONFIG
+            )
+            print(f"数据库连接池已创建: minconn=2, maxconn=50")
+        except Exception as e:
+            print(f"创建数据库连接池失败: {str(e)}")
+            raise
+    return _db_pool
+
+
+def get_db_connection():
+    """
+    从连接池获取数据库连接
+    """
+    try:
+        db_pool = get_db_pool()
+        conn = db_pool.getconn()
+        return conn
+    except Exception as e:
+        print(f"从连接池获取数据库连接失败: {str(e)}")
+        return None
+
+
+def release_db_connection(conn):
+    """
+    将数据库连接归还到连接池
+    """
+    if conn:
+        try:
+            db_pool = get_db_pool()
+            db_pool.putconn(conn)
+        except Exception as e:
+            print(f"归还数据库连接失败: {str(e)}")
+
+
+def get_client_ip(request: Request) -> str:
+    """获取客户端IP地址"""
+    # 尝试从各种header中获取真实IP
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        # X-Forwarded-For可能包含多个IP，取第一个
+        return forwarded.split(",")[0].strip()
+
+    real_ip = request.headers.get("X-Real-IP")
+    if real_ip:
+        return real_ip
+
+    return request.client.host if request.client else "unknown"
+
+
+def generate_device_fingerprint(request: Request) -> str:
+    """生成设备指纹"""
+    # 收集设备信息
+    user_agent = request.headers.get("User-Agent", "")
+    accept_language = request.headers.get("Accept-Language", "")
+    accept_encoding = request.headers.get("Accept-Encoding", "")
+
+    # 组合信息生成指纹
+    fingerprint_data = f"{user_agent}|{accept_language}|{accept_encoding}"
+    fingerprint = hashlib.md5(fingerprint_data.encode()).hexdigest()[:16]
+
+    return fingerprint
+
+
+def get_file_extension(filename: str) -> str:
+    """获取文件扩展名"""
+    return os.path.splitext(filename)[1].lower()
+
+
+def is_allowed_file(filename: str) -> bool:
+    """检查文件类型是否允许"""
+    ext = get_file_extension(filename)
+    return ext in ALLOWED_EXTENSIONS
+
+
+def generate_timestamp_filename(original_filename: str) -> str:
+    """
+    生成基于时间戳的文件名（添加UUID避免并发冲突）
+    格式: {毫秒时间戳}_{UUID前8位}.ext
+    """
+    ext = get_file_extension(original_filename)
+    if not ext:
+        ext = ".jpg"
+
+    # 使用毫秒级时间戳 + UUID（防止并发冲突）
+    timestamp_ms = int(time.time() * 1000)
+    unique_id = uuid.uuid4().hex[:8]
+
+    return f"{timestamp_ms}_{unique_id}{ext}"
+
+
+def save_upload_record(
+    file_id: str,
+    filename: str,
+    stored_filename: str,
+    file_path: str,
+    file_size: int,
+    mime_type: str,
+    package_name: str,
+    module_name: str,
+    fingerprint: str,
+    ip: str,
+    user_agent: str,
+    upload_status: str,
+    oss_url: str = None,
+    error_message: str = None,
+    session_id: str = None,
+    parent_file_id: str = None,
+    is_generated: bool = False
+) -> bool:
+    """
+    保存上传记录到数据库（使用 src.core.db_adapter）
+    """
+    try:
+        with get_db_cursor() as cur:
+            upload_time = int(time.time() * 1000)  # 毫秒时间戳
+
+            query = """
+                INSERT INTO upload_records (
+                    file_id, filename, stored_filename, file_path, file_size, mime_type,
+                    package_name, module_name, uploader_fingerprint, uploader_ip,
+                    uploader_user_agent, upload_time, upload_status, oss_url, error_message, session_id,
+                    parent_file_id, is_generated
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+
+            cur.execute(query, (
+                file_id, filename, stored_filename, file_path, file_size, mime_type,
+                package_name, module_name, fingerprint, ip,
+                user_agent, upload_time, upload_status, oss_url, error_message, session_id,
+                parent_file_id, is_generated
+            ))
+
+            return True
+
+    except Exception as e:
+        print(f"保存上传记录失败: {str(e)}")
+        return False
+
+
+def upload_to_tos(
+    file_content: bytes,
+    tos_path: str,
+    max_retries: int = 2
+) -> Optional[str]:
+    """
+    直接上传文件到火山引擎TOS（带重试机制）
+
+    参数:
+        file_content: 文件内容 (bytes)
+        tos_path: TOS相对路径
+        max_retries: 最大重试次数
+
+    返回:
+        TOS文件URL 或 None
+    """
+    for attempt in range(max_retries):
+        try:
+            if not TOS_ACCESS_KEY or not TOS_SECRET_KEY:
+                return None
+
+            # 创建TOS客户端配置
+            tos_config = {
+                "endpoint": TOS_ENDPOINT,
+                "bucket": TOS_BUCKET,
+                "access_key": TOS_ACCESS_KEY,
+                "secret_key": TOS_SECRET_KEY,
+            }
+            if TOS_CUSTOM_DOMAIN:
+                tos_config["custom_domain"] = TOS_CUSTOM_DOMAIN
+
+            from src.modules.storage.tos_client import get_tos_client
+            client = get_tos_client(tos_config)
+
+            # 上传文件
+            result = client.upload_file(tos_path, file_content)
+
+            if result and result.get("url"):
+                tos_url = result["url"]
+                print(f"TOS上传成功，返回URL: {tos_url}")
+                return tos_url
+
+            return None
+
+        except Exception as e:
+            if attempt < max_retries - 1:
+                wait_time = 2 ** attempt
+                print(f"TOS上传失败: {str(e)}，{wait_time}秒后重试 (尝试 {attempt + 1}/{max_retries})")
+                time.sleep(wait_time)
+            else:
+                print(f"TOS上传失败: {str(e)}")
+
+    return None
+
+
+@router.get("/upload")
+async def upload_page():
+    """
+    上传页面路由
+
+    返回上传页面的HTML
+    """
+    html_path = os.path.join(os.path.dirname(__file__), "..", "templates", "upload.html")
+    if os.path.exists(html_path):
+        return FileResponse(html_path)
+
+    # 如果模板文件不存在，返回内置HTML
+    return FileResponse(os.path.join(os.path.dirname(__file__), "..", "templates", "upload.html"))
+
+
+@router.post("/upload/api")
+async def upload_file(
+    request: Request,
+    file: UploadFile = File(...),
+    module: str = Form("style"),  # 模块名：style, quiz, lottery, gen等
+    source: Optional[str] = Form("file"),
+    style_id: Optional[str] = Form(None),
+    user_id: Optional[str] = Form(None),
+    session_id: Optional[str] = Form(None),  # 添加session_id参数
+    parent_file_id: Optional[str] = Form(None),  # 源文件ID（用于gen文件）
+    is_generated: Optional[str] = Form(None)  # 是否为生成的文件
+):
+    """
+    照片上传API接口
+
+    上传到TOS路径: /application/包名/模块名/时间戳_UUID.ext
+    - style: 用户上传照片
+    - gen: AI生成的结果照片
+
+    参数:
+        file: 图片文件
+        module: 模块名 (style/quiz/lottery/gen等)
+        source: 来源标识 (camera/file)
+        style_id: 风格ID (可选)
+        user_id: 用户ID (可选)
+        session_id: 会话ID (可选)
+        parent_file_id: 源文件ID (用于gen文件)
+        is_generated: 是否为生成的文件 (true/false)
+
+    返回:
+        {
+            "code": 200,
+            "message": "上传成功",
+            "data": {
+                "url": "TOS文件URL",
+                "filename": "文件名",
+                "file_id": "文件ID",
+                "timestamp": 上传时间戳,
+                "size": 文件大小,
+                "tos_path": "TOS相对路径"
+            }
+        }
+    """
+    conn = None
+    file_id = str(uuid.uuid4())
+    original_filename = file.filename or "unknown"
+
+    # 获取客户端信息
+    client_ip = get_client_ip(request)
+    user_agent = request.headers.get("User-Agent", "unknown")
+    fingerprint = generate_device_fingerprint(request)
+
+    # 打印调试信息
+    print(f"========== 上传请求调试 ==========")
+    print(f"session_id参数: {session_id}")
+    print(f"session_id类型: {type(session_id)}")
+    print(f"session_id存在: {session_id is not None}")
+    print(f"session_id非空: {bool(session_id)}")
+    print(f"================================")
+
+    # 获取MIME类型
+    mime_type = file.content_type or "image/jpeg"
+
+    try:
+        # 验证文件名
+        if not file.filename:
+            raise HTTPException(status_code=400, detail="文件名为空")
+
+        # 验证文件类型
+        if not is_allowed_file(file.filename):
+            raise HTTPException(
+                status_code=400,
+                detail=f"不支持的文件类型。支持的类型: {', '.join(ALLOWED_EXTENSIONS)}"
+            )
+
+        # 读取文件内容并检查大小
+        file_content = await file.read()
+        file_size = len(file_content)
+
+        if file_size > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=413,
+                detail=f"文件过大，最大支持 {MAX_FILE_SIZE // (1024*1024)}MB"
+            )
+
+        # 生成基于时间戳+UUID的文件名（避免并发冲突）
+        stored_filename = generate_timestamp_filename(file.filename)
+
+        # 构建TOS路径: /application/包名/模块名/时间戳.ext
+        tos_path = f"application/{APP_PACKAGE_NAME}/{module}/{stored_filename}"
+
+        # 上传到TOS（带重试）
+        file_url = upload_to_tos(file_content, tos_path, max_retries=2)
+
+        # 如果TOS上传失败，保存到本地作为备份
+        if not file_url:
+            filepath = os.path.join(UPLOAD_FOLDER, stored_filename)
+            with open(filepath, "wb") as f:
+                f.write(file_content)
+            file_url = f"{BASE_URL}/application/uploads/{stored_filename}"
+            print(f"警告: TOS上传失败，文件已保存到本地: {filepath}")
+
+        # 保存上传记录到数据库
+        # 处理is_generated参数
+        is_generated_bool = is_generated is not None and is_generated.lower() in ('true', '1', 'yes')
+
+        save_upload_record(
+            file_id=file_id,
+            filename=original_filename,
+            stored_filename=stored_filename,
+            file_path=tos_path,
+            file_size=file_size,
+            mime_type=mime_type,
+            package_name=APP_PACKAGE_NAME,
+            module_name=module,
+            fingerprint=fingerprint,
+            ip=client_ip,
+            user_agent=user_agent,
+            upload_status="success",
+            oss_url=file_url,
+            session_id=session_id,
+            parent_file_id=parent_file_id,
+            is_generated=is_generated_bool
+        )
+
+        # 返回成功结果
+        return JSONResponse(
+            status_code=200,
+            content={
+                "code": 200,
+                "message": "上传成功",
+                "data": {
+                    "url": file_url,
+                    "filename": stored_filename,
+                    "original_filename": original_filename,
+                    "file_id": file_id,
+                    "timestamp": int(time.time() * 1000),
+                    "size": file_size,
+                    "tos_path": tos_path,
+                    "module": module,
+                    "style_id": style_id,
+                    "user_id": user_id
+                }
+            }
+        )
+
+    except HTTPException as he:
+        # 修复: 正确捕获HTTPException对象
+        save_upload_record(
+            file_id=file_id,
+            filename=original_filename,
+            stored_filename="",
+            file_path="",
+            file_size=0,
+            mime_type=mime_type,
+            package_name=APP_PACKAGE_NAME,
+            module_name=module,
+            fingerprint=fingerprint,
+            ip=client_ip,
+            user_agent=user_agent,
+            upload_status="failed",
+            error_message=str(he.detail)
+        )
+        raise
+    except Exception as e:
+        # 修复: 正确捕获普通Exception对象
+        save_upload_record(
+            file_id=file_id,
+            filename=original_filename,
+            stored_filename="",
+            file_path="",
+            file_size=0,
+            mime_type=mime_type,
+            package_name=APP_PACKAGE_NAME,
+            module_name=module,
+            fingerprint=fingerprint,
+            ip=client_ip,
+            user_agent=user_agent,
+            upload_status="failed",
+            error_message=str(e)
+        )
+        raise HTTPException(status_code=500, detail=f"上传失败: {str(e)}")
+
+
+@router.get("/uploads/{filename}")
+async def get_uploaded_file(filename: str):
+    """
+    访问已上传的文件
+
+    参数:
+        filename: 文件名
+    """
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="文件不存在")
+
+    return FileResponse(filepath)
+
+
+@router.get("/upload/health")
+async def health_check():
+    """健康检查"""
+    # 检查数据库连接池状态
+    pool_status = "not_initialized"
+    try:
+        if _db_pool:
+            pool_status = f"running (minconn=2, maxconn=50)"
+    except:
+        pass
+
+    return {
+        "status": "healthy",
+        "service": "ai-activity-upload",
+        "version": "2.1.0",  # 版本号升级
+        "timestamp": datetime.now().isoformat(),
+        "features": {
+            "database_logging": True,
+            "timestamp_filename_with_uuid": True,  # 新增：文件名带UUID
+            "module_based_path": True,
+            "fingerprint_tracking": True,
+            "db_connection_pool": True,  # 新增：数据库连接池
+            "tos_upload_retry": True  # 新增：TOS上传重试
+        },
+        "db_pool_status": pool_status
+    }
+
+
+@router.get("/upload/query")
+async def query_uploads(
+    limit: int = 1,
+    module: Optional[str] = None,
+    package_name: Optional[str] = None
+):
+    """
+    查询上传记录（使用连接池）
+
+    参数:
+        limit: 返回记录数量，默认1条
+        module: 模块名过滤 (可选)
+        package_name: 包名过滤 (可选)
+
+    返回:
+        {
+            "code": 200,
+            "data": [
+                {
+                    "file_id": "文件ID",
+                    "filename": "原始文件名",
+                    "oss_url": "TOS文件URL",
+                    "upload_time": 1234567890123,
+                    "module_name": "style",
+                    "package_name": "com.jcoding.aiactivity"
+                }
+            ]
+        }
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return {"code": 500, "message": "数据库连接失败"}
+
+        # 使用RealDictCursor，使结果以字典形式返回
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # 构建查询条件
+        conditions = []
+        params = []
+
+        if module:
+            conditions.append("module_name = %s")
+            params.append(module)
+
+        if package_name:
+            conditions.append("package_name = %s")
+            params.append(package_name)
+        else:
+            # 默认只查询本应用的记录
+            conditions.append("package_name = %s")
+            params.append(APP_PACKAGE_NAME)
+
+        where_clause = " AND ".join(conditions) if conditions else "1=1"
+
+        # 查询最近的上传记录
+        query = f"""
+            SELECT file_id, filename, oss_url, upload_time, module_name, package_name, session_id
+            FROM upload_records
+            WHERE {where_clause}
+            ORDER BY upload_time DESC
+            LIMIT %s
+        """
+        params.append(limit)
+
+        cur.execute(query, params)
+        rows = cur.fetchall()
+
+        # 转换结果
+        data = []
+        for row in rows:
+            data.append({
+                "file_id": row.get("file_id"),
+                "filename": row.get("filename"),
+                "oss_url": row.get("oss_url"),
+                "upload_time": row.get("upload_time"),
+                "module_name": row.get("module_name"),
+                "package_name": row.get("package_name"),
+                "session_id": row.get("session_id")
+            })
+
+        cur.close()
+        return {"code": 200, "data": data}
+
+    except Exception as e:
+        print(f"查询上传记录失败: {str(e)}")
+        return {"code": 500, "message": f"查询失败: {str(e)}"}
+    finally:
+        if conn:
+            release_db_connection(conn)
+
+
+@router.get("/generation/query")
+async def query_generation(
+    session_id: Optional[str] = None,
+    limit: int = 1
+):
+    """
+    查询AI生成结果（用于Android客户端扫码后轮询生成状态）
+
+    参数:
+        session_id: 会话ID，用于标识唯一的扫码机会
+        limit: 返回记录数量，默认1条
+
+    返回:
+        {
+            "code": 200,
+            "data": {
+                "result_url": "TOS文件URL",
+                "session_id": "会话ID",
+                "upload_time": 1234567890123,
+                "status": "completed" | "processing" | "pending"
+            }
+        }
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return {"code": 500, "message": "数据库连接失败"}
+
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # 构建查询条件
+        conditions = ["is_generated = TRUE"]
+        params = []
+
+        if session_id:
+            conditions.append("session_id = %s")
+            params.append(session_id)
+
+        # 默认只查询本应用的记录
+        conditions.append("package_name = %s")
+        params.append(APP_PACKAGE_NAME)
+
+        where_clause = " AND ".join(conditions)
+
+        # 查询最近的生成结果（来自gen模块的记录）
+        query = f"""
+            SELECT file_id, filename, oss_url, upload_time, module_name, package_name, session_id
+            FROM upload_records
+            WHERE {where_clause}
+              AND module_name IN ('gen', 'generation', 'style')
+            ORDER BY upload_time DESC
+            LIMIT %s
+        """
+        params.append(limit)
+
+        cur.execute(query, params)
+        rows = cur.fetchall()
+
+        if not rows:
+            return {"code": 200, "data": None, "message": "暂无生成结果"}
+
+        row = rows[0]
+
+        # 判断状态
+        status = "completed"
+        if not row.get("oss_url") or row.get("oss_url") == "":
+            status = "pending"
+
+        data = {
+            "result_url": row.get("oss_url", ""),
+            "session_id": row.get("session_id", ""),
+            "upload_time": row.get("upload_time", 0),
+            "status": status,
+            "file_id": row.get("file_id", "")
+        }
+
+        cur.close()
+        return {"code": 200, "data": data}
+
+    except Exception as e:
+        print(f"查询生成结果失败: {str(e)}")
+        return {"code": 500, "message": f"查询失败: {str(e)}"}
+    finally:
+        if conn:
+            release_db_connection(conn)
+
+
+@router.post("/upload/url")
+async def upload_url(
+    url: str = Form(...),
+    module: str = Form("gen"),
+    session_id: Optional[str] = Form(None),
+    is_generated: Optional[str] = Form("true")
+):
+    """
+    通过URL方式保存生成结果记录
+
+    用于Android端生成图片后将结果URL保存到数据库
+    """
+    try:
+        # 生成文件ID和基本信息
+        file_id = str(uuid.uuid4())
+        filename = url.split("/")[-1] if "/" in url else "generated.jpg"
+
+        # 保存到数据库
+        save_upload_record(
+            file_id=file_id,
+            filename=filename,
+            stored_filename=filename,
+            file_path="",
+            file_size=0,
+            mime_type="image/jpeg",
+            package_name=APP_PACKAGE_NAME,
+            module_name=module,
+            fingerprint="",
+            ip="",
+            user_agent="Android",
+            upload_status="success",
+            oss_url=url,
+            session_id=session_id,
+            parent_file_id=None,
+            is_generated=is_generated is not None and is_generated.lower() in ('true', '1', 'yes')
+        )
+
+        return {"code": 200, "message": "URL保存成功", "data": {"file_id": file_id, "url": url}}
+
+    except Exception as e:
+        print(f"保存URL失败: {str(e)}")
+        return {"code": 500, "message": f"保存失败: {str(e)}"}
+
+
+@router.get("/")
+async def index():
+    """上传服务首页"""
+    return {
+        "service": "AI活动秀 - 照片上传服务",
+        "version": "2.1.0",  # 版本号升级
+        "tos_path_pattern": f"application/{APP_PACKAGE_NAME}/{{module}}/{{timestamp}}_{{uuid}}.ext",
+        "endpoints": {
+            "upload_page": f"GET {BASE_URL}/application/upload",
+            "upload_api": f"POST {BASE_URL}/application/upload/api",
+            "view_file": f"GET {BASE_URL}/application/uploads/<filename>",
+            "health": f"GET {BASE_URL}/application/upload/health",
+            "query": f"GET {BASE_URL}/application/upload/query"
+        },
+        "improvements": [
+            "数据库连接池 - 支持高并发上传",
+            "文件名添加UUID - 避免并发冲突",
+            "TOS上传重试机制 - 提高成功率",
+            "修复异常处理代码"
+        ]
+    }

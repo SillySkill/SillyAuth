@@ -1,0 +1,60 @@
+id: staff
+name: 员工权限管理模块
+version: 1.0.0
+description: 提供员工管理、角色管理和权限控制系统
+dependencies: [auth]
+
+config:
+  # 预定义系统角色
+  system_roles:
+    - code: super_admin
+      name: 超级管理员
+      permissions: ["*"]
+    - code: admin
+      name: 管理员
+      permissions:
+        - "orders:order:*"
+        - "goods:product:*"
+        - "promotion:coupon:*"
+        - "promotion:activity:*"
+        - "logistics:ship:*"
+        - "staff:user:*"
+        - "staff:role:read"
+        - "storage:*"
+        - "points:*"
+    - code: operator
+      name: 运营人员
+      permissions:
+        - "orders:order:read"
+        - "orders:order:update"
+        - "goods:product:read"
+        - "goods:product:create"
+        - "goods:product:update"
+        - "promotion:coupon:*"
+        - "promotion:activity:*"
+    - code: customer_service
+      name: 客服人员
+      permissions:
+        - "orders:order:read"
+        - "orders:order:update"
+        - "orders:order:refund"
+        - "goods:product:read"
+    - code: warehouse
+      name: 仓库人员
+      permissions:
+        - "orders:order:read"
+        - "logistics:ship:read"
+        - "logistics:ship:update"
+    - code: finance
+      name: 财务人员
+      permissions:
+        - "orders:order:read"
+        - "orders:order:refund"
+        - "points:*"
+        - "logistics:ship:read"
+  # 审计日志配置
+  audit_log_enabled: true
+  # JWT 配置
+  jwt_secret: "${JWT_SECRET}"
+  jwt_algorithm: "HS256"
+  jwt_expire_minutes: 43200

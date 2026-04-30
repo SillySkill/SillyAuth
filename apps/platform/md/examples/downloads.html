@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="tech-blue">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>资源下载 - SillyMD AI Skills 托管中心</title>
+  <meta name="description" content="WSL、Python、Git、VS Code 等开发工具国内镜像下载，快速稳定">
+  <meta name="keywords" content="WSL下载, Python下载, Git下载, VS Code, 开发工具, 国内镜像">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="资源下载 - SillyMD">
+  <meta property="og:description" content="开发工具国内镜像下载">
+  <meta property="og:image" id="ogImage" content="">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="../image/logo-1.png" type="image/png">
+  <link rel="stylesheet" href="./css/responsive.css">
+
+  <!-- Config.js -->
+  <script type="module" src="./js/config.js"></script>
+  <style>
+    /* Base styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-white);
+      line-height: 1.6;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* Hero Section */
+    .downloads-hero {
+      background: linear-gradient(135deg, #0A1628 0%, #1A2842 50%, #0A1628 100%);
+      padding: 120px 0 80px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      background: rgba(0, 102, 255, 0.2);
+      border: 1px solid rgba(0, 102, 255, 0.4);
+      border-radius: 20px;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
+    .downloads-hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #0066FF 0%, #00D4FF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .downloads-hero p {
+      font-size: 1.25rem;
+      color: var(--text-light);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Stats Section */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      max-width: 1400px;
+      margin: -40px auto 60px;
+      padding: 0 24px;
+    }
+    .stat-card {
+      background: var(--bg-dark-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 102, 255, 0.2);
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-label {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    /* Categories Section */
+    .categories-section {
+      padding: 40px 0;
+      background: var(--bg-dark-secondary);
+    }
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .category-card {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .category-card:hover, .category-card.active {
+      border-color: var(--primary);
+      background: rgba(0, 102, 255, 0.05);
+      transform: translateY(-4px);
+    }
+    .category-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+    .category-name {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .category-count {
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    /* Downloads Section */
+    .downloads-section {
+      padding: 80px 0;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      max-width: 1400px;
+      margin: 0 auto 40px;
+      padding: 0 24px;
+    }
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .section-subtitle {
+      color: var(--text-light);
+      font-size: 1rem;
+    }
+    .search-box {
+      position: relative;
+      width: 300px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 10px 40px 10px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      color: var(--text-white);
+      font-size: 0.9rem;
+    }
+    .search-box i {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+    }
+
+    .downloads-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Download Card */
+    .download-card {
+      background: var(--bg-dark-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .download-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary-light);
+      box-shadow: 0 8px 32px rgba(0, 102, 255, 0.3);
+    }
+    .download-header {
+      display: flex;
+      align-items: center;
+      padding: 24px;
+      gap: 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .download-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+    .download-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .download-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .download-version {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+    .download-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+    .official-badge {
+      padding: 2px 8px;
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 4px;
+      color: #10B981;
+      font-size: 0.75rem;
+    }
+
+    .download-body {
+      padding: 24px;
+    }
+    .download-description {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .download-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .download-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(0, 102, 255, 0.1);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      transition: all 0.3s;
+    }
+    .download-link:hover {
+      background: rgba(0, 102, 255, 0.2);
+      border-color: var(--primary);
+    }
+    .download-link-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .download-link-primary:hover {
+      background: var(--primary-dark);
+    }
+    .link-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .link-icon {
+      font-size: 1.2rem;
+    }
+    .link-name {
+      font-weight: 500;
+    }
+    .link-size {
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+    .link-action {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+    .mirror-badge {
+      padding: 2px 8px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: #F59E0B;
+    }
+
+    .download-footer {
+      padding: 16px 24px;
+      background: rgba(0, 0, 0, 0.2);
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .download-stats {
+      display: flex;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    /* Platform Tabs */
+    .platform-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      max-width: 1400px;
+      margin: 0 auto 24px;
+      padding: 0 24px;
+    }
+    .platform-tab {
+      padding: 8px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .platform-tab:hover, .platform-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .downloads-hero h1 { font-size: 2.5rem; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .downloads-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .downloads-hero h1 { font-size: 2rem; }
+      .stats-bar { grid-template-columns: 1fr; }
+      .category-grid { grid-template-columns: repeat(3, 1fr); }
+      .section-header { flex-direction: column; gap: 16px; align-items: flex-start; }
+      .search-box { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar"></nav>
+
+  <!-- Hero Section -->
+  <section class="downloads-hero">
+    <div class="container">
+      <div class="hero-badge">
+        <i class="fas fa-cloud-download-alt"></i>
+        <span>国内高速镜像</span>
+      </div>
+      <h1>开发工具资源下载</h1>
+      <p>WSL、Python、Git、VS Code 等开发工具，国内镜像高速下载</p>
+    </div>
+  </section>
+
+  <!-- Stats Bar -->
+  <section class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-value">50+</div>
+      <div class="stat-label">开发工具</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">100+</div>
+      <div class="stat-label">资源文件</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">1M+</div>
+      <div class="stat-label">总下载量</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">99.9%</div>
+      <div class="stat-label">可用性</div>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="categories-section">
+    <div class="category-grid">
+      <div class="category-card active" data-category="all">
+        <div class="category-icon">📦</div>
+        <div class="category-name">全部资源</div>
+        <div class="category-count">50+</div>
+      </div>
+      <div class="category-card" data-category="wsl">
+        <div class="category-icon">🐧</div>
+        <div class="category-name">WSL</div>
+        <div class="category-count">8</div>
+      </div>
+      <div class="category-card" data-category="python">
+        <div class="category-icon">🐍</div>
+        <div class="category-name">Python</div>
+        <div class="category-count">12</div>
+      </div>
+      <div class="category-card" data-category="nodejs">
+        <div class="category-icon">💚</div>
+        <div class="category-name">Node.js</div>
+        <div class="category-count">10</div>
+      </div>
+      <div class="category-card" data-category="git">
+        <div class="category-icon">📂</div>
+        <div class="category-name">Git</div>
+        <div class="category-count">6</div>
+      </div>
+      <div class="category-card" data-category="vscode">
+        <div class="category-icon">💻</div>
+        <div class="category-name">VS Code</div>
+        <div class="category-count">5</div>
+      </div>
+      <div class="category-card" data-category="docker">
+        <div class="category-icon">🐳</div>
+        <div class="category-name">Docker</div>
+        <div class="category-count">4</div>
+      </div>
+      <div class="category-card" data-category="tools">
+        <div class="category-icon">🛠️</div>
+        <div class="category-name">其他工具</div>
+        <div class="category-count">15</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Platform Filter -->
+  <div class="platform-tabs">
+    <div class="platform-tab active" data-platform="all">
+      <i class="fas fa-desktop"></i>
+      <span>全部平台</span>
+    </div>
+    <div class="platform-tab" data-platform="windows">
+      <i class="fab fa-windows"></i>
+      <span>Windows</span>
+    </div>
+    <div class="platform-tab" data-platform="macos">
+      <i class="fab fa-apple"></i>
+      <span>macOS</span>
+    </div>
+    <div class="platform-tab" data-platform="linux">
+      <i class="fab fa-linux"></i>
+      <span>Linux</span>
+    </div>
+  </div>
+
+  <!-- Downloads Section -->
+  <section class="downloads-section">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">热门资源</h2>
+        <p class="section-subtitle">最常用的开发工具和框架</p>
+      </div>
+      <div class="search-box">
+        <input type="text" placeholder="搜索资源...">
+        <i class="fas fa-search"></i>
+      </div>
+    </div>
+
+    <div class="downloads-grid" id="downloadsGrid">
+      <!-- 动态加载资源列表 -->
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="footer"></footer>
+
+  <script>
+    // 设置 Open Graph 图片 URL（动态生成）
+    window.addEventListener('DOMContentLoaded', function() {
+      const ogImage = document.getElementById('ogImage');
+      if (ogImage && typeof window.getFileProxyUrl === 'function') {
+        ogImage.content = window.getFileProxyUrl('og-downloads.jpg');
+      } else if (ogImage) {
+        // Fallback
+        ogImage.content = 'https://jc-st.oss-cn-shanghai.aliyuncs.com/sillymd/og-downloads.jpg';
+      }
+    });
+
+    // 动态加载导航和页脚
+    fetch('./index.html')
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        document.getElementById('navbar').innerHTML = doc.querySelector('.navbar').outerHTML;
+        document.getElementById('footer').innerHTML = doc.querySelector('.footer').outerHTML;
+      });
+
+    // API 配置
+    const API_BASE = 'http://47.96.133.238:8000/api';
+
+    // 加载资源数据
+    async function loadDownloads(category = 'all', platform = 'all') {
+      try {
+        const response = await fetch(`${API_BASE}/downloads?category=${category}&platform=${platform}`);
+        const data = await response.json();
+
+        if (data.success) {
+          renderDownloads(data.data);
+        }
+      } catch (error) {
+        console.error('加载资源失败:', error);
+        // 使用静态数据作为fallback
+        renderStaticDownloads();
+      }
+    }
+
+    // 渲染资源列表
+    function renderDownloads(downloads) {
+      const grid = document.getElementById('downloadsGrid');
+      grid.innerHTML = downloads.map(download => `
+        <div class="download-card">
+          <div class="download-header">
+            <div class="download-icon">${getCategoryIcon(download.category)}</div>
+            <div class="download-info">
+              <h3 class="download-title">${download.title_zh_CN}</h3>
+              <div class="download-version">
+                版本 ${download.version}
+                ${download.is_official ? '<span class="official-badge">官方</span>' : ''}
+              </div>
+              <div class="download-meta">
+                <span><i class="fas fa-laptop"></i> ${getPlatformText(download.platform)}</span>
+                <span><i class="fas fa-file"></i> ${download.file_type}</span>
+              </div>
+            </div>
+          </div>
+          <div class="download-body">
+            <p class="download-description">${download.description_zh_CN}</p>
+            <div class="download-links">
+              <a href="${download.file_url}" class="download-link download-link-primary" download>
+                <div class="link-info">
+                  <i class="fas fa-cloud-download-alt link-icon"></i>
+                  <div>
+                    <div class="link-name">直接下载</div>
+                    <div class="link-size">${formatFileSize(download.file_size)}</div>
+                  </div>
+                </div>
+                <div class="link-action">
+                  <i class="fas fa-download"></i>
+                  <span>下载</span>
+                </div>
+              </a>
+              ${download.mirror_url_1 ? `
+              <a href="${download.mirror_url_1}" class="download-link" target="_blank">
+                <div class="link-info">
+                  <i class="fas fa-server link-icon"></i>
+                  <div>
+                    <div class="link-name">阿里云镜像</div>
+                    <div class="link-size">${getMirrorName(download.mirror_url_names, 'mirror_url_1')}</div>
+                  </div>
+                </div>
+                <div class="link-action">
+                  <span class="mirror-badge">镜像</span>
+                  <i class="fas fa-external-link-alt"></i>
+                </div>
+              </a>
+              ` : ''}
+              ${download.github_url ? `
+              <a href="${download.github_url}" class="download-link" target="_blank">
+                <div class="link-info">
+                  <i class="fab fa-github link-icon"></i>
+                  <div class="link-name">GitHub 仓库</div>
+                </div>
+                <div class="link-action">
+                  <i class="fas fa-external-link-alt"></i>
+                </div>
+              </a>
+              ` : ''}
+            </div>
+          </div>
+          <div class="download-footer">
+            <div class="download-stats">
+              <span><i class="fas fa-download"></i> ${formatNumber(download.download_count)}</span>
+              <span><i class="fas fa-eye"></i> ${formatNumber(download.view_count)}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 静态数据（fallback）
+    function renderStaticDownloads() {
+      // 使用 getFileProxyUrl 生成 OSS 资源 URL
+      const getFileUrl = (path) => {
+        if (typeof window.getFileProxyUrl === 'function') {
+          return window.getFileProxyUrl(path);
+        }
+        // Fallback: 如果 config.js 未加载，使用原始 OSS URL
+        return `https://jc-st.oss-cn-shanghai.aliyuncs.com/sillymd/${path}`;
+      };
+
+      const downloads = [
+        {
+          category: 'wsl',
+          title_zh_CN: 'WSL2 for Windows',
+          version: '2.0.0',
+          is_official: true,
+          platform: 'windows',
+          file_type: 'msi',
+          description_zh_CN: '适用于 Windows 10/11 的 WSL2 安装包，支持最新的 Linux 内核',
+          file_url: getFileUrl('downloads/wsl.2.0.0.x64.msi'),
+          file_size: 256000000,
+          mirror_url_1: 'https://mirrors.aliyun.com/wsl/wsl.2.0.0.x64.msi',
+          mirror_url_names: '{"mirror_url_1": "阿里云"}',
+          github_url: 'https://github.com/microsoft/WSL',
+          download_count: 125000,
+          view_count: 250000
+        },
+        {
+          category: 'python',
+          title_zh_CN: 'Python 3.12.1',
+          version: '3.12.1',
+          is_official: true,
+          platform: 'windows',
+          file_type: 'exe',
+          description_zh_CN: 'Python 3.12.1 Windows x64 安装包，包含 pip 和标准库',
+          file_url: getFileUrl('downloads/python-3.12.1-amd64.exe'),
+          file_size: 25600000,
+          mirror_url_1: 'https://mirrors.aliyun.com/python/3.12.1/python-3.12.1-amd64.exe',
+          mirror_url_names: '{"mirror_url_1": "阿里云"}',
+          github_url: 'https://www.python.org/downloads/',
+          download_count: 89000,
+          view_count: 156000
+        }
+      ];
+      renderDownloads(downloads);
+    }
+
+    // 辅助函数
+    function getCategoryIcon(category) {
+      const icons = {
+        'wsl': '🐧',
+        'python': '🐍',
+        'nodejs': '💚',
+        'git': '📂',
+        'vscode': '💻',
+        'docker': '🐳',
+        'tools': '🛠️'
+      };
+      return icons[category] || '📦';
+    }
+
+    function getPlatformText(platform) {
+      const map = { windows: 'Windows', macos: 'macOS', linux: 'Linux', all: '全平台' };
+      return map[platform] || platform;
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes >= 1073741824) {
+        return (bytes / 1073741824).toFixed(2) + ' GB';
+      } else if (bytes >= 1048576) {
+        return (bytes / 1048576).toFixed(2) + ' MB';
+      } else {
+        return bytes + ' B';
+      }
+    }
+
+    function formatNumber(num) {
+      if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+      } else if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+      }
+      return num.toString();
+    }
+
+    function getMirrorName(namesJson, key) {
+      try {
+        const names = JSON.parse(namesJson || '{}');
+        return names[key] || '镜像';
+      } catch {
+        return '镜像';
+      }
+    }
+
+    // 分类点击事件
+    document.querySelectorAll('.category-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        loadDownloads(card.dataset.category, getCurrentPlatform());
+      });
+    });
+
+    // 平台筛选
+    document.querySelectorAll('.platform-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        loadDownloads(getCurrentCategory(), tab.dataset.platform);
+      });
+    });
+
+    function getCurrentCategory() {
+      const active = document.querySelector('.category-card.active');
+      return active ? active.dataset.category : 'all';
+    }
+
+    function getCurrentPlatform() {
+      const active = document.querySelector('.platform-tab.active');
+      return active ? active.dataset.platform : 'all';
+    }
+
+    // 初始化
+    loadDownloads();
+  </script>
+</body>
+</html>

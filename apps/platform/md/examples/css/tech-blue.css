@@ -1,0 +1,295 @@
+/* ==================== 科技蓝主题 ==================== */
+
+/* 科技蓝主题变量覆盖 */
+:root {
+    --tech-blue-primary: #0ea5e9;
+    --tech-blue-secondary: #0284c7;
+    --tech-blue-accent: #38bdf8;
+    --tech-glow: rgba(14, 165, 233, 0.5);
+}
+
+/* 科技感背景效果 */
+.tech-blue .gradient-orb {
+    background: linear-gradient(135deg, var(--tech-blue-primary), #6366f1);
+}
+
+/* 发光按钮 */
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+/* 科技卡片效果 */
+.feature-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--tech-blue-primary), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.feature-card:hover::before {
+    opacity: 1;
+}
+
+/* 输入框科技效果 */
+.input-group input:focus {
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15),
+                0 0 20px rgba(14, 165, 233, 0.1);
+}
+
+/* 导航栏科技效果 */
+.navbar {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* 文字渐变效果 */
+.gradient-text {
+    background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 科技边框 */
+.tech-border {
+    position: relative;
+    border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.tech-border::before,
+.tech-border::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--tech-blue-primary);
+    transition: all 0.3s;
+}
+
+.tech-border::before {
+    top: -1px;
+    left: -1px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.tech-border::after {
+    bottom: -1px;
+    right: -1px;
+    border-left: none;
+    border-top: none;
+}
+
+/* 扫描线效果 */
+.scan-line {
+    position: relative;
+    overflow: hidden;
+}
+
+.scan-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--tech-blue-primary), transparent);
+    animation: scan 3s linear infinite;
+}
+
+@keyframes scan {
+    0% { transform: translateY(0); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* 数字雨背景效果 */
+.digital-rain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: 
+        linear-gradient(0deg, transparent 24%, rgba(14, 165, 233, .3) 25%, rgba(14, 165, 233, .3) 26%, transparent 27%, transparent 74%, rgba(14, 165, 233, .3) 75%, rgba(14, 165, 233, .3) 76%, transparent 77%, transparent),
+        linear-gradient(90deg, transparent 24%, rgba(14, 165, 233, .3) 25%, rgba(14, 165, 233, .3) 26%, transparent 27%, transparent 74%, rgba(14, 165, 233, .3) 75%, rgba(14, 165, 233, .3) 76%, transparent 77%, transparent);
+    background-size: 50px 50px;
+}
+
+/* 脉冲动画 */
+.pulse {
+    animation: tech-pulse 2s ease-in-out infinite;
+}
+
+@keyframes tech-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 15px rgba(14, 165, 233, 0);
+    }
+}
+
+/* 霓虹发光效果 */
+.neon-glow {
+    text-shadow: 
+        0 0 5px var(--tech-blue-primary),
+        0 0 10px var(--tech-blue-primary),
+        0 0 20px var(--tech-blue-primary),
+        0 0 40px var(--tech-blue-secondary);
+}
+
+/* 玻璃态效果增强 */
+.glass-effect {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(14, 165, 233, 0.2);
+}
+
+/* 科技感按钮变体 */
+.btn-tech {
+    background: transparent;
+    border: 1px solid var(--tech-blue-primary);
+    color: var(--tech-blue-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-tech::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-tech:hover {
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--tech-blue-accent);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+}
+
+.btn-tech:hover::before {
+    left: 100%;
+}
+
+/* 加载动画 */
+.tech-loader {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(14, 165, 233, 0.2);
+    border-top-color: var(--tech-blue-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 状态指示器 */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.status-dot.online {
+    background: var(--success-color);
+    box-shadow: 0 0 8px var(--success-color);
+}
+
+.status-dot.offline {
+    background: var(--error-color);
+}
+
+.status-dot.busy {
+    background: var(--warning-color);
+}
+
+/* 科技感分割线 */
+.tech-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--tech-blue-primary), transparent);
+    margin: 30px 0;
+}
+
+/* 标签 */
+.tech-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    background: rgba(14, 165, 233, 0.1);
+    border: 1px solid rgba(14, 165, 233, 0.3);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--tech-blue-accent);
+}
+
+.tech-tag:hover {
+    background: rgba(14, 165, 233, 0.2);
+    border-color: var(--tech-blue-primary);
+}
+
+/* 工具提示 */
+.tech-tooltip {
+    position: relative;
+}
+
+.tech-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+}
+
+.tech-tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
+}

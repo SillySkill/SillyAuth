@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- 科技蓝背景，70%透明度 -->
+    <solid android:color="@color/tech_blue_70percent" />
+
+    <!-- 圆角 -->
+    <corners android:radius="16dp" />
+
+    <!-- 可选：添加描边 -->
+    <stroke
+        android:width="2dp"
+        android:color="#8000BFFF" />
+</shape>

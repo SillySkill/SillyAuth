@@ -1,0 +1,32 @@
+{
+  "name": "sillymd-seed-generator",
+  "version": "1.1.0",
+  "description": "SillyMD 首期种子数据生成系统 - 真实版",
+  "main": "seed-generator.js",
+  "scripts": {
+    "generate": "node seed-generator.js",
+    "generate:small": "node seed-generator.js --users 20 --skills 50",
+    "generate:medium": "node seed-generator.js --users 50 --skills 200",
+    "generate:large": "node seed-generator.js --users 100 --skills 500",
+    "generate:xlarge": "node seed-generator.js --users 200 --skills 1000",
+    "test": "node seed-generator.js --users 10 --skills 20 --output ./test",
+    "import": "node import-to-db.js",
+    "clear": "node clear-mock-data.js",
+    "validate": "node validate.js"
+  },
+  "keywords": [
+    "sillymd",
+    "skills",
+    "mock-data",
+    "seed",
+    "realistic"
+  ],
+  "author": "SillyMD Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "mysql2": "^3.6.0"
+  },
+  "devDependencies": {}
+}

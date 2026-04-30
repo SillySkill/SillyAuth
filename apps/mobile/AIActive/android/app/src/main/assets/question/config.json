@@ -1,0 +1,23 @@
+{
+  "classify": ["choice"],
+  "catalog": [
+    {
+      "qid": "jcq101",
+      "catalog_name": "AI知识",
+      "status": 1,
+      "file": "知识问答.json"
+    },
+  ],
+  "push_prize": 1,
+  "default": 0,
+  "round": {
+    "qty": 10,
+    "choice": 10,
+    "judgement": 0
+  },
+  "prizes": {
+    "enabled": true,
+    "default_threshold": 3,
+    "default_prize_image": "question/prize.jpg"
+  }
+}

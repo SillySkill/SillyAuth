@@ -1,0 +1,75 @@
+{
+  "app": {
+    "name": "挺傻의 AI 스킬 센터",
+    "tagline": "AI 스킬 호스팅 및 마켓플레이스"
+  },
+  "nav": {
+    "home": "홈",
+    "skills": "스킬",
+    "categories": "카테고리",
+    "about": "소개",
+    "login": "로그인",
+    "register": "회원가입",
+    "logout": "로그아웃"
+  },
+  "skills": {
+    "title": "AI 스킬 마켓플레이스",
+    "subtitle": "AI 스킬 탐색, 발견, 사용",
+    "search": "스킬 검색...",
+    "noResults": "일치하는 스킬이 없습니다",
+    "loading": "로딩 중...",
+    "featured": "추천 스킬",
+    "newest": "최신",
+    "popular": "인기",
+    "categories": {
+      "tech": "기술",
+      "product": "제품",
+      "design": "디자인",
+      "marketing": "마케팅",
+      "ops": "운영",
+      "all": "모든 카테고리"
+    },
+    "actions": {
+      "install": "설치",
+      "demo": "데모",
+      "view": "자세히 보기",
+      "download": "다운로드",
+      "share": "공유",
+      "favorite": "즐겨찾기"
+    },
+    "stats": {
+      "downloads": "다운로드",
+      "rating": "평점",
+      "reviews": "리뷰"
+    },
+    "detail": {
+      "description": "설명",
+      "installation": "설치",
+      "examples": "사용 예시",
+      "reviews": "리뷰",
+      "related": "관련 스킬",
+      "author": "작성자",
+      "version": "버전",
+      "updated": "최종 업데이트"
+    }
+  },
+  "common": {
+    "back": "뒤로",
+    "close": "닫기",
+    "save": "저장",
+    "cancel": "취소",
+    "confirm": "확인",
+    "delete": "삭제",
+    "edit": "편집",
+    "submit": "제출",
+    "loading": "로딩 중...",
+    "error": "오류",
+    "success": "성공",
+    "noData": "데이터 없음"
+  },
+  "footer": {
+    "copyright": "저작권",
+    "links": "링크",
+    "contact": "문의"
+  }
+}

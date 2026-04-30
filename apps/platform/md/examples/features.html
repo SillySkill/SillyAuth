@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功能 - 挺傻的网站</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/tech-blue.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <!-- Config.js -->
+    <script type="module" src="js/config.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .features-hero { padding: 120px 0 80px; text-align: center; background: linear-gradient(180deg, rgba(14, 165, 233, 0.1) 0%, transparent 100%); }
+        .features-hero h1 { font-size: 48px; font-weight: 800; margin-bottom: 20px; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; padding: 60px 0; }
+        .feature-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 40px; transition: all 0.3s ease; }
+        .feature-card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); }
+        .feature-icon { width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; margin-bottom: 24px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="silly/logo/logo.svg" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <i class="fas fa-cube" style="display:none;"></i>
+                <span>挺傻的网站</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="features.html" class="active">功能</a></li>
+                <li><a href="pricing.html">价格</a></li>
+                <li><a href="about.html">关于</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-ghost">登录</a>
+                <a href="register.html" class="btn btn-primary">注册</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="features-hero">
+        <div class="container">
+            <h1>强大功能，助力成长</h1>
+            <p style="color: var(--text-muted); font-size: 20px;">我们提供全方位的工具和服务</p>
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                <h3 style="font-size: 22px; font-weight: 600; margin-bottom: 12px;">极速性能</h3>
+                <p style="color: var(--text-muted);">采用最新技术架构，确保毫秒级响应速度</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #10b981, #34d399);"><i class="fas fa-shield-alt"></i></div>
+                <h3 style="font-size: 22px; font-weight: 600; margin-bottom: 12px;">企业级安全</h3>
+                <p style="color: var(--text-muted);">端到端加密保护您的数据安全</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);"><i class="fas fa-chart-line"></i></div>
+                <h3 style="font-size: 22px; font-weight: 600; margin-bottom: 12px;">数据分析</h3>
+                <p style="color: var(--text-muted);">深入了解用户行为和业务数据</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);"><i class="fas fa-puzzle-piece"></i></div>
+                <h3 style="font-size: 22px; font-weight: 600; margin-bottom: 12px;">轻松集成</h3>
+                <p style="color: var(--text-muted);">丰富的API接口，无缝对接现有系统</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #ec4899, #f472b6);"><i class="fas fa-users"></i></div>
+                <h3 style="font-size: 22px; font-weight: 600; margin-bottom: 12px;">团队协作</h3>
+                <p style="color: var(--text-muted);">邀请团队成员，实时协作</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #06b6d4, #22d3ee);"><i class="fas fa-headset"></i></div>
+                <h3 style="font-size: 22px; font-weight: 600; margin-bottom: 12px;">24/7 支持</h3>
+                <p style="color: var(--text-muted);">专业技术团队全天候服务</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <img src="silly/logo/logo.svg" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <i class="fas fa-cube" style="display:none;"></i>
+                        <span>挺傻的网站</span>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2024 挺傻的网站. All rights reserved.</p></div>
+        </div>
+    </footer>
+    <script src="js/i18n.js"></script>
+    <script src="js/mobile-menu.js"></script>
+</body>
+</html>

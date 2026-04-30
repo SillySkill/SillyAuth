@@ -1,0 +1,14 @@
+id: downloads
+name: 下载区模块
+version: 1.0.0
+description: 提供 SillyClaw 程序下载功能
+dependencies: [storage, sillyclaw]
+
+config:
+  download_base_url: https://skills.sillymd.com
+  featured_downloads:
+    - id: sillyclaw
+      name: SillyClaw 控制面板
+      category: application
+      latest_version_required: true
+  cache_ttl: 3600  # 1 hour in seconds

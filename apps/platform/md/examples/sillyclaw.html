@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>傻福虾U盘 - SillyClaw 智能存储设备</title>
+  <meta name="description" content="傻福虾U盘 (SillyClaw) - 双接口高速USB闪存盘，支持128GB/256GB/512GB/1TB多种容量，Type-A + Type-C双接口设计">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #FF6B35;
+      --primary-dark: #E55A2B;
+      --primary-light: #FF8A5C;
+      --secondary: #FFD93D;
+      --accent: #6BCB77;
+      --bg-dark: #1A1A2E;
+      --bg-dark-secondary: #16213E;
+      --bg-dark-tertiary: #0F3460;
+      --bg-light: #FFF8F0;
+      --bg-white: #FFFFFF;
+      --text-primary: #1A1A2E;
+      --text-secondary: #4A4A68;
+      --text-light: #8A8AA8;
+      --text-white: #FFFFFF;
+      --border-light: rgba(255, 107, 53, 0.2);
+      --border-medium: rgba(255, 107, 53, 0.4);
+      --gradient-primary: linear-gradient(135deg, #FF6B35 0%, #FFD93D 100%);
+      --gradient-dark: linear-gradient(180deg, #1A1A2E 0%, #16213E 100%);
+      --shadow-md: 0 4px 16px rgba(255, 107, 53, 0.2);
+      --shadow-lg: 0 8px 32px rgba(255, 107, 53, 0.3);
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-light);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Navigation */
+    .navbar {
+      background: var(--bg-white);
+      padding: 1rem 2rem;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .nav-brand i {
+      font-size: 1.8rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-links a.active {
+      color: var(--primary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: var(--bg-white);
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: var(--gradient-dark);
+      padding: 8rem 2rem 4rem;
+      text-align: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 70%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.1);
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      justify-content: center;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--secondary);
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Features Section */
+    .features {
+      padding: 5rem 2rem;
+      background: var(--bg-white);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-header h2 {
+      font-size: 2.5rem;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+
+    .section-header p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: var(--bg-light);
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid var(--border-light);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.25rem;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* Products Section */
+    .products {
+      padding: 5rem 2rem;
+      background: var(--bg-light);
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .product-card {
+      background: var(--bg-white);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid var(--border-light);
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .product-image {
+      height: 200px;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-dark-secondary) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product-image i {
+      font-size: 5rem;
+      color: var(--primary);
+      opacity: 0.8;
+    }
+
+    .product-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--secondary);
+      color: var(--text-primary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .product-info {
+      padding: 1.5rem;
+    }
+
+    .product-capacity {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .product-color {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .product-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .product-feature {
+      background: var(--bg-light);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .product-price {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .price-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .price-unit {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .product-actions .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    /* Tech Specs */
+    .specs {
+      padding: 5rem 2rem;
+      background: var(--bg-white);
+    }
+
+    .specs-table {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--bg-light);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .spec-row {
+      display: flex;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .spec-row:last-child {
+      border-bottom: none;
+    }
+
+    .spec-label {
+      width: 200px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .spec-value {
+      flex: 1;
+      color: var(--text-secondary);
+    }
+
+    /* Purchase Section */
+    .purchase {
+      padding: 5rem 2rem;
+      background: var(--gradient-dark);
+      color: white;
+    }
+
+    .purchase-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .purchase-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .purchase-info h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .purchase-info p {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 2rem;
+    }
+
+    .purchase-links {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .purchase-link {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(255,255,255,0.1);
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: white;
+      transition: background 0.3s;
+    }
+
+    .purchase-link:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .purchase-link i {
+      font-size: 1.5rem;
+      color: var(--secondary);
+    }
+
+    .purchase-link-text {
+      flex: 1;
+    }
+
+    .purchase-link-title {
+      font-weight: 600;
+    }
+
+    .purchase-link-desc {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .purchase-qr {
+      background: var(--bg-white);
+      padding: 2rem;
+      border-radius: var(--radius-xl);
+      text-align: center;
+    }
+
+    .qr-placeholder {
+      width: 200px;
+      height: 200px;
+      background: var(--bg-light);
+      margin: 0 auto 1rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      border: 2px dashed var(--border-light);
+    }
+
+    .qr-placeholder i {
+      font-size: 4rem;
+      color: var(--text-light);
+    }
+
+    .qr-placeholder .qr-label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 0.5rem;
+    }
+
+    .qr-codes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .qr-item {
+      text-align: center;
+    }
+
+    .qr-item .qr-placeholder {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 0.5rem;
+    }
+
+    .qr-item .qr-placeholder i {
+      font-size: 2rem;
+    }
+
+    .qr-item .qr-placeholder .qr-label {
+      font-size: 0.7rem;
+      margin-top: 0.25rem;
+    }
+
+    .purchase-note {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .purchase-note i {
+      color: var(--accent);
+    }
+
+    @media (max-width: 640px) {
+      .qr-codes {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .qr-item .qr-placeholder {
+        width: 80px;
+        height: 80px;
+      }
+
+      .qr-item .qr-placeholder i {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--bg-dark);
+      color: white;
+      padding: 3rem 2rem 1rem;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-section h4 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: var(--secondary);
+    }
+
+    .footer-section a {
+      display: block;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      margin-bottom: 0.5rem;
+      transition: color 0.3s;
+    }
+
+    .footer-section a:hover {
+      color: var(--primary);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 2rem;
+      margin-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 1rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+
+      .section-header h2 {
+        font-size: 2rem;
+      }
+
+      .hero-stats {
+        gap: 2rem;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+      }
+    }
+
+    /* Mobile Menu */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: block;
+      }
+    }
+
+    /* Serial Number Verification */
+    .verify-section {
+      padding: 3rem 2rem;
+      background: var(--bg-white);
+      margin-top: -2rem;
+      position: relative;
+      z-index: 10;
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+
+    .verify-box {
+      max-width: 500px;
+      margin: 0 auto;
+      background: var(--bg-light);
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+
+    .verify-box h3 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+    }
+
+    .verify-form {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .verify-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .verify-input:focus {
+      border-color: var(--primary);
+    }
+
+    .verify-result {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      text-align: center;
+      display: none;
+    }
+
+    .verify-result.success {
+      display: block;
+      background: rgba(107, 203, 119, 0.1);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .verify-result.error {
+      display: block;
+      background: rgba(255, 107, 53, 0.1);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <i class="fas fa-fish"></i>
+      SillyClaw
+    </a>
+    <div class="nav-links">
+      <a href="#features">产品特点</a>
+      <a href="#products">产品规格</a>
+      <a href="#specs">技术参数</a>
+      <a href="#purchase">购买渠道</a>
+      <a href="login.html">登录</a>
+      <a href="register.html" class="btn btn-primary">立即购买</a>
+    </div>
+    <button class="mobile-menu-btn">
+      <i class="fas fa-bars"></i>
+    </button>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <i class="fas fa-bolt"></i>
+        全新上市
+      </div>
+      <h1>傻福虾U盘</h1>
+      <p>双接口高速USB闪存盘，Type-A + Type-C设计，兼容各类设备。精致金属外壳，携带方便，是您随身携带的智能存储伙伴。</p>
+      <div class="hero-buttons">
+        <a href="#products" class="btn btn-primary">
+          <i class="fas fa-shopping-cart"></i>
+          查看产品
+        </a>
+        <a href="#purchase" class="btn btn-secondary" style="color: white; border-color: white;">
+          <i class="fas fa-store"></i>
+          购买渠道
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-value">128GB-1TB</div>
+          <div class="stat-label">容量选择</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">USB 3.2</div>
+          <div class="stat-label">高速传输</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">双接口</div>
+          <div class="stat-label">Type-A + Type-C</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">240+</div>
+          <div class="stat-label">已生产数量</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Serial Number Verification -->
+  <section class="verify-section">
+    <div class="verify-box">
+      <h3><i class="fas fa-qrcode"></i> 验证产品真伪</h3>
+      <form class="verify-form" id="verifyForm">
+        <input type="text" class="verify-input" placeholder="输入18位序列号" maxlength="18" id="serialInput">
+        <button type="submit" class="btn btn-primary">验证</button>
+      </form>
+      <div class="verify-result" id="verifyResult"></div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>产品特点</h2>
+        <p>精致工艺，卓越性能，随身携带的智能存储</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-plug"></i>
+          </div>
+          <h3>双接口设计</h3>
+          <p>同时支持 Type-A 和 Type-C 接口，兼容电脑、手机、平板等多种设备，无需转接头。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-tachometer-alt"></i>
+          </div>
+          <h3>高速传输</h3>
+          <p>采用 USB 3.2 技术，读取速度高达 150MB/s，大文件传输轻松快捷。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3>稳定可靠</h3>
+          <p>采用优质闪存芯片，支持Wear Leveling技术，延长使用寿命，保护数据安全。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-fingerprint"></i>
+          </div>
+          <h3>序列号验证</h3>
+          <p>每产品都有唯一18位序列号，可官网验证真伪，享受质保服务。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-gem"></i>
+          </div>
+          <h3>金属外壳</h3>
+          <p>优质金属材质，精致打磨，手感舒适，散热效果好，保护内部芯片。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-palette"></i>
+          </div>
+          <h3>多色可选</h3>
+          <p>银色和枪灰银两种配色可选，满足不同审美需求。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Section -->
+  <section class="products" id="products">
+    <div class="container">
+      <div class="section-header">
+        <h2>产品规格</h2>
+        <p>多种容量，满足不同存储需求</p>
+      </div>
+      <div class="products-grid">
+        <div class="product-card">
+          <div class="product-image">
+            <i class="fas fa-hdd"></i>
+            <span class="product-badge">入门首选</span>
+          </div>
+          <div class="product-info">
+            <div class="product-capacity">128GB</div>
+            <div class="product-color">银色 / Silver</div>
+            <div class="product-features">
+              <span class="product-feature">USB 3.2</span>
+              <span class="product-feature">Type-A + C</span>
+              <span class="product-feature">金属外壳</span>
+            </div>
+            <div class="product-price">
+              <span class="price-value">¥69</span>
+              <span class="price-unit">起</span>
+            </div>
+            <div class="product-actions">
+              <a href="#purchase" class="btn btn-primary">立即购买</a>
+              <a href="#specs" class="btn btn-secondary">查看详情</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-image">
+            <i class="fas fa-database"></i>
+            <span class="product-badge">性价比</span>
+          </div>
+          <div class="product-info">
+            <div class="product-capacity">256GB</div>
+            <div class="product-color">银色 / Silver</div>
+            <div class="product-features">
+              <span class="product-feature">USB 3.2</span>
+              <span class="product-feature">Type-A + C</span>
+              <span class="product-feature">金属外壳</span>
+            </div>
+            <div class="product-price">
+              <span class="price-value">¥99</span>
+              <span class="price-unit">起</span>
+            </div>
+            <div class="product-actions">
+              <a href="#purchase" class="btn btn-primary">立即购买</a>
+              <a href="#specs" class="btn btn-secondary">查看详情</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-image">
+            <i class="fas fa-server"></i>
+            <span class="product-badge">高性能</span>
+          </div>
+          <div class="product-info">
+            <div class="product-capacity">512GB</div>
+            <div class="product-color">枪灰银 / Gunmetal</div>
+            <div class="product-features">
+              <span class="product-feature">USB 3.2</span>
+              <span class="product-feature">Type-A + C</span>
+              <span class="product-feature">金属外壳</span>
+            </div>
+            <div class="product-price">
+              <span class="price-value">¥169</span>
+              <span class="price-unit">起</span>
+            </div>
+            <div class="product-actions">
+              <a href="#purchase" class="btn btn-primary">立即购买</a>
+              <a href="#specs" class="btn btn-secondary">查看详情</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-image">
+            <i class="fas fa-cloud"></i>
+            <span class="product-badge">旗舰款</span>
+          </div>
+          <div class="product-info">
+            <div class="product-capacity">1TB</div>
+            <div class="product-color">枪灰银 / Gunmetal</div>
+            <div class="product-features">
+              <span class="product-feature">USB 3.2</span>
+              <span class="product-feature">Type-A + C</span>
+              <span class="product-feature">金属外壳</span>
+            </div>
+            <div class="product-price">
+              <span class="price-value">¥269</span>
+              <span class="price-unit">起</span>
+            </div>
+            <div class="product-actions">
+              <a href="#purchase" class="btn btn-primary">立即购买</a>
+              <a href="#specs" class="btn btn-secondary">查看详情</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Specs -->
+  <section class="specs" id="specs">
+    <div class="container">
+      <div class="section-header">
+        <h2>技术参数</h2>
+        <p>详细规格，了解产品每一处细节</p>
+      </div>
+      <div class="specs-table">
+        <div class="spec-row">
+          <div class="spec-label">产品名称</div>
+          <div class="spec-value">傻福虾U盘 (SillyClaw USB Drive)</div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">容量选项</div>
+          <div class="spec-value">128GB / 256GB / 512GB / 1TB</div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">接口类型</div>
+          <div class="spec-value">USB 3.2 Gen 1 (Type-A + Type-C)</div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">读取速度</div>
+          <div class="spec-value">最高 150MB/s</div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">写入速度</div>
+          <div class="spec-value">最高 50MB/s</div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">外壳材质</div>
+          <div class="spec-value">金属合金</div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">颜色选项</div>
+          <div class="spec-value">银色、枪灰银</div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">工作温度</div>
+          <div class="spec-value">0°C - 70°C</div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">存储温度</div>
+          <div class="spec-value">-40°C - 85°C</div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">质保期限</div>
+          <div class="spec-value">1年有限质保</div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">序列号</div>
+          <div class="spec-value">18位唯一序列号，支持官网验证</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Purchase Section -->
+  <section class="purchase" id="purchase">
+    <div class="container">
+      <div class="purchase-content">
+        <div class="purchase-info">
+          <h2>购买渠道</h2>
+          <p>通过官方渠道购买，确保正品，享受完整质保服务</p>
+          <div class="purchase-links" id="purchaseLinks">
+            <!-- 购买链接将通过 JavaScript 动态配置 -->
+            <a href="https://shop.taobao.com" target="_blank" class="purchase-link" data-channel="taobao">
+              <i class="fab fa-taobao"></i>
+              <div class="purchase-link-text">
+                <div class="purchase-link-title">淘宝旗舰店</div>
+                <div class="purchase-link-desc">搜索 "傻福虾U盘"</div>
+              </div>
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+            <a href="#" class="purchase-link" data-channel="alipay">
+              <i class="fab fa-alipay"></i>
+              <div class="purchase-link-text">
+                <div class="purchase-link-title">支付宝小程序</div>
+                <div class="purchase-link-desc">SillyClaw 官方商城</div>
+              </div>
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+            <a href="#" class="purchase-link" data-channel="weidian">
+              <i class="fas fa-store"></i>
+              <div class="purchase-link-text">
+                <div class="purchase-link-title">官方微店</div>
+                <div class="purchase-link-desc">扫码直达购买页面</div>
+              </div>
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+            <a href="#" class="purchase-link" data-channel="wechat">
+              <i class="fab fa-weixin"></i>
+              <div class="purchase-link-text">
+                <div class="purchase-link-title">微信客服</div>
+                <div class="purchase-link-desc">sillymd-com</div>
+              </div>
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+          </div>
+          <p class="purchase-note">
+            <i class="fas fa-info-circle"></i>
+            如需批量采购或定制，请联系客服
+          </p>
+        </div>
+        <div class="purchase-qr">
+          <div class="qr-codes">
+            <div class="qr-item">
+              <div class="qr-placeholder">
+                <i class="fas fa-qrcode"></i>
+                <span class="qr-label">淘宝</span>
+              </div>
+            </div>
+            <div class="qr-item">
+              <div class="qr-placeholder">
+                <i class="fas fa-qrcode"></i>
+                <span class="qr-label">微店</span>
+              </div>
+            </div>
+            <div class="qr-item">
+              <div class="qr-placeholder">
+                <i class="fas fa-qrcode"></i>
+                <span class="qr-label">客服</span>
+              </div>
+            </div>
+          </div>
+          <h3>扫码咨询</h3>
+          <p style="color: var(--text-secondary); margin-top: 0.5rem;">添加客服微信，了解更多</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>产品</h4>
+        <a href="#features">产品特点</a>
+        <a href="#products">产品规格</a>
+        <a href="#specs">技术参数</a>
+        <a href="#purchase">购买渠道</a>
+      </div>
+      <div class="footer-section">
+        <h4>支持</h4>
+        <a href="#">常见问题</a>
+        <a href="#">售后服务</a>
+        <a href="#">质保政策</a>
+        <a href="#">联系客服</a>
+      </div>
+      <div class="footer-section">
+        <h4>关于</h4>
+        <a href="#">关于我们</a>
+        <a href="openclaw.html">OpenClaw</a>
+        <a href="#">新闻资讯</a>
+        <a href="#">加入团队</a>
+      </div>
+      <div class="footer-section">
+        <h4>连接</h4>
+        <a href="#"><i class="fab fa-github"></i> GitHub</a>
+        <a href="#"><i class="fab fa-twitter"></i> Twitter</a>
+        <a href="#"><i class="fab fa-weibo"></i> 微博</a>
+        <a href="#"><i class="fab fa-discord"></i> Discord</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 SillyMD. All rights reserved. | 傻福虾U盘 - SillyClaw</p>
+    </div>
+  </footer>
+
+  <script>
+    // ========== 购买渠道配置 ==========
+    // 请根据实际情况修改以下配置
+    const PURCHASE_CONFIG = {
+      taobao: {
+        url: 'https://shop.taobao.com',  // 淘宝店铺链接
+        searchKeyword: '傻福虾U盘'  // 淘宝搜索关键词
+      },
+      alipay: {
+        url: null,  // 支付宝小程序链接（待配置）
+        qrCodeUrl: null  // 或使用二维码图片 URL
+      },
+      weidian: {
+        url: null,  // 微店链接
+        qrCodeUrl: null
+      },
+      wechat: {
+        account: 'sillymd-com',  // 微信号
+        qrCodeUrl: null  // 客服二维码图片 URL
+      }
+    };
+
+    // 初始化购买链接
+    function initPurchaseLinks() {
+      // 淘宝链接（使用搜索页面）
+      const taobaoLink = document.querySelector('[data-channel="taobao"]');
+      if (taobaoLink && PURCHASE_CONFIG.taobao.url) {
+        taobaoLink.href = `https://shop.taobao.com/search?q=${encodeURIComponent(PURCHASE_CONFIG.taobao.searchKeyword)}`;
+      }
+
+      // 支付宝小程序
+      const alipayLink = document.querySelector('[data-channel="alipay"]');
+      if (alipayLink) {
+        if (PURCHASE_CONFIG.alipay.url) {
+          alipayLink.href = PURCHASE_CONFIG.alipay.url;
+        } else {
+          alipayLink.style.opacity = '0.5';
+          alipayLink.style.pointerEvents = 'none';
+        }
+      }
+
+      // 微店
+      const weidianLink = document.querySelector('[data-channel="weidian"]');
+      if (weidianLink) {
+        if (PURCHASE_CONFIG.weidian.url) {
+          weidianLink.href = PURCHASE_CONFIG.weidian.url;
+        } else {
+          weidianLink.style.opacity = '0.5';
+          weidianLink.style.pointerEvents = 'none';
+        }
+      }
+
+      // 微信客服
+      const wechatLink = document.querySelector('[data-channel="wechat"]');
+      if (wechatLink && PURCHASE_CONFIG.wechat.qrCodeUrl) {
+        // 如果有二维码图片，添加点击事件显示图片
+        wechatLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          alert('微信号：' + PURCHASE_CONFIG.wechat.account + '\n\n请扫码添加客服微信');
+        });
+      }
+    }
+
+    // 页面加载时初始化
+    document.addEventListener('DOMContentLoaded', initPurchaseLinks);
+
+    // Serial Number Verification
+    document.getElementById('verifyForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const serial = document.getElementById('serialInput').value.trim();
+      const result = document.getElementById('verifyResult');
+
+      if (serial.length !== 18) {
+        result.className = 'verify-result error';
+        result.innerHTML = '<i class="fas fa-times-circle"></i> 序列号格式不正确，请输入18位序列号';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/sillyclaw/drive/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ serial })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.data.valid) {
+          result.className = 'verify-result success';
+          result.innerHTML = `
+            <i class="fas fa-check-circle"></i> 正品验证通过！<br>
+            <small>产品：${data.data.capacity} / ${data.data.color}</small><br>
+            <small>批次：${data.data.batch}</small>
+          `;
+        } else {
+          result.className = 'verify-result error';
+          result.innerHTML = '<i class="fas fa-times-circle"></i> 未找到该序列号，请核对后重试';
+        }
+      } catch (error) {
+        result.className = 'verify-result error';
+        result.innerHTML = '<i class="fas fa-exclamation-triangle"></i> 验证服务暂时不可用，请稍后重试';
+      }
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

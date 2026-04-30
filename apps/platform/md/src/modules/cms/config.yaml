@@ -1,0 +1,14 @@
+id: cms
+name: CMS 内容管理模块
+version: 1.0.0
+description: 提供教程、文章管理功能
+dependencies: [auth, storage]
+
+config:
+  max_article_length: 100000
+  allowed_content_types: [markdown, html]
+  featured_articles_limit: 10
+
+routes:
+  prefix: /cms
+  tags: [内容管理]

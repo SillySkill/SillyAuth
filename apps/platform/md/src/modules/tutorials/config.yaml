@@ -1,0 +1,9 @@
+id: tutorials
+name: 技术教程模块
+version: "1.0.0"
+description: 提供技术教程的浏览、分类筛选、搜索和章节管理功能
+dependencies:
+  - auth
+config:
+  page_size_default: 20
+  featured_count: 6

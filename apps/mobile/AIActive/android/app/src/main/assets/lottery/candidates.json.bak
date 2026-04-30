@@ -1,0 +1,126 @@
+{
+  "candidates": [
+    {
+      "id": "c001",
+      "name": "张伟",
+      "phone": "138****0001",
+      "department": "技术部"
+    },
+    {
+      "id": "c002",
+      "name": "李娜",
+      "phone": "139****0002",
+      "department": "市场部"
+    },
+    {
+      "id": "c003",
+      "name": "王强",
+      "phone": "136****0003",
+      "department": "财务部"
+    },
+    {
+      "id": "c004",
+      "name": "刘芳",
+      "phone": "137****0004",
+      "department": "人事部"
+    },
+    {
+      "id": "c005",
+      "name": "陈杰",
+      "phone": "135****0005",
+      "department": "技术部"
+    },
+    {
+      "id": "c006",
+      "name": "杨敏",
+      "phone": "138****0006",
+      "department": "市场部"
+    },
+    {
+      "id": "c007",
+      "name": "赵磊",
+      "phone": "139****0007",
+      "department": "运营部"
+    },
+    {
+      "id": "c008",
+      "name": "孙婷",
+      "phone": "136****0008",
+      "department": "设计部"
+    },
+    {
+      "id": "c009",
+      "name": "周浩",
+      "phone": "137****0009",
+      "department": "产品部"
+    },
+    {
+      "id": "c010",
+      "name": "吴霞",
+      "phone": "135****0010",
+      "department": "技术部"
+    },
+    {
+      "id": "c011",
+      "name": "郑涛",
+      "phone": "138****0011",
+      "department": "市场部"
+    },
+    {
+      "id": "c012",
+      "name": "王丽",
+      "phone": "139****0012",
+      "department": "财务部"
+    },
+    {
+      "id": "c013",
+      "name": "冯超",
+      "phone": "136****0013",
+      "department": "人事部"
+    },
+    {
+      "id": "c014",
+      "name": "朱艳",
+      "phone": "137****0014",
+      "department": "运营部"
+    },
+    {
+      "id": "c015",
+      "name": "胡明",
+      "phone": "135****0015",
+      "department": "技术部"
+    },
+    {
+      "id": "c016",
+      "name": "林静",
+      "phone": "138****0016",
+      "department": "设计部"
+    },
+    {
+      "id": "c017",
+      "name": "谢峰",
+      "phone": "139****0017",
+      "department": "产品部"
+    },
+    {
+      "id": "c018",
+      "name": "袁华",
+      "phone": "136****0018",
+      "department": "市场部"
+    },
+    {
+      "id": "c019",
+      "name": "黄萍",
+      "phone": "137****0019",
+      "department": "财务部"
+    },
+    {
+      "id": "c020",
+      "name": "何军",
+      "phone": "135****0020",
+      "department": "人事部"
+    }
+  ],
+  "default_winner_count": 3,
+  "allow_duplicate_winners": false
+}

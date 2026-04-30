@@ -1,0 +1,13 @@
+id: sillyclaw
+name: SillyClaw 版本管理模块
+version: 1.0.0
+description: 提供 SillyClaw 版本检查、下载、发布功能
+dependencies: [storage]
+
+config:
+  tos:
+    endpoint: tos-cn-shanghai.volces.com
+    bucket: sillymd-skills
+    custom_domain: skills.sillymd.com
+  release_path: sillyclaw/releases/
+  version_check_cache_ttl: 3600  # 1 hour in seconds

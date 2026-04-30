@@ -1,0 +1,20 @@
+id: vendor
+name: 开发者入驻模块
+version: 1.0.0
+description: 提供开发者入驻、认证、等级管理功能
+dependencies: [auth]
+
+config:
+  tiers:
+    - id: basic
+      name: 基础开发者
+      commission_rate: 0.7
+      features: [skills_basic, skills_publish]
+    - id: standard
+      name: 标准开发者
+      commission_rate: 0.8
+      features: [skills_basic, skills_publish, analytics, api_access]
+    - id: premium
+      name: 高级开发者
+      commission_rate: 0.85
+      features: [all]

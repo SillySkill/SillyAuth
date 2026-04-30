@@ -1,0 +1,87 @@
+{
+    "db1":
+    {
+        "cn": "db1.bin",
+        "en": "enfemale.bin"
+    },
+    "db3":
+    {
+        "cn": "db3.bin",
+        "en": "enmale.bin"
+    },
+    "db7":
+    {
+        "cn": "db7.bin",
+        "en": "enfemale.bin"
+    },
+    "f0":
+    {
+        "cn": "f0.bin",
+        "en": "enfemale.bin"
+    },
+    "f2":
+    {
+        "cn": "f2.bin",
+        "en": "enfemale.bin"
+    },
+    "femozhifou":
+    {
+        "cn": "femozhifou.bin",
+        "en": "enfemale.bin"
+    },
+    "fn":
+    {
+        "cn": "fn.bin",
+        "en": "enfemale.bin"
+    },
+    "kefu":
+    {
+        "cn": "kefu.bin",
+        "en": "enfemale.bin"
+    },
+    "kefu2":
+    {
+        "cn": "kefu2.bin",
+        "en": "enfemale.bin"
+    },
+    "kefu3":
+    {
+        "cn": "kefu3.bin",
+        "en": "enfemale.bin"
+    },
+    "m0":
+    {
+        "cn": "m0.bin",
+        "en": "enmale.bin"
+    },
+    "m25":
+    {
+        "cn": "m25.bin",
+        "en": "enmale.bin"
+    },
+    "M206":
+    {
+        "cn": "M206.bin",
+        "en": "enmale.bin"
+    },
+    "memozhifou":
+    {
+        "cn": "memozhifou.bin",
+        "en": "enmale.bin"
+    },
+    "newsman":
+    {
+        "cn": "newsman.bin",
+        "en": "enmale.bin"
+    },
+    "pb":
+    {
+        "cn": "pb.bin",
+        "en": "enmale.bin"
+    },
+    "xiaowei":
+    {
+        "cn": "xiaowei.bin",
+        "en": "enfemale.bin"
+    }
+}

@@ -1,0 +1,10 @@
+ext {
+    android = [
+        compileSdkVersion: 30,
+        minSdkVersion    : 16,
+        targetSdkVersion : 33,
+    ]
+
+    STREAM_TTS_SDK_VERSION = 'LOCAL'
+    REALTIME_TTS_SDK_VERSION = 'LOCAL'
+}

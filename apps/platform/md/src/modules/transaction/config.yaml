@@ -1,0 +1,13 @@
+id: transaction
+name: 交易系统模块
+version: 1.0.0
+description: 提供订单、结算、退款管理功能
+dependencies: [auth, payment]
+
+config:
+  settlement:
+    auto_settlement_days: 7
+    min_settlement_amount: 100
+  refund:
+    allow_partial: true
+    max_refund_days: 30

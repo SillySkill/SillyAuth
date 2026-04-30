@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - SillyMD</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .user-profile {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-info h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .user-info .email {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .menu-section {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item:hover {
+            background: #f9f9f9;
+        }
+
+        .menu-item i {
+            font-size: 24px;
+            margin-right: 15px;
+            color: #667eea;
+            width: 30px;
+        }
+
+        .menu-item .label {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .menu-item .arrow {
+            color: #999;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid #ddd;
+            color: #666;
+        }
+
+        .btn-outline:hover {
+            background: #f5f5f5;
+        }
+
+        /* 订单列表 */
+        .order-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .order-info {
+            flex: 1;
+        }
+
+        .order-number {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .order-details {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .order-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #52c41a;
+        }
+
+        .order-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .order-status.pending { background: #fff7e6; color: #fa8c16; }
+        .order-status.paid { background: #f6ffed; color: #52c41a; }
+        .order-status.cancelled { background: #fff1f0; color: #ff4d4f; }
+
+        /* 我的收藏 */
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .favorite-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+
+        .favorite-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .favorite-thumb {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .favorite-info {
+            padding: 15px;
+        }
+
+        .favorite-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .favorite-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #999;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Tab 标签 */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 表单 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 用户资料 -->
+        <div class="user-profile">
+            <div class="profile-header">
+                <div class="avatar" id="userAvatar">U</div>
+                <div class="user-info">
+                    <h1 id="userName">用户名</h1>
+                    <div class="email" id="userEmail">user@example.com</div>
+                    <div class="user-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="userPoints">0</div>
+                            <div class="stat-label">积分</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="userLevel">1</div>
+                            <div class="stat-label">等级</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="userExp">0</div>
+                            <div class="stat-label">经验</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="editProfile()">编辑资料</button>
+            </div>
+        </div>
+
+        <!-- 快捷菜单 -->
+        <div class="menu-section">
+            <div class="menu-item" onclick="switchTab('orders')">
+                <i class="ri-shopping-bag-3-line"></i>
+                <span class="label">我的订单</span>
+                <span class="arrow">→</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('favorites')">
+                <i class="ri-heart-3-line"></i>
+                <span class="label">我的收藏</span>
+                <span class="arrow">→</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('points')">
+                <i class="ri-coin-line"></i>
+                <span class="label">积分记录</span>
+                <span class="arrow">→</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('settings')">
+                <i class="ri-settings-3-line"></i>
+                <span class="label">账号设置</span>
+                <span class="arrow">→</span>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content-card">
+            <!-- 订单 -->
+            <div id="ordersTab" class="tab-content active">
+                <div class="card-title">
+                    <span>📦 我的订单</span>
+                    <div class="actions">
+                        <button class="btn btn-outline" onclick="loadOrders('all')">全部</button>
+                        <button class="btn btn-outline" onclick="loadOrders('pending')">待支付</button>
+                    </div>
+                </div>
+                <div class="order-list" id="orderList">
+                    <div class="empty-state">
+                        <i class="ri-shopping-bag-3-line"></i>
+                        <p>暂无订单</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 收藏 -->
+            <div id="favoritesTab" class="tab-content">
+                <div class="card-title">
+                    <span>❤️ 我的收藏</span>
+                </div>
+                <div class="favorites-grid" id="favoritesList">
+                    <div class="empty-state">
+                        <i class="ri-heart-line"></i>
+                        <p>暂无收藏</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 积分 -->
+            <div id="pointsTab" class="tab-content">
+                <div class="card-title">
+                    <span>💰 积分记录</span>
+                </div>
+                <div class="order-list" id="pointsList">
+                    <div class="empty-state">
+                        <i class="ri-coin-line"></i>
+                        <p>暂无积分记录</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 设置 -->
+            <div id="settingsTab" class="tab-content">
+                <div class="card-title">
+                    <span>⚙️ 账号设置</span>
+                </div>
+                <form id="profileForm" onsubmit="saveProfile(event)">
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="editUsername" placeholder="输入用户名" required>
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="editEmail" placeholder="输入邮箱" required>
+                    </div>
+                    <div class="form-group">
+                        <label>个人简介</label>
+                        <textarea id="editBio" rows="4" placeholder="介绍一下自己..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">保存</button>
+                        <button type="button" class="btn btn-outline" onclick="cancelEdit()">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API 基础 URL
+        const API_BASE = 'http://47.96.133.238:8000/api';
+
+        // 获取认证 token
+        function getAuthToken() {
+            return localStorage.getItem('auth_token');
+        }
+
+        // 显示提示
+        function showToast(message, type = 'success') {
+            alert(message); // 简化版，实际应该用 toast
+        }
+
+        // 切换标签
+        function switchTab(tabName) {
+            // 隐藏所有内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 移除所有 tab 的 active 状态
+            document.querySelectorAll('.tabs .tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 激活选中的 tab
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            document.querySelectorAll('.tabs .tab').forEach((tab, index) => {
+                if (tab.textContent.toLowerCase().includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // 加载对应数据
+            if (tabName === 'orders') loadOrders('all');
+            if (tabName === 'favorites') loadFavorites();
+            if (tabName === 'points') loadPoints();
+        }
+
+        // 加载用户信息
+        async function loadUserInfo() {
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/users/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const user = data.data;
+                    document.getElementById('userName').textContent = user.username;
+                    document.getElementById('userEmail').textContent = user.email;
+                    document.getElementById('userAvatar').textContent = user.username.charAt(0).toUpperCase();
+
+                    // 加载积分信息
+                    loadUserPoints();
+                }
+            } catch (error) {
+                console.error('加载用户信息失败:', error);
+            }
+        }
+
+        // 加载积分信息
+        async function loadUserPoints() {
+            try {
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE}/points/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.data;
+                    document.getElementById('userPoints').textContent = stats.totalPoints || 0;
+                    document.getElementById('userLevel').textContent = stats.level || 1;
+                    document.getElementById('userExp').textContent = stats.experience || 0;
+                }
+            } catch (error) {
+                console.error('加载积分信息失败:', error);
+            }
+        }
+
+        // 加载订单列表
+        async function loadOrders(filter = 'all') {
+            try {
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE}/payment/orders?status=${filter}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    renderOrders(data.data.items);
+                }
+            } catch (error) {
+                console.error('加载订单失败:', error);
+            }
+        }
+
+        // 渲染订单列表
+        function renderOrders(orders) {
+            const orderList = document.getElementById('orderList');
+
+            if (!orders || orders.length === 0) {
+                orderList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="ri-shopping-bag-3-line"></i>
+                        <p>暂无订单</p>
+                    </div>
+                `;
+                return;
+            }
+
+            orderList.innerHTML = orders.map(order => `
+                <div class="order-item">
+                    <div class="order-info">
+                        <div class="order-number">${order.order_number}</div>
+                        <div class="order-details">
+                            ${order.product_name} - ${order.purchase_type === 'one_time' ? '一次性购买' : '订阅'}
+                        </div>
+                        <div class="order-details">
+                            下单时间: ${new Date(order.created_at).toLocaleString()}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="order-amount">¥${order.final_price}</div>
+                        <span class="order-status ${order.payment_status}">
+                            ${order.payment_status === 'paid' ? '已支付' : '待支付'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 加载收藏列表
+        async function loadFavorites() {
+            try {
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE}/favorites`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    renderFavorites(data.data);
+                }
+            } catch (error) {
+                console.error('加载收藏失败:', error);
+            }
+        }
+
+        // 渲染收藏列表
+        function renderFavorites(favorites) {
+            const favoritesList = document.getElementById('favoritesList');
+
+            if (!favorites || favorites.length === 0) {
+                favoritesList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="ri-heart-line"></i>
+                        <p>暂无收藏</p>
+                    </div>
+                `;
+                return;
+            }
+
+            favoritesList.innerHTML = favorites.map(item => `
+                <div class="favorite-card">
+                    <img src="${item.thumbnail || '/images/default-thumb.jpg'}" alt="" class="favorite-thumb">
+                    <div class="favorite-info">
+                        <div class="favorite-title">${item.title}</div>
+                        <div class="favorite-meta">
+                            <span>${item.category || ''}</span>
+                            <span>${item.price ? '¥' + item.price : '免费'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 加载积分记录
+        async function loadPoints() {
+            try {
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE}/points/transactions?page=1&page_size=10`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    renderPointsTransactions(data.data.items);
+                }
+            } catch (error) {
+                console.error('加载积分记录失败:', error);
+            }
+        }
+
+        // 渲染积分记录
+        function renderPointsTransactions(transactions) {
+            const pointsList = document.getElementById('pointsList');
+
+            if (!transactions || transactions.length === 0) {
+                pointsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="ri-coin-line"></i>
+                        <p>暂无积分记录</p>
+                    </div>
+                `;
+                return;
+            }
+
+            pointsList.innerHTML = transactions.map(tx => `
+                <div class="order-item">
+                    <div class="order-info">
+                        <div class="order-number">${tx.description}</div>
+                        <div class="order-details">
+                            ${new Date(tx.created_at).toLocaleString()}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="order-amount" style="color: ${tx.amount > 0 ? '#52c41a' : '#ff4d4f'}">
+                            ${tx.amount > 0 ? '+' : ''}${tx.amount} 积分
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 编辑资料
+        function editProfile() {
+            switchTab('settings');
+
+            // 填充当前值
+            document.getElementById('editUsername').value = document.getElementById('userName').textContent;
+            document.getElementById('editEmail').value = document.getElementById('userEmail').textContent;
+        }
+
+        // 取消编辑
+        function cancelEdit() {
+            document.getElementById('profileForm').reset();
+            showToast('已取消', 'info');
+        }
+
+        // 保存资料
+        async function saveProfile(event) {
+            event.preventDefault();
+
+            try {
+                const token = getAuthToken();
+                const formData = {
+                    username: document.getElementById('editUsername').value,
+                    email: document.getElementById('editEmail').value,
+                    bio: document.getElementById('editBio').value
+                };
+
+                const response = await fetch(`${API_BASE}/users/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('保存成功');
+                    loadUserInfo();
+                } else {
+                    showToast(data.message || '保存失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存失败:', error);
+                showToast('保存失败，请重试', 'error');
+            }
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            loadUserInfo();
+        });
+    </script>
+</body>
+</html>

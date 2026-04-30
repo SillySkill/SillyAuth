@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<ScrollView
+    android:id="@+id/scroll_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/background">
+
+        <!-- 顶部栏 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:background="@color/primary">
+
+            <Button
+                android:id="@+id/btn_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/back"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:textColor="@color/text_on_primary" />
+
+            <TextView
+                android:id="@+id/tv_style_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="风格：3D动漫"
+                android:textSize="20sp"
+                android:textColor="@color/text_on_primary"
+                android:gravity="center"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:id="@+id/tv_offline_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/offline_mode"
+                android:textColor="@color/offline_text"
+                android:background="@color/offline_bg"
+                android:padding="4dp"
+                android:visibility="gone" />
+
+            <!-- 关闭按钮 -->
+            <Button
+                android:id="@+id/btn_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✕"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:minWidth="0dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:textColor="@color/text_on_primary" />
+
+        </LinearLayout>
+
+        <!-- 生成时间 -->
+        <TextView
+            android:id="@+id/tv_generation_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="生成时间：2026-01-21 10:30:00"
+            android:textSize="14sp"
+            android:textAlignment="center"
+            android:padding="8dp"
+            android:background="@color/background"
+            android:textColor="@color/text_secondary" />
+
+        <!-- 图片对比区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <!-- 原始照片 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="8dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="原始照片"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="@color/text_primary" />
+
+                <ImageView
+                    android:id="@+id/iv_original"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:scaleType="centerCrop"
+                    android:background="@color/divider" />
+
+            </LinearLayout>
+
+            <!-- 生成结果 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="8dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="AI生成结果"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="@color/primary" />
+
+                <ImageView
+                    android:id="@+id/iv_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:scaleType="centerCrop"
+                    android:background="@color/divider" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- 操作按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- 新增：内场秀互动按钮组 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="内场秀互动"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/text_primary" />
+
+            <Button
+                android:id="@+id/btn_signature"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="✍️ 添加签名"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <Button
+                android:id="@+id/btn_checkin"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="📝 签到"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <Button
+                android:id="@+id/btn_push_inner"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:text="📺 推送到内场秀"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp"
+                android:backgroundTint="@color/accent" />
+
+            <Button
+                android:id="@+id/btn_regenerate"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:text="重新生成"
+                android:textSize="18sp"
+                style="@style/Widget.MaterialComponents.Button.TextButton" />
+
+        </LinearLayout>
+
+        <!-- 使用说明 -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="使用说明：\n1. 点击&apos;保存到相册&apos;将图片保存到手机\n2. 点击&apos;分享图片&apos;可以分享到微信、朋友圈等\n3. 点击&apos;重新生成&apos;使用同一张照片再次生成"
+            android:textSize="14sp"
+            android:padding="16dp"
+            android:textColor="@color/text_secondary"
+            android:background="@color/background"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+</ScrollView>
+
+    <!-- 数字人显示区域（右下角） -->
+    <FrameLayout
+        android:id="@+id/digital_human_container"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:background="@android:color/transparent"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/iv_digital_human"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:contentDescription="数字人" />
+    </FrameLayout>
+
+</RelativeLayout>

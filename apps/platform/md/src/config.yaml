@@ -1,0 +1,71 @@
+# SillyMD 全局配置
+
+app:
+  name: SillyMD
+  version: 1.0.0
+  debug: false
+
+server:
+  host: ${SERVER_HOST:-0.0.0.0}
+  port: ${SERVER_PORT:-8000}
+  workers: 4
+
+database:
+  # 从 .env 文件读取
+  host: ${DB_HOST}
+  port: ${DB_PORT}
+  name: ${DB_NAME}
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}
+  pool_size: 10
+  max_overflow: 20
+
+cors:
+  allow_origins:
+    - "*"
+  allow_credentials: true
+  allow_methods:
+    - "*"
+  allow_headers:
+    - "*"
+
+# JWT 配置 (从 .env 读取)
+jwt:
+  secret_key: ${JWT_SECRET}
+  algorithm: ${JWT_ALGORITHM:-HS256}
+  access_token_expire_minutes: ${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-43200}
+
+# TOS 存储配置 (从 .env 读取)
+tos:
+  endpoint: ${TOS_ENDPOINT}
+  bucket: ${TOS_BUCKET}
+  access_key: ${TOS_ACCESS_KEY}
+  secret_key: ${TOS_SECRET_KEY}
+  custom_domain: ${TOS_CUSTOM_DOMAIN}
+
+# 模块加载顺序 (依赖顺序)
+modules:
+  load_order:
+    - storage        # 基础存储服务
+    - auth           # 用户认证
+    - admin          # 管理后台
+    - skills         # Skills 平台
+    - recommendations # 推荐系统 (从 ClawHub 抓取技能)
+    - vendor         # 开发者入驻
+    - payment        # 支付模块
+    - transaction    # 交易系统
+    - goods          # 商品系统
+    - marketplace    # 傻福虾盘
+    - points         # 积分商城
+    - tasks          # 任务系统
+    - messages       # 消息系统
+    - cms            # CMS 内容管理
+    - downloads      # 下载区
+    - sillyclaw      # SillyClaw 版本管理
+    - arena          # 虾拳馆 PK
+
+# 日志配置
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: logs/sillymd.log

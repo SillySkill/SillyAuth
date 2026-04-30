@@ -1,0 +1,8 @@
+id: config_data
+name: 通用配置数据模块
+version: 1.0.0
+description: 提供通用配置数据存储功能，支持任意JSON格式数据
+dependencies: []
+
+config:
+  table_name: config_data

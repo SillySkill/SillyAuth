@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目 - 挺傻的网站</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/tech-blue.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo">
+                <img src="silly/logo/logo.svg" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <i class="fas fa-cube" style="display:none;"></i>
+                <span>挺傻的网站</span>
+            </a>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>概览</span></a>
+            <a href="analytics.html" class="nav-item"><i class="fas fa-chart-line"></i><span>分析</span></a>
+            <a href="projects.html" class="nav-item active"><i class="fas fa-folder"></i><span>项目</span></a>
+            <a href="messages.html" class="nav-item"><i class="fas fa-envelope"></i><span>消息</span></a>
+            <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i><span>设置</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar"><i class="fas fa-user"></i></div>
+                <div class="user-info"><span class="user-name">Test User</span><span class="user-role">Free Plan</span></div>
+                <button class="btn-icon" onclick="auth.logout()"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="搜索项目..."></div>
+            <div class="top-actions">
+                <button class="btn btn-primary"><i class="fas fa-plus"></i> 新建项目</button>
+                <button class="btn-icon"><i class="fas fa-bell"></i></button>
+            </div>
+        </header>
+
+        <div class="page-content">
+            <div class="page-header"><h1>我的项目</h1><p>管理和跟踪您的所有项目</p></div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;" id="projectsGrid">
+                <!-- 项目卡片将由 JS 动态生成 -->
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 48px; margin-bottom: 16px; color: var(--primary-light);"></i>
+                    <p style="color: var(--text-light);">加载中...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="js/vendor-api.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/mobile-menu.js"></script>
+    <script src="js/projects.js"></script>
+</body>
+</html>

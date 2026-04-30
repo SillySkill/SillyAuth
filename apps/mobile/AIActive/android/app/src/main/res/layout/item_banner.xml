@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:elevation="0dp">
+
+    <!-- 图片容器 -->
+    <ImageView
+        android:id="@+id/iv_banner_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+
+    <!-- 视频容器 - 使用BannerVideoView支持填充宽度 -->
+    <com.jcoding.aiactivity.widget.BannerVideoView
+        android:id="@+id/vv_banner_video"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="1dp"
+        android:visibility="gone" />
+
+</FrameLayout>

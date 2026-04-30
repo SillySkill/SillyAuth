@@ -1,0 +1,53 @@
+/* ==================== 赛博紫主题 ==================== */
+:root {
+    /* 主色调 */
+    --primary-color: #9333ea;
+    --primary-dark: #7e22ce;
+    --primary-light: #a855f7;
+    --secondary-color: #ec4899;
+    --accent-color: #f43f5e;
+    
+    /* 状态色 */
+    --success-color: #22c55e;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+    
+    /* 背景色 */
+    --bg-primary: #1a0f2e;
+    --bg-secondary: #2d1b4e;
+    --bg-tertiary: #3d1f6e;
+    --bg-card: rgba(45, 27, 78, 0.8);
+    
+    /* 文字色 */
+    --text-primary: #faf5ff;
+    --text-secondary: #e9d5ff;
+    --text-muted: #c4b5fd;
+    
+    /* 边框和阴影 */
+    --border-color: rgba(147, 51, 234, 0.2);
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --glow-color: rgba(147, 51, 234, 0.5);
+    
+    /* 渐变 */
+    --gradient-primary: linear-gradient(135deg, #9333ea, #ec4899);
+    --gradient-glow: radial-gradient(circle, rgba(147, 51, 234, 0.15), transparent);
+}
+
+/* 主题特定的发光效果 */
+.cyber-purple-glow {
+    box-shadow: 0 0 30px rgba(147, 51, 234, 0.3);
+}
+
+/* 按钮渐变 */
+.btn-primary {
+    background: linear-gradient(135deg, #9333ea, #ec4899);
+}
+
+/* 悬浮球 */
+.gradient-orb.orb-1 {
+    background: linear-gradient(135deg, #9333ea, #ec4899);
+}
+
+.gradient-orb.orb-2 {
+    background: linear-gradient(135deg, #f43f5e, #ec4899);
+}

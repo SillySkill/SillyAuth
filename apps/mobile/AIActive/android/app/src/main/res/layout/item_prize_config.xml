@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="16dp"
+    android:layout_marginBottom="8dp"
+    android:elevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/tv_prize_name"
+            android:text="一等奖"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#333333" />
+
+        <Button
+            android:id="@+id/btn_edit_prize"
+            android:layout_width="60dp"
+            android:layout_height="36dp"
+            android:text="编辑"
+            android:background="#2196F3"
+            android:textColor="#FFFFFF"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btn_delete_prize"
+            android:layout_width="60dp"
+            android:layout_height="36dp"
+            android:text="删除"
+            android:background="#F44336"
+            android:textColor="#FFFFFF" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_prize_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="数量：5"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:paddingTop="4dp" />
+
+    <View
+        android:id="@+id/view_prize_color"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:background="#FFD700"
+        android:paddingTop="8dp" />
+
+</LinearLayout>

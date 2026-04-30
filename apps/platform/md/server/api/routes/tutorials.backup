@@ -1,0 +1,560 @@
+"""
+Tutorials API Routes
+技术教程 API 路由
+
+提供教程的查询、分类筛选、搜索等功能
+"""
+from fastapi import APIRouter, HTTPException, Query
+from typing import List, Optional
+from pydantic import BaseModel
+from datetime import datetime
+
+router = APIRouter(prefix="/api/content/tutorials", tags=["技术教程"])
+
+# 数据库配置（将在 main.py 中设置）
+DB_CONFIG = None
+
+
+def set_db_config(config):
+    """设置数据库配置"""
+    global DB_CONFIG
+    DB_CONFIG = config
+
+
+# ============================================
+# Schema Definitions
+# ============================================
+
+class TutorialListItem(BaseModel):
+    """教程列表项"""
+    id: int
+    tutorial_key: str
+    slug: str
+    title: str
+    title_zh_CN: str
+    title_en: Optional[str] = None
+    description: str
+    description_zh_CN: str
+    description_en: Optional[str] = None
+    category: str
+    subcategory: Optional[str] = None
+    difficulty: str
+    tags: List[str] = []
+    thumbnail: Optional[str] = None
+    video_url: Optional[str] = None
+    video_type: Optional[str] = None
+    video_duration: Optional[int] = None
+    github_url: Optional[str] = None
+    documentation_url: Optional[str] = None
+    view_count: int = 0
+    like_count: int = 0
+    featured: bool = False
+    is_published: bool = False
+    created_at: str
+    updated_at: str
+
+
+class TutorialChapter(BaseModel):
+    """教程章节"""
+    id: int
+    chapter_order: int
+    chapter_key: str
+    title: str
+    title_zh_CN: str
+    title_en: Optional[str] = None
+    description: Optional[str] = None
+    description_zh_CN: Optional[str] = None
+    description_en: Optional[str] = None
+    content: Optional[str] = None
+    content_zh_CN: Optional[str] = None
+    content_en: Optional[str] = None
+    video_url: Optional[str] = None
+    video_start_time: Optional[int] = None
+    video_end_time: Optional[int] = None
+    is_free: bool = False
+    code_snippets: List[dict] = []
+    attachments: List[dict] = []
+
+
+class TutorialDetail(BaseModel):
+    """教程详情"""
+    id: int
+    tutorial_key: str
+    slug: str
+    title: str
+    title_zh_CN: str
+    title_en: Optional[str] = None
+    description: str
+    description_zh_CN: str
+    description_en: Optional[str] = None
+    content: Optional[str] = None
+    content_zh_CN: Optional[str] = None
+    content_en: Optional[str] = None
+    category: str
+    subcategory: Optional[str] = None
+    difficulty: str
+    tags: List[str] = []
+    thumbnail: Optional[str] = None
+    video_url: Optional[str] = None
+    video_type: Optional[str] = None
+    video_duration: Optional[int] = None
+    video_file_size: Optional[int] = None
+    github_url: Optional[str] = None
+    documentation_url: Optional[str] = None
+    official_website: Optional[str] = None
+    view_count: int = 0
+    like_count: int = 0
+    featured: bool = False
+    is_pinned: bool = False
+    is_published: bool = False
+    chapters: List[TutorialChapter] = []
+    created_at: str
+    updated_at: str
+
+
+class TutorialListResponse(BaseModel):
+    """教程列表响应"""
+    success: bool
+    data: dict
+
+
+class TutorialResponse(BaseModel):
+    """教程详情响应"""
+    success: bool
+    data: dict
+
+
+# ============================================
+# Helper Functions
+# ============================================
+
+def get_db_connection():
+    """获取数据库连接"""
+    from ..database import get_db
+    return get_db(DB_CONFIG)
+
+
+# ============================================
+# Public API Endpoints
+# ============================================
+
+@router.get("/", response_model=TutorialListResponse)
+async def list_tutorials(
+    category: Optional[str] = Query(None, description="工具分类"),
+    subcategory: Optional[str] = Query(None, description="子分类"),
+    difficulty: Optional[str] = Query(None, description="难度级别"),
+    featured: Optional[bool] = Query(None, description="是否精选"),
+    is_published: bool = Query(True, description="是否已发布"),
+    page: int = Query(1, ge=1, description="页码"),
+    page_size: int = Query(20, ge=1, le=100, description="每页数量"),
+    search: Optional[str] = Query(None, description="搜索关键词"),
+    lang: str = Query("zh-CN", description="语言")
+):
+    """
+    获取教程列表
+
+    支持按分类、难度、精选状态筛选，支持关键词搜索
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # 构建查询条件
+                conditions = ["is_published = %s"]
+                params = [is_published]
+
+                if category:
+                    conditions.append("category = %s")
+                    params.append(category)
+
+                if subcategory:
+                    conditions.append("subcategory = %s")
+                    params.append(subcategory)
+
+                if difficulty:
+                    conditions.append("difficulty = %s")
+                    params.append(difficulty)
+
+                if featured is not None:
+                    conditions.append("featured = %s")
+                    params.append(featured)
+
+                if search:
+                    conditions.append("(title_zh_CN ILIKE %s OR title_en ILIKE %s OR description_zh_CN ILIKE %s OR description_en ILIKE %s)")
+                    search_pattern = f"%{search}%"
+                    params.extend([search_pattern, search_pattern, search_pattern, search_pattern])
+
+                # 查询总数
+                count_query = f"SELECT COUNT(*) as total FROM tutorials WHERE {' AND '.join(conditions)}"
+                cur.execute(count_query, params)
+                total = cur.fetchone()['total']
+
+                # 查询列表
+                offset = (page - 1) * page_size
+                list_query = f"""
+                    SELECT
+                        id, tutorial_key, slug,
+                        title_zh_CN, title_en,
+                        description_zh_CN, description_en,
+                        category, subcategory, difficulty, tags,
+                        thumbnail, video_url, video_type, video_duration,
+                        github_url, documentation_url,
+                        view_count, like_count, featured, is_published,
+                        created_at, updated_at
+                    FROM tutorials
+                    WHERE {' AND '.join(conditions)}
+                    ORDER BY position ASC, created_at DESC
+                    LIMIT %s OFFSET %s
+                """
+                cur.execute(list_query, params + [page_size, offset])
+                rows = cur.fetchall()
+
+                # 格式化结果
+                results = []
+                for row in rows:
+                    # 解析标签
+                    tags_list = []
+                    if row['tags']:
+                        tags_list = [tag.strip() for tag in row['tags'].split(',') if tag.strip()]
+
+                    # 根据语言选择标题和描述
+                    title = row['title_zh_CN'] if lang == "zh-CN" else (row['title_en'] or row['title_zh_CN'])
+                    description = row['description_zh_CN'] if lang == "zh-CN" else (row['description_en'] or row['description_zh_CN'])
+
+                    results.append({
+                        "id": row['id'],
+                        "tutorial_key": row['tutorial_key'],
+                        "slug": row['slug'],
+                        "title": title,
+                        "title_zh_CN": row['title_zh_CN'],
+                        "title_en": row['title_en'],
+                        "description": description,
+                        "description_zh_CN": row['description_zh_CN'],
+                        "description_en": row['description_en'],
+                        "category": row['category'],
+                        "subcategory": row['subcategory'],
+                        "difficulty": row['difficulty'],
+                        "tags": tags_list,
+                        "thumbnail": row['thumbnail'],
+                        "video_url": row['video_url'],
+                        "video_type": row['video_type'],
+                        "video_duration": row['video_duration'],
+                        "github_url": row['github_url'],
+                        "documentation_url": row['documentation_url'],
+                        "view_count": row['view_count'],
+                        "like_count": row['like_count'],
+                        "featured": row['featured'],
+                        "is_published": row['is_published'],
+                        "created_at": row['created_at'].isoformat() if row['created_at'] else None,
+                        "updated_at": row['updated_at'].isoformat() if row['updated_at'] else None
+                    })
+
+                return {
+                    "success": True,
+                    "data": {
+                        "items": results,
+                        "total": total,
+                        "page": page,
+                        "page_size": page_size,
+                        "total_pages": (total + page_size - 1) // page_size
+                    }
+                }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/featured")
+async def get_featured_tutorials(
+    limit: int = Query(6, ge=1, le=20, description="返回数量"),
+    lang: str = Query("zh-CN", description="语言")
+):
+    """
+    获取精选教程列表
+
+    用于首页推荐
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                query = """
+                    SELECT
+                        id, slug,
+                        title_zh_CN, title_en,
+                        description_zh_CN, description_en,
+                        category, difficulty, thumbnail,
+                        video_url, video_duration,
+                        view_count, like_count
+                    FROM tutorials
+                    WHERE featured = TRUE AND is_published = TRUE
+                    ORDER BY position ASC, view_count DESC
+                    LIMIT %s
+                """
+                cur.execute(query, (limit,))
+                rows = cur.fetchall()
+
+                results = []
+                for row in rows:
+                    title = row['title_zh_CN'] if lang == "zh-CN" else (row['title_en'] or row['title_zh_CN'])
+                    description = row['description_zh_CN'] if lang == "zh-CN" else (row['description_en'] or row['description_zh_CN'])
+
+                    results.append({
+                        "id": row['id'],
+                        "slug": row['slug'],
+                        "title": title,
+                        "description": description,
+                        "category": row['category'],
+                        "difficulty": row['difficulty'],
+                        "thumbnail": row['thumbnail'],
+                        "video_url": row['video_url'],
+                        "video_duration": row['video_duration'],
+                        "view_count": row['view_count'],
+                        "like_count": row['like_count']
+                    })
+
+                return {
+                    "success": True,
+                    "data": {
+                        "items": results,
+                        "total": len(results)
+                    }
+                }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/categories")
+async def get_tutorial_categories():
+    """
+    获取教程分类统计
+
+    返回每个分类下的教程数量
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                query = """
+                    SELECT category, COUNT(*) as count
+                    FROM tutorials
+                    WHERE is_published = TRUE
+                    GROUP BY category
+                """
+                cur.execute(query)
+                rows = cur.fetchall()
+
+                categories = {
+                    "claude-code": {"name": "Claude Code", "icon": "🤖", "count": 0},
+                    "openclaw": {"name": "OpenClaw", "icon": "🦞", "count": 0},
+                    "cursor": {"name": "Cursor", "icon": "⚡", "count": 0},
+                    "windsurf": {"name": "Windsurf", "icon": "🌊", "count": 0},
+                    "copilot": {"name": "GitHub Copilot", "icon": "✈️", "count": 0},
+                    "bolt": {"name": "Bolt.new", "icon": "⚡", "count": 0},
+                    "new": {"name": "v0.dev", "icon": "🆕", "count": 0},
+                    "codeium": {"name": "Codeium", "icon": "💎", "count": 0},
+                    "tabnine": {"name": "Tabnine", "icon": "9️⃣", "count": 0},
+                    "continue": {"name": "Continue", "icon": "▶️", "count": 0}
+                }
+
+                for row in rows:
+                    if row['category'] in categories:
+                        categories[row['category']]["count"] = row['count']
+
+                return {
+                    "success": True,
+                    "data": categories
+                }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{id_or_slug}", response_model=TutorialResponse)
+async def get_tutorial_detail(
+    id_or_slug: str,
+    lang: str = Query("zh-CN", description="语言")
+):
+    """
+    获取教程详情
+
+    支持通过 ID 或 slug 查询
+    同时返回章节列表
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # 查询教程（支持 ID 或 slug）
+                if id_or_slug.isdigit():
+                    query = "SELECT * FROM tutorials WHERE id = %s"
+                    cur.execute(query, (int(id_or_slug),))
+                else:
+                    query = "SELECT * FROM tutorials WHERE slug = %s"
+                    cur.execute(query, (id_or_slug,))
+
+                tutorial = cur.fetchone()
+
+                if not tutorial:
+                    raise HTTPException(status_code=404, detail="教程不存在")
+
+                # 增加浏览次数
+                update_query = "UPDATE tutorials SET view_count = view_count + 1 WHERE id = %s"
+                cur.execute(update_query, (tutorial['id'],))
+                conn.commit()
+
+                # 获取章节
+                chapter_query = """
+                    SELECT
+                        id, chapter_order, chapter_key,
+                        title_zh_CN, title_en,
+                        description_zh_CN, description_en,
+                        content_zh_CN, content_en,
+                        video_url, video_start_time, video_end_time,
+                        is_free, code_snippets, attachments
+                    FROM tutorial_chapters
+                    WHERE tutorial_id = %s
+                    ORDER BY chapter_order
+                """
+                cur.execute(chapter_query, (tutorial['id'],))
+                chapter_rows = cur.fetchall()
+
+                # 格式化章节数据
+                chapter_list = []
+                for chapter in chapter_rows:
+                    import json
+                    chapter_list.append({
+                        "id": chapter['id'],
+                        "chapter_order": chapter['chapter_order'],
+                        "chapter_key": chapter['chapter_key'],
+                        "title": chapter['title_zh_CN'] if lang == "zh-CN" else (chapter['title_en'] or chapter['title_zh_CN']),
+                        "title_zh_CN": chapter['title_zh_CN'],
+                        "title_en": chapter['title_en'],
+                        "description": chapter['description_zh_CN'] if lang == "zh-CN" else chapter['description_en'],
+                        "description_zh_CN": chapter['description_zh_CN'],
+                        "description_en": chapter['description_en'],
+                        "content": chapter['content_zh_CN'] if lang == "zh-CN" else chapter['content_en'],
+                        "content_zh_CN": chapter['content_zh_CN'],
+                        "content_en": chapter['content_en'],
+                        "video_url": chapter['video_url'],
+                        "video_start_time": chapter['video_start_time'],
+                        "video_end_time": chapter['video_end_time'],
+                        "is_free": chapter['is_free'],
+                        "code_snippets": json.loads(chapter['code_snippets']) if chapter.get('code_snippets') else [],
+                        "attachments": json.loads(chapter['attachments']) if chapter.get('attachments') else []
+                    })
+
+                # 解析标签
+                import json
+                tags_list = []
+                if tutorial.get('tags'):
+                    tags_list = [tag.strip() for tag in tutorial['tags'].split(',') if tag.strip()]
+
+                # 根据语言选择标题和描述
+                title = tutorial['title_zh_CN'] if lang == "zh-CN" else (tutorial.get('title_en') or tutorial['title_zh_CN'])
+                description = tutorial['description_zh_CN'] if lang == "zh-CN" else (tutorial.get('description_en') or tutorial['description_zh_CN'])
+                content = tutorial.get('content_zh_CN') if lang == "zh-CN" else tutorial.get('content_en')
+
+                return {
+                    "success": True,
+                    "data": {
+                        "id": tutorial['id'],
+                        "tutorial_key": tutorial['tutorial_key'],
+                        "slug": tutorial['slug'],
+                        "title": title,
+                        "title_zh_CN": tutorial['title_zh_CN'],
+                        "title_en": tutorial.get('title_en'),
+                        "description": description,
+                        "description_zh_CN": tutorial['description_zh_CN'],
+                        "description_en": tutorial.get('description_en'),
+                        "content": content,
+                        "content_zh_CN": tutorial.get('content_zh_CN'),
+                        "content_en": tutorial.get('content_en'),
+                        "category": tutorial['category'],
+                        "subcategory": tutorial.get('subcategory'),
+                        "difficulty": tutorial['difficulty'],
+                        "tags": tags_list,
+                        "thumbnail": tutorial.get('thumbnail'),
+                        "video_url": tutorial.get('video_url'),
+                        "video_type": tutorial.get('video_type'),
+                        "video_duration": tutorial.get('video_duration'),
+                        "video_file_size": tutorial.get('video_file_size'),
+                        "github_url": tutorial.get('github_url'),
+                        "documentation_url": tutorial.get('documentation_url'),
+                        "official_website": tutorial.get('official_website'),
+                        "view_count": tutorial['view_count'],
+                        "like_count": tutorial['like_count'],
+                        "featured": tutorial['featured'],
+                        "is_pinned": tutorial.get('is_pinned', False),
+                        "is_published": tutorial['is_published'],
+                        "chapters": chapter_list,
+                        "created_at": tutorial['created_at'].isoformat() if tutorial.get('created_at') else None,
+                        "updated_at": tutorial['updated_at'].isoformat() if tutorial.get('updated_at') else None
+                    }
+                }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{tutorial_id}/view")
+async def record_tutorial_view(tutorial_id: int):
+    """
+    记录教程浏览次数
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # 检查教程是否存在
+                cur.execute("SELECT id, view_count FROM tutorials WHERE id = %s", (tutorial_id,))
+                tutorial = cur.fetchone()
+
+                if not tutorial:
+                    raise HTTPException(status_code=404, detail="教程不存在")
+
+                # 增加浏览次数
+                cur.execute(
+                    "UPDATE tutorials SET view_count = view_count + 1 WHERE id = %s",
+                    (tutorial_id,)
+                )
+                conn.commit()
+
+                return {
+                    "success": True,
+                    "data": {
+                        "view_count": tutorial['view_count'] + 1
+                    }
+                }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{tutorial_id}/like")
+async def like_tutorial(tutorial_id: int):
+    """
+    点赞教程
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # 检查教程是否存在
+                cur.execute("SELECT id, like_count FROM tutorials WHERE id = %s", (tutorial_id,))
+                tutorial = cur.fetchone()
+
+                if not tutorial:
+                    raise HTTPException(status_code=404, detail="教程不存在")
+
+                # 增加点赞数
+                cur.execute(
+                    "UPDATE tutorials SET like_count = like_count + 1 WHERE id = %s",
+                    (tutorial_id,)
+                )
+                conn.commit()
+
+                return {
+                    "success": True,
+                    "data": {
+                        "like_count": tutorial['like_count'] + 1
+                    }
+                }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -1,0 +1,75 @@
+{
+  "app": {
+    "name": "SillyMD AI Skills Center",
+    "tagline": "AI Skills Hosting & Marketplace"
+  },
+  "nav": {
+    "home": "Home",
+    "skills": "Skills",
+    "categories": "Categories",
+    "about": "About",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "skills": {
+    "title": "AI Skills Marketplace",
+    "subtitle": "Explore, Discover, Use AI Skills",
+    "search": "Search skills...",
+    "noResults": "No matching skills found",
+    "loading": "Loading...",
+    "featured": "Featured",
+    "newest": "Newest",
+    "popular": "Popular",
+    "categories": {
+      "tech": "Tech",
+      "product": "Product",
+      "design": "Design",
+      "marketing": "Marketing",
+      "ops": "Operations",
+      "all": "All Categories"
+    },
+    "actions": {
+      "install": "Install",
+      "demo": "Demo",
+      "view": "View Details",
+      "download": "Download",
+      "share": "Share",
+      "favorite": "Favorite"
+    },
+    "stats": {
+      "downloads": "Downloads",
+      "rating": "Rating",
+      "reviews": "Reviews"
+    },
+    "detail": {
+      "description": "Description",
+      "installation": "Installation",
+      "examples": "Examples",
+      "reviews": "Reviews",
+      "related": "Related Skills",
+      "author": "Author",
+      "version": "Version",
+      "updated": "Last Updated"
+    }
+  },
+  "common": {
+    "back": "Back",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "noData": "No Data"
+  },
+  "footer": {
+    "copyright": "Copyright",
+    "links": "Links",
+    "contact": "Contact"
+  }
+}

@@ -1,0 +1,53 @@
+# Logistics Module Configuration
+
+config:
+  # 模块配置
+  pagination:
+    default_page_size: 20
+    max_page_size: 100
+
+  # 运费计算配置
+  shipping:
+    # 默认首重(kg)
+    default_first_weight: 1.0
+    # 默认续重(kg)
+    default_continue_weight: 1.0
+    # 默认首重费用(元)
+    default_first_fee: 10.0
+    # 默认续重费用(元/kg)
+    default_continue_fee: 5.0
+    # 包邮门槛(元)
+    free_shipping_threshold: 99.0
+
+  # 快递公司配置
+  express_companies:
+    - code: shunfeng
+      name: 顺丰速运
+      enabled: true
+    - code: yuantong
+      name: 圆通速递
+      enabled: true
+    - code: zhongtong
+      name: 中通快递
+      enabled: true
+    - code: yunda
+      name: 韵达快递
+      enabled: true
+    - code: jtexpress
+      name: 极兔速递
+      enabled: true
+    - code: zto
+      name: 中通快递
+      enabled: true
+
+  # 快递100 API 配置
+  kd100:
+    api_url: "https://api.kuaidi100.com/api"
+    app_key: ""  # 需要在 https://www.kuaidi100.com/ 注册获取
+
+  # 地区配置
+  regions:
+    # 一线城市
+    tier1_cities: ["北京", "上海", "广州", "深圳"]
+    # 二线城市
+    tier2_cities: ["杭州", "南京", "武汉", "成都", "西安", "重庆"]

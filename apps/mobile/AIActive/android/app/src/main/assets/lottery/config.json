@@ -1,0 +1,21 @@
+{
+  "lottery": {
+    "jlot10001": {
+      "file_name": "circle",
+      "program_name": "旋转球"
+    },
+    "jlot10002": {
+      "file_name": "grid",
+      "program_name": "网格抽奖"
+    },
+    "jlot10003": {
+      "file_name": "random",
+      "program_name": "随机抽取"
+    },
+    "jlot10004": {
+      "file_name": "fireworks",
+      "program_name": "礼花",
+      "activity": "FireworksLotteryActivity"
+    }
+  }
+}

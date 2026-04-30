@@ -1,0 +1,246 @@
+package com.jcoding.aiactivity.utils;
+
+import android.content.Context;
+import android.util.Log;
+
+import com.jcoding.aiactivity.entity.Candidate;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+/**
+ * Excel抽奖数据读取器
+ * 从assets目录读取Excel文件并解析候选人数据
+ */
+public class ExcelPrizeDataReader {
+
+    private static final String TAG = "ExcelPrizeDataReader";
+    private static final String EXCEL_FILE_PATH = "lottery/prizeDate.xlsx";
+
+    private Context context;
+
+    public ExcelPrizeDataReader(Context context) {
+        this.context = context.getApplicationContext();
+    }
+
+    /**
+     * 从Excel文件读取候选人数据
+     *
+     * @return 候选人列表
+     */
+    public List<Candidate> readCandidatesFromExcel() {
+        List<Candidate> candidates = new ArrayList<>();
+
+        try {
+            InputStream inputStream = context.getAssets().open(EXCEL_FILE_PATH);
+
+            // 使用Apache POI读取Excel
+            org.apache.poi.ss.usermodel.Workbook workbook = org.apache.poi.ss.usermodel.WorkbookFactory.create(inputStream);
+            org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheetAt(0); // 读取第一个sheet
+
+            Iterator<org.apache.poi.ss.usermodel.Row> rowIterator = sheet.iterator();
+
+            // 跳过标题行（如果第一行是标题）
+            if (rowIterator.hasNext()) {
+                rowIterator.next();
+            }
+
+            int rowIndex = 0;
+            while (rowIterator.hasNext()) {
+                org.apache.poi.ss.usermodel.Row row = rowIterator.next();
+                rowIndex++;
+
+                try {
+                    // 读取单元格数据
+                    // 假设Excel列结构：姓名 | 电话 | 部门 | 工号
+                    String name = getCellValueAsString(row, 0);
+                    String phone = getCellValueAsString(row, 1);
+                    String department = getCellValueAsString(row, 2);
+                    String employeeId = getCellValueAsString(row, 3);
+
+                    // 验证必填字段
+                    if (name != null && !name.isEmpty()) {
+                        Candidate candidate = new Candidate();
+                        candidate.setName(name);
+                        candidate.setPhone(phone);
+                        candidate.setDepartment(department);
+                        candidate.setEmployeeId(employeeId);
+
+                        candidates.add(candidate);
+
+                        Log.d(TAG, "读取候选人 " + rowIndex + ": " + name);
+                    }
+
+                } catch (Exception e) {
+                    Log.e(TAG, "解析第 " + rowIndex + " 行失败", e);
+                }
+            }
+
+            workbook.close();
+            inputStream.close();
+
+            Log.i(TAG, "成功读取 " + candidates.size() + " 名候选人");
+            return candidates;
+
+        } catch (IOException e) {
+            Log.e(TAG, "读取Excel文件失败", e);
+            return candidates;
+        } catch (Exception e) {
+            Log.e(TAG, "解析Excel文件失败", e);
+            return candidates;
+        }
+    }
+
+    /**
+     * 获取单元格值作为字符串
+     */
+    private String getCellValueAsString(org.apache.poi.ss.usermodel.Row row, int columnIndex) {
+        try {
+            org.apache.poi.ss.usermodel.Cell cell = row.getCell(columnIndex);
+            if (cell == null) {
+                return "";
+            }
+
+            switch (cell.getCellType()) {
+                case STRING:
+                    return cell.getStringCellValue().trim();
+                case NUMERIC:
+                    // 数字转字符串（处理电话号码等）
+                    double numericValue = cell.getNumericCellValue();
+                    if (numericValue == (long) numericValue) {
+                        return String.valueOf((long) numericValue);
+                    } else {
+                        return String.valueOf(numericValue);
+                    }
+                case BOOLEAN:
+                    return String.valueOf(cell.getBooleanCellValue());
+                case FORMULA:
+                    try {
+                        return cell.getStringCellValue();
+                    } catch (Exception e) {
+                        return String.valueOf(cell.getNumericCellValue());
+                    }
+                case BLANK:
+                    return "";
+                default:
+                    return "";
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "读取单元格 " + columnIndex + " 失败", e);
+            return "";
+        }
+    }
+
+    /**
+     * 检查Excel文件是否存在
+     */
+    public boolean isExcelFileExists() {
+        try {
+            String[] files = context.getAssets().list("lottery");
+            if (files != null) {
+                for (String file : files) {
+                    if ("prizeDate.xlsx".equals(file)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } catch (IOException e) {
+            Log.e(TAG, "检查Excel文件失败", e);
+            return false;
+        }
+    }
+
+    /**
+     * 获取Excel文件的基本信息
+     */
+    public ExcelFileInfo getExcelFileInfo() {
+        ExcelFileInfo info = new ExcelFileInfo();
+        info.setExists(isExcelFileExists());
+        info.setPath(EXCEL_FILE_PATH);
+
+        if (info.isExists()) {
+            try {
+                InputStream inputStream = context.getAssets().open(EXCEL_FILE_PATH);
+                org.apache.poi.ss.usermodel.Workbook workbook = org.apache.poi.ss.usermodel.WorkbookFactory.create(inputStream);
+                org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheetAt(0);
+
+                info.setSheetCount(workbook.getNumberOfSheets());
+                info.setFirstSheetName(sheet.getSheetName());
+                info.setRowCount(sheet.getPhysicalNumberOfRows());
+
+                workbook.close();
+                inputStream.close();
+            } catch (Exception e) {
+                Log.e(TAG, "获取Excel文件信息失败", e);
+            }
+        }
+
+        return info;
+    }
+
+    /**
+     * Excel文件信息类
+     */
+    public static class ExcelFileInfo {
+        private boolean exists;
+        private String path;
+        private int sheetCount;
+        private String firstSheetName;
+        private int rowCount;
+
+        public boolean isExists() {
+            return exists;
+        }
+
+        public void setExists(boolean exists) {
+            this.exists = exists;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
+        }
+
+        public int getSheetCount() {
+            return sheetCount;
+        }
+
+        public void setSheetCount(int sheetCount) {
+            this.sheetCount = sheetCount;
+        }
+
+        public String getFirstSheetName() {
+            return firstSheetName;
+        }
+
+        public void setFirstSheetName(String firstSheetName) {
+            this.firstSheetName = firstSheetName;
+        }
+
+        public int getRowCount() {
+            return rowCount;
+        }
+
+        public void setRowCount(int rowCount) {
+            this.rowCount = rowCount;
+        }
+
+        @Override
+        public String toString() {
+            return "ExcelFileInfo{" +
+                    "exists=" + exists +
+                    ", path='" + path + '\'' +
+                    ", sheetCount=" + sheetCount +
+                    ", firstSheetName='" + firstSheetName + '\'' +
+                    ", rowCount=" + rowCount +
+                    '}';
+        }
+    }
+}

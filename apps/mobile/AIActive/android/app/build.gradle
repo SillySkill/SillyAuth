@@ -1,0 +1,211 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+// 在构建开始时清理Excel临时文件
+def cleanExcelTempFiles() {
+    def assetsDir = file("src/main/assets")
+    if (assetsDir.exists()) {
+        assetsDir.eachFileRecurse { file ->
+            if (file.name.startsWith('~$') && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+                try {
+                    file.delete()
+                    println "[PRE-BUILD] Deleted Excel temp file: ${file.absolutePath}"
+                } catch (Exception e) {
+                    // 忽略删除失败的文件
+                }
+            }
+        }
+    }
+}
+
+// 执行清理
+cleanExcelTempFiles()
+
+android {
+    namespace 'com.jcoding.aiactivity'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.jcoding.aiactivity"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // 支持多dex
+        multiDexEnabled true
+    }
+
+    // 强制使用统一的Kotlin版本
+    configurations.all {
+        resolutionStrategy {
+            force 'org.jetbrains.kotlin:kotlin-stdlib:2.1.0'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.1.0'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0'
+        }
+    }
+
+    // 签名配置
+    signingConfigs {
+        release {
+            storeFile file('release.keystore')
+            storePassword 'jcoding123'
+            keyAlias 'jcoding'
+            keyPassword 'jcoding123'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+
+    buildFeatures {
+        viewBinding true
+        dataBinding true
+    }
+
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt', 'META-INF/license.txt', 'META-INF/NOTICE', 'META-INF/NOTICE.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0']
+        }
+    }
+
+    // 忽略Excel临时文件
+    sourceSets {
+        main {
+            assets {
+                exclude '**/~$*.xlsx'
+                exclude '**/~$*.xls'
+            }
+        }
+    }
+
+    // 清理Excel临时文件的任务
+    tasks.register('cleanExcelTempFiles') {
+        doLast {
+            def assetsDir = file("src/main/assets")
+            if (assetsDir.exists()) {
+                assetsDir.eachFileRecurse { file ->
+                    if (file.name.startsWith('~$') && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+                        try {
+                            file.delete()
+                            println "Deleted Excel temp file: ${file.absolutePath}"
+                        } catch (Exception e) {
+                            println "Could not delete ${file.name}: ${e.message}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 在mergeAssets之前清理临时文件
+    afterEvaluate {
+        tasks.findByName('generateDebugAssets')?.dependsOn cleanExcelTempFiles
+        tasks.findByName('generateReleaseAssets')?.dependsOn cleanExcelTempFiles
+    }
+}
+
+dependencies {
+    // 腾讯TTS SDK
+    implementation(name: 'libqcloudtts-release', ext: 'aar')
+
+    // 腾讯ASR SDK
+    implementation(name: 'libqcloudasr-release', ext: 'aar')
+
+    // Kotlin标准库
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.1.0'
+
+    // AndroidX核心库
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.multidex:multidex:2.0.1'
+
+    // Lifecycle组件
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
+
+    // CameraX
+    def camerax_version = "1.3.1"
+    implementation "androidx.camera:camera-core:${camerax_version}"
+    implementation "androidx.camera:camera-camera2:${camerax_version}"
+    implementation "androidx.camera:camera-lifecycle:${camerax_version}"
+    implementation "androidx.camera:camera-view:${camerax_version}"
+
+    // 网络请求
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // 图片加载
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    kapt 'com.github.bumptech.glide:compiler:4.16.0'
+
+    // 协程
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+
+    // 权限请求
+    implementation 'com.guolindev.permissionx:permissionx:1.7.1'
+
+    // EventBus
+    implementation 'org.greenrobot:eventbus:3.3.1'
+
+    // 阿里云OSS
+    implementation 'com.aliyun.dpa:oss-android-sdk:2.9.13'
+
+    // 二维码生成库
+    implementation 'com.google.zxing:core:3.5.3'
+
+    // Firebase (配置推送)
+    implementation platform('com.google.firebase:firebase-bom:32.7.0')
+    implementation 'com.google.firebase:firebase-messaging-ktx'
+
+    // WebSocket
+    implementation 'org.java-websocket:Java-WebSocket:1.5.4'
+
+    // NanoHTTPD - 轻量级HTTP服务器（用于内场秀主服务器架构）
+    // 使用项目源码，不需要依赖库
+    // implementation 'org.nanohttpd:nanohttpd-webserver:2.3.1'
+
+    // Glide GIF支持（用于数字人动画）
+    implementation 'com.github.bumptech.glide:gifdecoder:4.16.0'
+
+    // ZXing二维码生成
+    implementation 'com.google.zxing:core:3.5.1'
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+
+    // Apache POI - Excel解析（暂时禁用，改用prizeDate.json）
+    // 使用3.17版本以支持minSdkVersion 24
+    // implementation 'org.apache.poi:poi:3.17'
+    // implementation 'org.apache.poi:poi-ooxml:3.17'
+
+    // 测试
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}

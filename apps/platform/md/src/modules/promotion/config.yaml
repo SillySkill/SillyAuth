@@ -1,0 +1,19 @@
+id: promotion
+name: 促销管理模块
+version: 1.0.0
+description: 提供优惠券、限时抢购、折扣活动等促销功能
+dependencies: [auth, goods, transaction]
+
+config:
+  coupon:
+    default_valid_days: 30
+    max_coupons_per_user: 10
+    allow_stacking: false
+  flash_sale:
+    max_items_per_user: 1
+    require_identity_verification: false
+    auto_end_when_sold_out: true
+
+routes:
+  prefix: /api/promotions
+  tags: [促销管理]

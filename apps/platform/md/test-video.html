@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>视频测试</title>
+</head>
+<body style="background: #0A1628; padding: 20px;">
+  <h1 style="color: white;">OSS视频加载测试</h1>
+
+  <h2 style="color: white;">视频1 (lay-1080.mp4)</h2>
+  <video controls autoplay muted loop crossorigin="anonymous" style="width: 100%; max-width: 800px; background: #1A2842;" poster="image/hero/slide1.svg">
+    <source src="https://jc-st.oss-cn-shanghai.aliyuncs.com/sillymd/hero/lay-1080.mp4" type="video/mp4">
+  </video>
+
+  <h2 style="color: white; margin-top: 30px;">视频2 (man-1080.mp4)</h2>
+  <video controls autoplay muted loop crossorigin="anonymous" style="width: 100%; max-width: 800px; background: #1A2842;" poster="image/hero/slide2.svg">
+    <source src="https://jc-st.oss-cn-shanghai.aliyuncs.com/sillymd/hero/man-1080.mp4" type="video/mp4">
+  </video>
+
+  <div id="log" style="color: white; margin-top: 20px; padding: 10px; background: #1A2842;"></div>
+
+  <script>
+    const videos = document.querySelectorAll('video');
+    const log = document.getElementById('log');
+
+    videos.forEach((video, index) => {
+      video.addEventListener('loadstart', () => log.innerHTML += '视频' + (index+1) + ': 开始加载<br>');
+      video.addEventListener('loadedmetadata', () => log.innerHTML += '视频' + (index+1) + ': 元数据加载完成<br>');
+      video.addEventListener('canplay', () => log.innerHTML += '视频' + (index+1) + ': 可以播放<br>');
+      video.addEventListener('play', () => log.innerHTML += '视频' + (index+1) + ': 开始播放<br>');
+      video.addEventListener('error', (e) => log.innerHTML += '视频' + (index+1) + ': 错误 - ' + (video.error ? video.error.message : 'unknown') + '<br>');
+    });
+  </script>
+</body>
+</html>

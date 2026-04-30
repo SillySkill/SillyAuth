@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="tech-blue">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>内容创作 - SillyMD</title>
+  <meta name="description" content="分享你的 AI 工具教程和开发资源，获得收益">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="./css/responsive.css">
+
+  <!-- Config.js -->
+  <script type="module" src="./js/config.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-white);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Hero Section */
+    .creation-hero {
+      background: linear-gradient(135deg, #0A1628 0%, #1A2842 50%, #0A1628 100%);
+      padding: 120px 0 80px;
+      text-align: center;
+      margin-top: 80px;
+    }
+    .creation-hero h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #0066FF 0%, #00D4FF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .creation-hero p {
+      font-size: 1.25rem;
+      color: var(--text-light);
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+
+    /* Type Selection */
+    .type-selection {
+      padding: 60px 0;
+      background: var(--bg-dark-secondary);
+    }
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
+    }
+    .type-card {
+      background: var(--bg-dark);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .type-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-8px);
+      box-shadow: 0 8px 32px rgba(0, 102, 255, 0.3);
+    }
+    .type-card.selected {
+      border-color: var(--primary);
+      background: rgba(0, 102, 255, 0.1);
+    }
+    .type-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+    .type-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .type-description {
+      color: var(--text-light);
+      margin-bottom: 20px;
+    }
+    .type-features {
+      list-style: none;
+      text-align: left;
+    }
+    .type-features li {
+      padding: 8px 0;
+      color: var(--text-light);
+    }
+    .type-features li i {
+      color: var(--accent);
+      margin-right: 8px;
+    }
+
+    /* Creation Form */
+    .creation-form-section {
+      padding: 80px 0;
+    }
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .section-subtitle {
+      color: var(--text-light);
+      margin-bottom: 40px;
+    }
+
+    .form-container {
+      background: var(--bg-dark-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+    }
+
+    .form-group {
+      margin-bottom: 32px;
+    }
+    .form-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+    .form-label .required {
+      color: #F87171;
+      margin-left: 4px;
+    }
+    .form-input,
+    .form-textarea,
+    .form-select {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      color: var(--text-white);
+      font-size: 0.95rem;
+      transition: all 0.3s;
+    }
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+    }
+    .form-textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+    .form-hint {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    /* File Upload */
+    .upload-area {
+      border: 2px dashed var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .upload-area:hover,
+    .upload-area.dragover {
+      border-color: var(--primary);
+      background: rgba(0, 102, 255, 0.05);
+    }
+    .upload-icon {
+      font-size: 3rem;
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+    .upload-text {
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+    .upload-hint {
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    /* Pricing Section */
+    .pricing-section {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .pricing-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .pricing-info {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .pricing-info h4 {
+      color: #10B981;
+      margin-bottom: 8px;
+    }
+    .pricing-info p {
+      font-size: 0.9rem;
+      color: var(--text-light);
+    }
+
+    /* Terms Checkbox */
+    .terms-checkbox {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .terms-checkbox input[type="checkbox"] {
+      margin-top: 4px;
+    }
+    .terms-label {
+      font-size: 0.9rem;
+      color: var(--text-light);
+    }
+    .terms-label a {
+      color: var(--primary-light);
+      text-decoration: underline;
+    }
+
+    /* Submit Button */
+    .submit-section {
+      text-align: center;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-light);
+    }
+    .btn-submit {
+      padding: 14px 48px;
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-lg);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* My Submissions */
+    .my-submissions {
+      padding: 80px 0;
+      background: var(--bg-dark-secondary);
+    }
+    .submissions-table {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .submission-item {
+      display: grid;
+      grid-template-columns: 80px 1fr 150px 120px 100px;
+      gap: 16px;
+      padding: 20px;
+      align-items: center;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .submission-item:last-child {
+      border-bottom: none;
+    }
+    .submission-thumbnail {
+      width: 80px;
+      height: 60px;
+      background: var(--gradient-dark);
+      border-radius: var(--radius-md);
+      object-fit: cover;
+    }
+    .submission-info {
+      min-width: 0;
+    }
+    .submission-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .submission-meta {
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+    .submission-price {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #F59E0B;
+    }
+    .submission-price.free {
+      color: #10B981;
+    }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .status-pending {
+      background: rgba(245, 158, 11, 0.1);
+      color: #F59E0B;
+    }
+    .status-reviewing {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3B82F6;
+    }
+    .status-approved {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10B981;
+    }
+    .status-rejected {
+      background: rgba(239, 68, 68, 0.1);
+      color: #EF4444;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .creation-hero h1 { font-size: 2rem; }
+      .type-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .submission-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .form-container { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar"></nav>
+
+  <!-- Hero Section -->
+  <section class="creation-hero">
+    <div class="container">
+      <h1>分享知识，创造价值</h1>
+      <p>发布你的 AI 工具教程和开发资源，获得收益回报。平台 AI 自动审核，快速上线。</p>
+    </div>
+  </section>
+
+  <!-- Type Selection -->
+  <section class="type-selection" id="typeSelection">
+    <div class="container">
+      <h2 class="section-title">选择内容类型</h2>
+      <p class="section-subtitle">选择你要创建的内容类型，开始你的创作之旅</p>
+
+      <div class="type-grid">
+        <div class="type-card" data-type="tutorial" onclick="selectType('tutorial')">
+          <div class="type-icon">📚</div>
+          <div class="type-title">技术教程</div>
+          <div class="type-description">
+            分享 AI 工具的使用教程、实战经验、技巧总结
+          </div>
+          <ul class="type-features">
+            <li><i class="fas fa-check"></i> 支持视频教程</li>
+            <li><i class="fas fa-check"></i> 可设置付费观看</li>
+            <li><i class="fas fa-check"></i> 70% 收益分成</li>
+            <li><i class="fas fa-check"></i> AI 自动审核</li>
+          </ul>
+        </div>
+
+        <div class="type-card" data-type="download" onclick="selectType('download')">
+          <div class="type-icon">📦</div>
+          <div class="type-title">资源下载</div>
+          <div class="type-description">
+            分享开发工具安装包、源码、配置文件等资源
+          </div>
+          <ul class="type-features">
+            <li><i class="fas fa-check"></i> 支持多版本管理</li>
+            <li><i class="fas fa-check"></i> 可设置付费下载</li>
+            <li><i class="fas fa-check"></i> 70% 收益分成</li>
+            <li><i class="fas fa-check"></i> 国内 CDN 加速</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Creation Form -->
+  <section class="creation-form-section" id="creationForm" style="display: none;">
+    <div class="container">
+      <h2 class="section-title">创建内容</h2>
+      <p class="section-subtitle">填写内容信息，提交后将进入 AI 审核流程</p>
+
+      <div class="form-container">
+        <form id="submissionForm" onsubmit="handleSubmit(event)">
+          <!-- Content Type (Hidden) -->
+          <input type="hidden" id="contentType" name="contentType" value="">
+
+          <!-- Basic Info -->
+          <div class="form-group">
+            <label class="form-label">
+              标题 <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-input"
+              id="title_zh_CN"
+              name="title_zh_CN"
+              placeholder="例如：Claude Code 完全入门指南"
+              required
+            >
+            <div class="form-hint">简洁明了地描述你的内容，建议不超过 50 个字符</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">英文标题</label>
+            <input
+              type="text"
+              class="form-input"
+              id="title_en"
+              name="title_en"
+              placeholder="例如：Claude Code Complete Guide"
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              中文描述 <span class="required">*</span>
+            </label>
+            <textarea
+              class="form-textarea"
+              id="description_zh_CN"
+              name="description_zh_CN"
+              placeholder="详细描述你的内容，包括主要内容、适合人群、学习收获等"
+              required
+            ></textarea>
+            <div class="form-hint">建议 100-300 个字符，帮助读者快速了解内容</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">英文描述</label>
+            <textarea
+              class="form-textarea"
+              id="description_en"
+              name="description_en"
+              placeholder="Detailed description of your content"
+            ></textarea>
+          </div>
+
+          <!-- Category Selection -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">
+                分类 <span class="required">*</span>
+              </label>
+              <select class="form-select" id="category" name="category" required onchange="updateSubcategories()">
+                <option value="">选择分类</option>
+                <!-- Options will be populated by JS -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                子分类 <span class="required">*</span>
+              </label>
+              <select class="form-select" id="subcategory" name="subcategory" required>
+                <option value="">选择子分类</option>
+                <!-- Options will be populated by JS -->
+              </select>
+            </div>
+          </div>
+
+          <!-- Tutorial-specific fields -->
+          <div id="tutorialFields" style="display: none;">
+            <div class="form-group">
+              <label class="form-label">难度级别</label>
+              <select class="form-select" id="difficulty" name="difficulty">
+                <option value="beginner">入门（Beginner）</option>
+                <option value="intermediate">中级（Intermediate）</option>
+                <option value="advanced">高级（Advanced）</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">教程内容（Markdown 格式）<span class="required">*</span></label>
+              <textarea
+                class="form-textarea"
+                id="content_zh_CN"
+                name="content_zh_CN"
+                placeholder="使用 Markdown 编写教程内容..."
+                required
+                style="min-height: 300px;"
+              ></textarea>
+              <div class="form-hint">支持 Markdown 语法，可以包含代码块、图片链接等</div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">视频链接</label>
+                <input
+                  type="url"
+                  class="form-input"
+                  id="video_url"
+                  name="video_url"
+                  placeholder="https://..."
+                >
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">视频类型</label>
+                <select class="form-select" id="video_type" name="video_type">
+                  <option value="upload">上传视频</option>
+                  <option value="youtube">YouTube</option>
+                  <option value="bilibili">Bilibili</option>
+                  <option value="vimeo">Vimeo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Download-specific fields -->
+          <div id="downloadFields" style="display: none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">支持平台</label>
+                <select class="form-select" id="platform" name="platform">
+                  <option value="windows">Windows</option>
+                  <option value="macos">macOS</option>
+                  <option value="linux">Linux</option>
+                  <option value="all">全平台</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">版本号</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  id="version"
+                  name="version"
+                  placeholder="例如：3.12.1"
+                >
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">文件上传</label>
+              <div class="upload-area" id="fileUploadArea" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">点击或拖拽文件到此处上传</div>
+                <div class="upload-hint">支持 exe, msi, zip, tar.gz 等格式，最大 2GB</div>
+              </div>
+              <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(event)">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">GitHub 仓库</label>
+              <input
+                type="url"
+                class="form-input"
+                id="github_url"
+                name="github_url"
+                placeholder="https://github.com/..."
+              >
+            </div>
+          </div>
+
+          <!-- Thumbnail -->
+          <div class="form-group">
+            <label class="form-label">缩略图</label>
+            <input
+              type="url"
+              class="form-input"
+              id="thumbnail"
+              name="thumbnail"
+              placeholder="图片 URL"
+            >
+            <div class="form-hint">建议尺寸：16:9，最小宽度 800px</div>
+          </div>
+
+          <!-- Pricing -->
+          <div class="pricing-section">
+            <div class="pricing-toggle">
+              <div>
+                <div style="font-weight: 600; margin-bottom: 8px;">
+                  <i class="fas fa-gem" style="color: #F59E0B; margin-right: 8px;"></i>
+                  设置为付费内容
+                </div>
+                <div style="font-size: 0.9rem; color: var(--text-light);">
+                  开启后，用户需要购买后才能查看完整内容
+                </div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="is_paid" name="is_paid" onchange="togglePricing()">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div id="pricingFields" style="display: none;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">价格（元）<span class="required">*</span></label>
+                  <input
+                    type="number"
+                    class="form-input"
+                    id="price"
+                    name="price"
+                    min="0"
+                    step="0.01"
+                    placeholder="例如：29.99"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">折扣价</label>
+                  <input
+                    type="number"
+                    class="form-input"
+                    id="discount_price"
+                    name="discount_price"
+                    min="0"
+                    step="0.01"
+                    placeholder="限时优惠价"
+                  >
+                </div>
+              </div>
+
+              <div class="pricing-info">
+                <h4><i class="fas fa-info-circle"></i> 收益说明</h4>
+                <p>• 您将获得售价的 70% 作为收益</p>
+                <p>• 平台收取 30% 作为服务费和支付手续费</p>
+                <p>• 收益将在用户购买结算后的 7 个工作日内到账</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Terms -->
+          <div class="terms-checkbox">
+            <input type="checkbox" id="agreeTerms" required>
+            <label class="terms-label" for="agreeTerms">
+              我已阅读并同意
+              <a href="/terms" target="_blank">《内容创作协议》</a>、
+              <a href="/privacy" target="_blank">《隐私政策》</a>，
+              并承诺所提交内容不侵犯他人权益，符合法律法规要求
+            </label>
+          </div>
+
+          <!-- Submit -->
+          <div class="submit-section">
+            <button type="submit" class="btn-submit" id="submitBtn">
+              <i class="fas fa-paper-plane"></i> 提交审核
+            </button>
+            <p style="margin-top: 16px; font-size: 0.85rem; color: var(--text-light);">
+              提交后，AI 将自动审核您的内容，审核通过后即可发布
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- My Submissions -->
+  <section class="my-submissions">
+    <div class="container">
+      <h2 class="section-title">我的提交</h2>
+      <p class="section-subtitle">查看你已提交的内容和审核状态</p>
+
+      <div class="submissions-table" id="submissionsList">
+        <!-- 将通过 JS 加载 -->
+        <div style="padding: 40px; text-align: center; color: var(--text-light);">
+          <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 16px;"></i>
+          <div>加载中...</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="footer"></footer>
+
+  <script>
+    // Category data
+    const categories = {
+      tutorial: {
+        name: '教程',
+        options: [
+          { value: 'claude-code', label: 'Claude Code' },
+          { value: 'openclaw', label: 'OpenClaw' },
+          { value: 'cursor', label: 'Cursor' },
+          { value: 'windsurf', label: 'Windsurf' },
+          { value: 'copilot', label: 'GitHub Copilot' },
+          { value: 'bolt', label: 'Bolt.new' },
+          { value: 'new', label: 'v0.dev' },
+          { value: 'codeium', label: 'Codeium' }
+        ],
+        subcategories: {
+          'claude-code': [
+            { value: 'installation', label: '安装教程' },
+            { value: 'usage', label: '使用教程' },
+            { value: 'tips', label: '使用技巧' },
+            { value: 'advanced', label: '高级教程' }
+          ]
+        }
+      },
+      download: {
+        name: '资源',
+        options: [
+          { value: 'wsl', label: 'WSL' },
+          { value: 'python', label: 'Python' },
+          { value: 'nodejs', label: 'Node.js' },
+          { value: 'git', label: 'Git' },
+          { value: 'vscode', label: 'VS Code' },
+          { value: 'docker', label: 'Docker' },
+          { value: 'postgresql', label: 'PostgreSQL' },
+          { value: 'redis', label: 'Redis' },
+          { value: 'mongodb', label: 'MongoDB' }
+        ],
+        subcategories: {
+          wsl: [
+            { value: 'installer', label: '安装包' },
+            { value: 'extensions', label: '扩展组件' }
+          ],
+          python: [
+            { value: 'installer', label: '安装包' },
+            { value: 'libraries', label: '常用库' }
+          ]
+        }
+      }
+    };
+
+    let selectedType = null;
+
+    // Load navigation and footer
+    fetch('./index.html')
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        document.getElementById('navbar').innerHTML = doc.querySelector('.navbar').outerHTML;
+        document.getElementById('footer').innerHTML = doc.querySelector('.footer').outerHTML;
+      });
+
+    // Select content type
+    function selectType(type) {
+      selectedType = type;
+      document.getElementById('contentType').value = type;
+
+      // Update UI
+      document.querySelectorAll('.type-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      document.querySelector(`.type-card[data-type="${type}"]`).classList.add('selected');
+
+      // Show form
+      document.getElementById('typeSelection').style.display = 'none';
+      document.getElementById('creationForm').style.display = 'block';
+
+      // Populate categories
+      populateCategories(type);
+
+      // Show/hide type-specific fields
+      if (type === 'tutorial') {
+        document.getElementById('tutorialFields').style.display = 'block';
+        document.getElementById('downloadFields').style.display = 'none';
+      } else {
+        document.getElementById('tutorialFields').style.display = 'none';
+        document.getElementById('downloadFields').style.display = 'block';
+      }
+
+      // Scroll to form
+      document.getElementById('creationForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Populate category select
+    function populateCategories(type) {
+      const categorySelect = document.getElementById('category');
+      categorySelect.innerHTML = '<option value="">选择分类</option>';
+
+      categories[type].options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.label;
+        categorySelect.appendChild(option);
+      });
+    }
+
+    // Update subcategories when category changes
+    function updateSubcategories() {
+      const category = document.getElementById('category').value;
+      const subcategorySelect = document.getElementById('subcategory');
+      subcategorySelect.innerHTML = '<option value="">选择子分类</option>';
+
+      if (category && categories[selectedType].subcategories[category]) {
+        categories[selectedType].subcategories[category].forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt.value;
+          option.textContent = opt.label;
+          subcategorySelect.appendChild(option);
+        });
+      }
+    }
+
+    // Toggle pricing fields
+    function togglePricing() {
+      const isPaid = document.getElementById('is_paid').checked;
+      document.getElementById('pricingFields').style.display = isPaid ? 'block' : 'none';
+    }
+
+    // Handle file selection
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const uploadArea = document.getElementById('fileUploadArea');
+        uploadArea.innerHTML = `
+          <div class="upload-icon"><i class="fas fa-file"></i></div>
+          <div class="upload-text">${file.name}</div>
+          <div class="upload-hint">${formatFileSize(file.size)}</div>
+        `;
+        uploadArea.classList.add('selected');
+      }
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes >= 1073741824) {
+        return (bytes / 1073741824).toFixed(2) + ' GB';
+      } else if (bytes >= 1048576) {
+        return (bytes / 1048576).toFixed(2) + ' MB';
+      } else if (bytes >= 1024) {
+        return (bytes / 1024).toFixed(2) + ' KB';
+      }
+      return bytes + ' B';
+    }
+
+    // Handle form submission
+    async function handleSubmit(event) {
+      event.preventDefault();
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
+
+      const formData = new FormData(event.target);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch('/api/content/submissions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('提交成功！您的内容将进入 AI 审核流程，审核通过后将自动发布。');
+          // Reset form
+          event.target.reset();
+          // Show type selection again
+          document.getElementById('creationForm').style.display = 'none';
+          document.getElementById('typeSelection').style.display = 'block';
+          // Reload submissions
+          loadMySubmissions();
+        } else {
+          alert('提交失败：' + result.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('提交失败，请稍后重试');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 提交审核';
+      }
+    }
+
+    // Load user's submissions
+    async function loadMySubmissions() {
+      try {
+        const response = await fetch('/api/content/my-submissions');
+        const result = await response.json();
+
+        if (result.success && result.data.length > 0) {
+          renderSubmissions(result.data);
+        } else {
+          document.getElementById('submissionsList').innerHTML = `
+            <div style="padding: 40px; text-align: center; color: var(--text-light);">
+              <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 16px;"></i>
+              <div>暂无提交记录</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading submissions:', error);
+      }
+    }
+
+    function renderSubmissions(submissions) {
+      // 使用 getFileProxyUrl 生成 OSS 资源 URL
+      const getFileUrl = (path) => {
+        if (typeof window.getFileProxyUrl === 'function') {
+          return window.getFileProxyUrl(path);
+        }
+        // Fallback: 如果 config.js 未加载，使用原始 OSS URL
+        return `https://jc-st.oss-cn-shanghai.aliyuncs.com/sillymd/${path}`;
+      };
+
+      const html = submissions.map(item => {
+        // 处理缩略图 URL
+        let thumbnailUrl = '/image/default-thumb.png';
+        if (item.thumbnail) {
+          if (item.thumbnail.startsWith('http://') || item.thumbnail.startsWith('https://')) {
+            // 如果是完整 URL，检查是否是 OSS URL
+            if (item.thumbnail.includes('jc-st.oss-cn-shanghai.aliyuncs.com')) {
+              // 提取路径部分并使用代理
+              const ossPath = item.thumbnail.replace('https://jc-st.oss-cn-shanghai.aliyuncs.com/sillymd/', '');
+              thumbnailUrl = getFileUrl(ossPath);
+            } else {
+              // 其他外部 URL 保持不变
+              thumbnailUrl = item.thumbnail;
+            }
+          } else {
+            // 相对路径使用代理
+            thumbnailUrl = getFileUrl(item.thumbnail);
+          }
+        }
+
+        return `
+          <div class="submission-item">
+            <img src="${thumbnailUrl}" class="submission-thumbnail" alt="">
+            <div class="submission-info">
+              <div class="submission-title">${item.title_zh_CN}</div>
+              <div class="submission-meta">
+                ${item.category} · ${item.subcategory} · 提交于 ${new Date(item.submitted_at).toLocaleDateString()}
+              </div>
+            </div>
+            <div class="submission-price ${item.is_paid ? '' : 'free'}">
+              ${item.is_paid ? `¥${item.price}` : '免费'}
+            </div>
+            <div>
+              <span class="status-badge status-${item.status}">
+                ${getStatusText(item.status)}
+              </span>
+            </div>
+            <div>
+              <button class="btn-ghost" onclick="viewSubmission(${item.id})">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('submissionsList').innerHTML = html;
+    }
+
+    function getStatusText(status) {
+      const map = {
+        'pending': '待审核',
+        'reviewing': '审核中',
+        'approved': '已通过',
+        'rejected': '已拒绝'
+      };
+      return map[status] || status;
+    }
+
+    function viewSubmission(id) {
+      window.open(`/submission/${id}.html`, '_blank');
+    }
+
+    // Initialize
+    loadMySubmissions();
+  </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+{
+  "app": {
+    "name": "挺傻的 AI Skills 中心",
+    "tagline": "AI 技能托管与市场"
+  },
+  "nav": {
+    "home": "首页",
+    "skills": "技能市场",
+    "categories": "分类",
+    "about": "关于",
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出"
+  },
+  "skills": {
+    "title": "AI 技能市场",
+    "subtitle": "探索、发现、使用 AI 技能",
+    "search": "搜索技能...",
+    "noResults": "未找到匹配的技能",
+    "loading": "加载中...",
+    "featured": "精选技能",
+    "newest": "最新发布",
+    "popular": "热门技能",
+    "categories": {
+      "tech": "技术",
+      "product": "产品",
+      "design": "设计",
+      "marketing": "市场营销",
+      "ops": "运营",
+      "all": "全部分类"
+    },
+    "actions": {
+      "install": "安装",
+      "demo": "演示",
+      "view": "查看详情",
+      "download": "下载",
+      "share": "分享",
+      "favorite": "收藏"
+    },
+    "stats": {
+      "downloads": "下载",
+      "rating": "评分",
+      "reviews": "评论"
+    },
+    "detail": {
+      "description": "描述",
+      "installation": "安装说明",
+      "examples": "使用示例",
+      "reviews": "用户评价",
+      "related": "相关技能",
+      "author": "作者",
+      "version": "版本",
+      "updated": "更新时间"
+    }
+  },
+  "common": {
+    "back": "返回",
+    "close": "关闭",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "delete": "删除",
+    "edit": "编辑",
+    "submit": "提交",
+    "loading": "加载中...",
+    "error": "出错了",
+    "success": "操作成功",
+    "noData": "暂无数据"
+  },
+  "footer": {
+    "copyright": "版权所有",
+    "links": "相关链接",
+    "contact": "联系我们"
+  }
+}

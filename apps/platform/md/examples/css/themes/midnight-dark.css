@@ -1,0 +1,53 @@
+/* ==================== 午夜黑主题 ==================== */
+:root {
+    /* 主色调 */
+    --primary-color: #525252;
+    --primary-dark: #404040;
+    --primary-light: #737373;
+    --secondary-color: #737373;
+    --accent-color: #a3a3a3;
+    
+    /* 状态色 */
+    --success-color: #22c55e;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+    
+    /* 背景色 */
+    --bg-primary: #000000;
+    --bg-secondary: #171717;
+    --bg-tertiary: #262626;
+    --bg-card: rgba(23, 23, 23, 0.9);
+    
+    /* 文字色 */
+    --text-primary: #fafafa;
+    --text-secondary: #d4d4d4;
+    --text-muted: #a3a3a3;
+    
+    /* 边框和阴影 */
+    --border-color: rgba(82, 82, 82, 0.3);
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --glow-color: rgba(115, 115, 115, 0.5);
+    
+    /* 渐变 */
+    --gradient-primary: linear-gradient(135deg, #525252, #737373);
+    --gradient-glow: radial-gradient(circle, rgba(115, 115, 115, 0.15), transparent);
+}
+
+/* 主题特定的发光效果 */
+.midnight-dark-glow {
+    box-shadow: 0 0 30px rgba(115, 115, 115, 0.3);
+}
+
+/* 按钮渐变 */
+.btn-primary {
+    background: linear-gradient(135deg, #525252, #737373);
+}
+
+/* 悬浮球 */
+.gradient-orb.orb-1 {
+    background: linear-gradient(135deg, #525252, #737373);
+}
+
+.gradient-orb.orb-2 {
+    background: linear-gradient(135deg, #a3a3a3, #737373);
+}

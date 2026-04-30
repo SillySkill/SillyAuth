@@ -1,0 +1,873 @@
+"""
+Payment Accounts API Routes
+收款账户管理 API 路由
+
+管理员可以维护平台的收款账户配置
+"""
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_, or_, func, text
+from typing import List, Optional, Set
+from pydantic import BaseModel, Field, validator
+from datetime import datetime
+import json
+import logging
+
+from ..database import get_db
+from ..models.users import User
+from ..middleware.auth import get_current_user, get_current_admin
+from ..utils.credential_crypto import (
+    encrypt_credentials,
+    decrypt_credentials,
+    mask_sensitive_data,
+    validate_credentials_fields,
+    _ENCRYPTION_ENABLED
+)
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/payment/accounts", tags=["收款账户管理"])
+
+# ============================================
+# Whitelist for Input Validation
+# ============================================
+
+ALLOWED_ACCOUNT_TYPES: Set[str] = {"wechat", "alipay", "paypal", "bank"}
+ALLOWED_CURRENCIES: Set[str] = {"CNY", "USD", "EUR", "GBP", "JPY", "HKD"}
+ALLOWED_SETTLEMENT_METHODS: Set[str] = {"direct", "points"}
+ALLOWED_SETTLEMENT_PERIODS: Set[str] = {"weekly", "monthly", "quarterly"}
+
+# ============================================
+# Schema Definitions
+# ============================================
+
+class PaymentAccountCreate(BaseModel):
+    """创建收款账户请求"""
+    account_type: str = Field(..., description="账户类型: wechat, alipay, paypal, bank")
+    account_name: str = Field(..., description="账户名称", min_length=1, max_length=255)
+    account_id: str = Field(..., description="账户标识", min_length=1, max_length=255)
+    credentials: dict = Field(..., description="凭证信息（加密存储）")
+    currency: str = Field(default="CNY", description="支持的货币")
+    description: Optional[str] = Field(None, description="描述", max_length=1000)
+
+    @validator('account_type')
+    def validate_account_type(cls, v):
+        if v not in ALLOWED_ACCOUNT_TYPES:
+            raise ValueError(f"无效的账户类型。允许的值: {', '.join(ALLOWED_ACCOUNT_TYPES)}")
+        return v
+
+    @validator('currency')
+    def validate_currency(cls, v):
+        if v not in ALLOWED_CURRENCIES:
+            raise ValueError(f"无效的货币。允许的值: {', '.join(ALLOWED_CURRENCIES)}")
+        return v
+
+    @validator('account_name')
+    def validate_account_name(cls, v):
+        # 防止 SQL 注入的基础检查
+        if any(char in v for char in [';', '--', '/*', '*/', 'xp_', 'DROP', 'DELETE', 'INSERT']):
+            raise ValueError("账户名称包含非法字符")
+        return v.strip()
+
+
+class PaymentAccountUpdate(BaseModel):
+    """更新收款账户请求"""
+    account_name: Optional[str] = None
+    credentials: Optional[dict] = None
+    is_active: Optional[bool] = None
+    is_primary: Optional[bool] = None
+    priority: Optional[int] = None
+    currency: Optional[str] = None
+    description: Optional[str] = None
+
+
+class CreatorSettlementPreference(BaseModel):
+    """创作者结算偏好"""
+    settlement_method: str = Field(default="direct", description="结算方式: direct, points")
+    payment_account_type: Optional[str] = Field(None, description="收款账户类型")
+    payment_account_id: Optional[str] = Field(None, description="收款账户标识")
+    auto_settle: bool = Field(default=False, description="是否自动结算")
+    min_settlement_amount: float = Field(default=100.00, description="最低结算金额", ge=0)
+    settlement_period: str = Field(default="monthly", description="结算周期")
+    paypal_email: Optional[str] = Field(None, description="PayPal 邮箱")
+    alipay_account: Optional[str] = Field(None, description="支付宝账号")
+    wechat_openid: Optional[str] = Field(None, description="微信 OpenID")
+
+    @validator('settlement_method')
+    def validate_settlement_method(cls, v):
+        if v not in ALLOWED_SETTLEMENT_METHODS:
+            raise ValueError(f"无效的结算方式。允许的值: {', '.join(ALLOWED_SETTLEMENT_METHODS)}")
+        return v
+
+    @validator('settlement_period')
+    def validate_settlement_period(cls, v):
+        if v not in ALLOWED_SETTLEMENT_PERIODS:
+            raise ValueError(f"无效的结算周期。允许的值: {', '.join(ALLOWED_SETTLEMENT_PERIODS)}")
+        return v
+
+    @validator('payment_account_type')
+    def validate_payment_account_type(cls, v):
+        if v is not None and v not in ALLOWED_ACCOUNT_TYPES:
+            raise ValueError(f"无效的收款账户类型。允许的值: {', '.join(ALLOWED_ACCOUNT_TYPES)}")
+        return v
+
+    @validator('paypal_email')
+    def validate_paypal_email(cls, v):
+        if v is not None and '@' not in v:
+            raise ValueError("无效的 PayPal 邮箱格式")
+        return v
+
+
+class SettlementRequest(BaseModel):
+    """结算请求"""
+    payment_account_type: str = Field(..., description="收款账户类型")
+    payment_account_id: str = Field(..., description="收款账户标识")
+
+
+# ============================================
+# Admin API: 收款账户管理
+# ============================================
+
+@router.get("/", response_model=dict)
+async def list_payment_accounts(
+    current_admin: User = Depends(get_current_admin),
+    account_type: Optional[str] = None,
+    is_active: Optional[bool] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取收款账户列表（管理员）
+    """
+    # 验证 account_type 参数
+    if account_type and account_type not in ALLOWED_ACCOUNT_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"无效的账户类型。允许的值: {', '.join(ALLOWED_ACCOUNT_TYPES)}"
+        )
+
+    # 使用参数化查询
+    query = text("""
+        SELECT id, account_type, account_name, account_id, credentials,
+               is_active, is_primary, priority, currency, description,
+               created_at, updated_at
+        FROM payment_accounts
+        WHERE 1=1
+        AND (:account_type IS NULL OR account_type = :account_type)
+        AND (:is_active IS NULL OR is_active = :is_active)
+        ORDER BY priority DESC, created_at ASC
+    """)
+
+    result = await db.execute(query, {
+        "account_type": account_type,
+        "is_active": is_active
+    })
+    rows = result.fetchall()
+
+    accounts = []
+    for row in rows:
+        # 解密并隐藏敏感信息
+        credentials = decrypt_credentials(row[4])
+        masked_credentials = mask_sensitive_data(credentials)
+
+        accounts.append({
+            "id": row[0],
+            "account_type": row[1],
+            "account_name": row[2],
+            "account_id": row[3],
+            "credentials": masked_credentials,
+            "is_active": row[5],
+            "is_primary": row[6],
+            "priority": row[7],
+            "currency": row[8],
+            "description": row[9],
+            "created_at": row[10].isoformat() if row[10] else None,
+            "updated_at": row[11].isoformat() if row[11] else None
+        })
+
+    return {
+        "success": True,
+        "data": accounts
+    }
+
+
+@router.post("/", response_model=dict)
+async def create_payment_account(
+    account: PaymentAccountCreate,
+    current_admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    创建收款账户（管理员）
+    """
+    # 验证必填字段（根据账户类型）
+    required_fields = {
+        "wechat": ["mch_id", "api_key"],
+        "alipay": ["app_id", "private_key"],
+        "paypal": ["client_id", "client_secret"],
+        "bank": ["bank_name", "account_number"]
+    }
+
+    if account.account_type in required_fields:
+        is_valid, error_msg = validate_credentials_fields(
+            account.credentials,
+            required_fields[account.account_type]
+        )
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_msg)
+
+    # 加密凭证
+    encrypted_credentials = encrypt_credentials(account.credentials)
+
+    # 如果设置为首选账户，取消同类型的其他首选
+    await db.execute(
+        text("UPDATE payment_accounts SET is_primary = FALSE WHERE account_type = :account_type"),
+        {"account_type": account.account_type}
+    )
+
+    # 插入新账户（使用参数化查询）
+    query = text("""
+        INSERT INTO payment_accounts
+        (account_type, account_name, account_id, credentials, is_active, is_primary, priority, currency, description)
+        VALUES (:account_type, :account_name, :account_id, :credentials, :is_active, :is_primary, :priority, :currency, :description)
+        RETURNING id
+    """)
+
+    result = await db.execute(
+        query,
+        {
+            "account_type": account.account_type,
+            "account_name": account.account_name,
+            "account_id": account.account_id,
+            "credentials": encrypted_credentials,
+            "is_active": True,
+            "is_primary": False,
+            "priority": 0,
+            "currency": account.currency,
+            "description": account.description
+        }
+    )
+    await db.commit()
+
+    new_id = result.scalar_one()
+
+    logger.info(
+        f"收款账户创建成功: ID={new_id}, 类型={account.account_type}, "
+        f"名称={account.account_name}, 加密启用={_ENCRYPTION_ENABLED}"
+    )
+
+    return {
+        "success": True,
+        "data": {
+            "id": new_id,
+            "message": "收款账户创建成功"
+        }
+    }
+
+
+@router.put("/{account_id}", response_model=dict)
+async def update_payment_account(
+    account_id: int,
+    account: PaymentAccountUpdate,
+    current_admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    更新收款账户（管理员）
+    """
+    # 检查账户是否存在（使用参数化查询）
+    check_query = text("SELECT id, account_type FROM payment_accounts WHERE id = :account_id")
+    result = await db.execute(check_query, {"account_id": account_id})
+    existing = result.fetchone()
+
+    if not existing:
+        raise HTTPException(status_code=404, detail="收款账户不存在")
+
+    # 如果设置为首选账户，取消同类型的其他首选
+    if account.is_primary:
+        await db.execute(
+            text("UPDATE payment_accounts SET is_primary = FALSE WHERE account_type = :account_type AND id != :account_id"),
+            {"account_type": existing[1], "account_id": account_id}
+        )
+
+    # 构建更新语句
+    update_fields = []
+    params = {"account_id": account_id}
+
+    if account.account_name is not None:
+        update_fields.append("account_name = :account_name")
+        params["account_name"] = account.account_name
+
+    if account.credentials is not None:
+        # 验证凭证字段
+        required_fields = {
+            "wechat": ["mch_id", "api_key"],
+            "alipay": ["app_id", "private_key"],
+            "paypal": ["client_id", "client_secret"],
+            "bank": ["bank_name", "account_number"]
+        }
+        if existing[1] in required_fields:
+            is_valid, error_msg = validate_credentials_fields(
+                account.credentials,
+                required_fields[existing[1]]
+            )
+            if not is_valid:
+                raise HTTPException(status_code=400, detail=error_msg)
+
+        # 加密新凭证
+        update_fields.append("credentials = :credentials")
+        params["credentials"] = encrypt_credentials(account.credentials)
+
+    if account.is_active is not None:
+        update_fields.append("is_active = :is_active")
+        params["is_active"] = account.is_active
+
+    if account.is_primary is not None:
+        update_fields.append("is_primary = :is_primary")
+        params["is_primary"] = account.is_primary
+
+    if account.priority is not None:
+        update_fields.append("priority = :priority")
+        params["priority"] = account.priority
+
+    if account.currency is not None:
+        if account.currency not in ALLOWED_CURRENCIES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"无效的货币。允许的值: {', '.join(ALLOWED_CURRENCIES)}"
+            )
+        update_fields.append("currency = :currency")
+        params["currency"] = account.currency
+
+    if account.description is not None:
+        update_fields.append("description = :description")
+        params["description"] = account.description
+
+    update_fields.append("updated_at = CURRENT_TIMESTAMP")
+
+    if update_fields:
+        # 使用参数化查询，避免 SQL 注入
+        query = text("UPDATE payment_accounts SET " + ", ".join(update_fields) + " WHERE id = :account_id")
+        await db.execute(query, params)
+        await db.commit()
+
+    logger.info(f"收款账户更新成功: ID={account_id}")
+
+    return {
+        "success": True,
+        "message": "收款账户更新成功"
+    }
+
+
+@router.delete("/{account_id}", response_model=dict)
+async def delete_payment_account(
+    account_id: int,
+    current_admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    删除收款账户（管理员）
+    """
+    # 使用参数化查询
+    query = text("DELETE FROM payment_accounts WHERE id = :account_id")
+    result = await db.execute(query, {"account_id": account_id})
+    await db.commit()
+
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="收款账户不存在")
+
+    logger.info(f"收款账户删除成功: ID={account_id}")
+
+    return {
+        "success": True,
+        "message": "收款账户删除成功"
+    }
+
+
+# ============================================
+# Creator API: 结算偏好管理
+# ============================================
+
+@router.get("/creator/preference", response_model=dict)
+async def get_creator_settlement_preference(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取创作者结算偏好
+    """
+    query = text("""
+        SELECT
+            id, settlement_method, payment_account_type, payment_account_id,
+            auto_settle, min_settlement_amount, settlement_period,
+            paypal_email, alipay_account, wechat_openid
+        FROM creator_settlement_preferences
+        WHERE user_id = :user_id
+    """)
+
+    result = await db.execute(query, {"user_id": current_user.id})
+    row = result.fetchone()
+
+    if not row:
+        # 返回默认配置
+        return {
+            "success": True,
+            "data": {
+                "settlement_method": "direct",
+                "auto_settle": False,
+                "min_settlement_amount": 100.00,
+                "settlement_period": "monthly"
+            }
+        }
+
+    return {
+        "success": True,
+        "data": {
+            "id": row[0],
+            "settlement_method": row[1],
+            "payment_account_type": row[2],
+            "payment_account_id": row[3],
+            "auto_settle": row[4],
+            "min_settlement_amount": float(row[5]),
+            "settlement_period": row[6],
+            "paypal_email": row[7],
+            "alipay_account": row[8],
+            "wechat_openid": row[9]
+        }
+    }
+
+
+@router.put("/creator/preference", response_model=dict)
+async def update_creator_settlement_preference(
+    preference: CreatorSettlementPreference,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    更新创作者结算偏好
+    """
+    # 检查是否已存在
+    check_query = text("SELECT id FROM creator_settlement_preferences WHERE user_id = :user_id")
+    result = await db.execute(check_query, {"user_id": current_user.id})
+    existing = result.fetchone()
+
+    if existing:
+        # 更新
+        query = text("""
+            UPDATE creator_settlement_preferences
+            SET settlement_method = :settlement_method,
+                payment_account_type = :payment_account_type,
+                payment_account_id = :payment_account_id,
+                auto_settle = :auto_settle,
+                min_settlement_amount = :min_settlement_amount,
+                settlement_period = :settlement_period,
+                paypal_email = :paypal_email,
+                alipay_account = :alipay_account,
+                wechat_openid = :wechat_openid,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = :user_id
+        """)
+        await db.execute(query, {
+            "user_id": current_user.id,
+            "settlement_method": preference.settlement_method,
+            "payment_account_type": preference.payment_account_type,
+            "payment_account_id": preference.payment_account_id,
+            "auto_settle": preference.auto_settle,
+            "min_settlement_amount": preference.min_settlement_amount,
+            "settlement_period": preference.settlement_period,
+            "paypal_email": preference.paypal_email,
+            "alipay_account": preference.alipay_account,
+            "wechat_openid": preference.wechat_openid
+        })
+    else:
+        # 创建
+        query = text("""
+            INSERT INTO creator_settlement_preferences
+            (user_id, settlement_method, payment_account_type, payment_account_id,
+             auto_settle, min_settlement_amount, settlement_period,
+             paypal_email, alipay_account, wechat_openid)
+            VALUES (:user_id, :settlement_method, :payment_account_type, :payment_account_id,
+                    :auto_settle, :min_settlement_amount, :settlement_period,
+                    :paypal_email, :alipay_account, :wechat_openid)
+        """)
+        await db.execute(query, {
+            "user_id": current_user.id,
+            "settlement_method": preference.settlement_method,
+            "payment_account_type": preference.payment_account_type,
+            "payment_account_id": preference.payment_account_id,
+            "auto_settle": preference.auto_settle,
+            "min_settlement_amount": preference.min_settlement_amount,
+            "settlement_period": preference.settlement_period,
+            "paypal_email": preference.paypal_email,
+            "alipay_account": preference.alipay_account,
+            "wechat_openid": preference.wechat_openid
+        })
+
+    await db.commit()
+
+    logger.info(f"创作者结算偏好更新成功: user_id={current_user.id}")
+
+    return {
+        "success": True,
+        "message": "结算偏好更新成功"
+    }
+
+
+# ============================================
+# Creator API: 收益查询
+# ============================================
+
+@router.get("/creator/earnings", response_model=dict)
+async def get_creator_earnings(
+    current_user: User = Depends(get_current_user),
+    status: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取创作者收益记录
+    """
+    # 验证 status 参数
+    valid_statuses = {"pending", "settled", "points_converted", "failed"}
+    if status and status not in valid_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail=f"无效的状态。允许的值: {', '.join(valid_statuses)}"
+        )
+
+    # 统计总数（使用参数化查询）
+    count_query = text("""
+        SELECT COUNT(*)
+        FROM creator_earnings
+        WHERE user_id = :user_id
+        AND (:status IS NULL OR settlement_status = :status)
+    """)
+    result = await db.execute(count_query, {
+        "user_id": current_user.id,
+        "status": status
+    })
+    total = result.scalar()
+
+    # 分页查询
+    offset = (page - 1) * page_size
+    query = text("""
+        SELECT
+            id, order_id, content_type, content_id,
+            gross_amount, platform_commission, creator_share,
+            settlement_status, settlement_method, settlement_amount,
+            points_awarded, settled_at, created_at
+        FROM creator_earnings
+        WHERE user_id = :user_id
+        AND (:status IS NULL OR settlement_status = :status)
+        ORDER BY created_at DESC
+        LIMIT :page_size OFFSET :offset
+    """)
+    result = await db.execute(query, {
+        "user_id": current_user.id,
+        "status": status,
+        "page_size": page_size,
+        "offset": offset
+    })
+    rows = result.fetchall()
+
+    earnings = []
+    for row in rows:
+        earnings.append({
+            "id": row[0],
+            "order_id": row[1],
+            "content_type": row[2],
+            "content_id": row[3],
+            "gross_amount": float(row[4]),
+            "platform_commission": float(row[5]),
+            "creator_share": float(row[6]),
+            "settlement_status": row[7],
+            "settlement_method": row[8],
+            "settlement_amount": float(row[9]) if row[9] else None,
+            "points_awarded": row[10],
+            "settled_at": row[11].isoformat() if row[11] else None,
+            "created_at": row[12].isoformat() if row[12] else None
+        })
+
+    return {
+        "success": True,
+        "data": {
+            "items": earnings,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size
+        }
+    }
+
+
+@router.get("/creator/earnings/summary", response_model=dict)
+async def get_creator_earnings_summary(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取创作者收益汇总
+    """
+    query = text("""
+        SELECT * FROM v_creator_earnings_summary
+        WHERE user_id = :user_id
+    """)
+
+    result = await db.execute(query, {"user_id": current_user.id})
+    row = result.fetchone()
+
+    if not row:
+        return {
+            "success": True,
+            "data": {
+                "pending_earnings": 0,
+                "settled_amount": 0,
+                "points_earned": 0,
+                "total_orders_count": 0
+            }
+        }
+
+    return {
+        "success": True,
+        "data": {
+            "settlement_method": row[3],
+            "auto_settle": row[4],
+            "total_earnings_count": row[5],
+            "pending_earnings": float(row[6]) if row[6] else 0,
+            "settled_amount": float(row[7]) if row[7] else 0,
+            "points_earned": row[8] if row[8] else 0,
+            "total_orders_count": row[9],
+            "total_gross_amount": float(row[10]) if row[10] else 0,
+            "total_platform_commission": float(row[11]) if row[11] else 0
+        }
+    }
+
+
+# ============================================
+# Creator API: 结算操作
+# ============================================
+
+@router.post("/creator/settle", response_model=dict)
+async def settle_creator_earnings(
+    request: SettlementRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    结算创作者收益
+
+    使用数据库行锁防止并发结算问题
+    """
+    # 验证账户类型
+    if request.payment_account_type not in ALLOWED_ACCOUNT_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"无效的收款账户类型。允许的值: {', '.join(ALLOWED_ACCOUNT_TYPES)}"
+        )
+
+    # 使用事务和行锁确保原子性
+    async with db.begin():
+        # 检查是否有足够的待结算金额（使用 FOR UPDATE 锁定行）
+        check_query = text("""
+            SELECT COALESCE(SUM(creator_share), 0) AS total_pending
+            FROM creator_earnings
+            WHERE user_id = :user_id AND settlement_status = 'pending'
+            FOR UPDATE
+        """)
+        result = await db.execute(check_query, {"user_id": current_user.id})
+        total_pending = result.scalar()
+
+        if total_pending < 100:
+            raise HTTPException(
+                status_code=400,
+                detail=f"待结算金额不足 100 元，当前为 {total_pending:.2f} 元"
+            )
+
+        # 执行结算（数据库函数内部也使用 FOR UPDATE SKIP LOCKED）
+        settle_query = text("""
+            SELECT batch_settle_creator_earnings(
+                :user_id,
+                :payment_account_type,
+                :payment_account_id
+            ) AS settlement_id
+        """)
+        result = await db.execute(settle_query, {
+            "user_id": current_user.id,
+            "payment_account_type": request.payment_account_type,
+            "payment_account_id": request.payment_account_id
+        })
+        settlement_id = result.scalar()
+
+    if not settlement_id:
+        raise HTTPException(status_code=500, detail="结算失败")
+
+    logger.info(
+        f"创作者收益结算成功: user_id={current_user.id}, "
+        f"settlement_id={settlement_id}, amount={total_pending:.2f}"
+    )
+
+    return {
+        "success": True,
+        "data": {
+            "settlement_id": settlement_id,
+            "message": f"成功结算 {total_pending:.2f} 元"
+        }
+    }
+
+
+@router.get("/creator/settlements", response_model=dict)
+async def get_creator_settlements(
+    current_user: User = Depends(get_current_user),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取创作者结算记录
+    """
+    # 统计总数
+    count_query = text("SELECT COUNT(*) FROM settlement_records WHERE user_id = :user_id")
+    result = await db.execute(count_query, {"user_id": current_user.id})
+    total = result.scalar()
+
+    # 分页查询
+    offset = (page - 1) * page_size
+    query = text("""
+        SELECT
+            id, batch_number, total_orders, total_amount, total_commission, total_earnings,
+            settlement_method, status, transaction_id, failure_reason,
+            period_start, period_end, created_at, processed_at
+        FROM settlement_records
+        WHERE user_id = :user_id
+        ORDER BY created_at DESC
+        LIMIT :page_size OFFSET :offset
+    """)
+
+    result = await db.execute(query, {
+        "user_id": current_user.id,
+        "page_size": page_size,
+        "offset": offset
+    })
+    rows = result.fetchall()
+
+    settlements = []
+    for row in rows:
+        settlements.append({
+            "id": row[0],
+            "batch_number": row[1],
+            "total_orders": row[2],
+            "total_amount": float(row[3]),
+            "total_commission": float(row[4]),
+            "total_earnings": float(row[5]),
+            "settlement_method": row[6],
+            "status": row[7],
+            "transaction_id": row[8],
+            "failure_reason": row[9],
+            "period_start": row[10].isoformat() if row[10] else None,
+            "period_end": row[11].isoformat() if row[11] else None,
+            "created_at": row[12].isoformat() if row[12] else None,
+            "processed_at": row[13].isoformat() if row[13] else None
+        })
+
+    return {
+        "success": True,
+        "data": {
+            "items": settlements,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size
+        }
+    }
+
+
+# ============================================
+# Admin API: 结算管理
+# ============================================
+
+@router.get("/admin/pending-settlements", response_model=dict)
+async def get_pending_settlements(
+    current_admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取待结算创作者列表（管理员）
+    """
+    query = text("SELECT * FROM v_pending_settlements ORDER BY total_pending_amount DESC")
+    result = await db.execute(query)
+    rows = result.fetchall()
+
+    settlements = []
+    for row in rows:
+        settlements.append({
+            "user_id": row[0],
+            "username": row[1],
+            "email": row[2],
+            "settlement_method": row[3],
+            "payment_account_type": row[4],
+            "payment_account_id": row[5],
+            "min_settlement_amount": float(row[6]) if row[6] else 100,
+            "pending_count": row[7],
+            "total_pending_amount": float(row[8]),
+            "oldest_earning_date": row[9].isoformat() if row[9] else None,
+            "latest_earning_date": row[10].isoformat() if row[10] else None
+        })
+
+    return {
+        "success": True,
+        "data": settlements
+    }
+
+
+@router.post("/admin/settle/{user_id}", response_model=dict)
+async def admin_settle_creator(
+    user_id: int,
+    request: SettlementRequest,
+    current_admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    管理员手动结算创作者收益
+
+    使用数据库行锁防止并发结算问题
+    """
+    # 验证账户类型
+    if request.payment_account_type not in ALLOWED_ACCOUNT_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"无效的收款账户类型。允许的值: {', '.join(ALLOWED_ACCOUNT_TYPES)}"
+        )
+
+    # 使用事务和行锁确保原子性
+    async with db.begin():
+        # 执行结算（数据库函数内部使用 FOR UPDATE SKIP LOCKED）
+        settle_query = text("""
+            SELECT batch_settle_creator_earnings(
+                :user_id,
+                :payment_account_type,
+                :payment_account_id
+            ) AS settlement_id
+        """)
+        result = await db.execute(settle_query, {
+            "user_id": user_id,
+            "payment_account_type": request.payment_account_type,
+            "payment_account_id": request.payment_account_id
+        })
+        settlement_id = result.scalar()
+
+    if not settlement_id:
+        raise HTTPException(status_code=500, detail="结算失败，可能没有足够的待结算金额")
+
+    logger.info(
+        f"管理员手动结算创作者收益成功: user_id={user_id}, "
+        f"settlement_id={settlement_id}, admin_id={current_admin.id}"
+    )
+
+    return {
+        "success": True,
+        "data": {
+            "settlement_id": settlement_id,
+            "user_id": user_id,
+            "message": "结算成功"
+        }
+    }

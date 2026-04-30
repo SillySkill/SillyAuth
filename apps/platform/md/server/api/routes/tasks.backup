@@ -1,0 +1,767 @@
+"""
+Task System API Routes
+任务系统 API 路由
+
+实现每日任务、成就系统、签到功能
+"""
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Request
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_, or_, func, text
+from typing import List, Optional
+from pydantic import BaseModel, Field
+from datetime import datetime, date
+from decimal import Decimal
+import logging
+
+from ..database import get_db
+from ..models.users import User
+from ..middleware.auth import get_current_user, get_current_admin, get_client_ip
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/tasks", tags=["任务系统"])
+
+
+# ============================================
+# Schema Definitions
+# ============================================
+
+class DailyTaskResponse(BaseModel):
+    """每日任务响应"""
+    id: int
+    task_key: str
+    task_name: str
+    task_name_en: Optional[str]
+    task_description: Optional[str]
+    task_type: str
+    task_target: int
+    task_reward_points: int
+    icon: Optional[str]
+    color: Optional[str]
+    progress: int = 0
+    is_completed: bool = False
+    is_rewarded: bool = False
+
+
+class AchievementResponse(BaseModel):
+    """成就响应"""
+    id: int
+    achievement_key: str
+    achievement_name: str
+    achievement_name_en: Optional[str]
+    description: Optional[str]
+    achievement_type: str
+    requirement_type: str
+    requirement_target: int
+    reward_points: int
+    reward_title: Optional[str]
+    reward_badge: Optional[str]
+    icon: Optional[str]
+    color: Optional[str]
+    progress: int = 0
+    target: int
+    is_unlocked: bool = False
+    is_secret: bool = False
+
+
+class SignInResponse(BaseModel):
+    """签到响应"""
+    success: bool
+    points_earned: int
+    consecutive_days: int
+    current_balance: int
+    sign_in_date: str
+    sign_in_time: str
+    new_unlocked_achievements: List[str] = []
+
+
+class UserTaskStatsResponse(BaseModel):
+    """用户任务统计响应"""
+    total_completed_today: int
+    total_points_earned_today: int
+    current_streak: int
+    max_streak: int
+    total_achievements_unlocked: int
+    total_points_from_achievements: int
+
+
+# ============================================
+# 签到 API
+# ============================================
+
+@router.post("/sign-in", response_model=dict)
+async def daily_sign_in(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    每日签到
+
+    获得积分，连续签到有额外奖励
+    """
+    # 获取客户端信息
+    client_ip = get_client_ip(request)
+    user_agent = request.headers.get("user-agent", "")
+
+    # 检查今日是否已签到
+    query = text("""
+        SELECT id, consecutive_days, points_earned
+        FROM sign_in_records
+        WHERE user_id = :user_id AND sign_in_date = CURRENT_DATE
+    """)
+
+    result = await db.execute(query, {"user_id": current_user.id})
+    existing = result.fetchone()
+
+    if existing:
+        # 今日已签到，返回现有记录
+        return {
+            "success": True,
+            "message": "今日已签到",
+            "data": {
+                "already_signed_in": True,
+                "points_earned": existing[2],
+                "consecutive_days": existing[1]
+            }
+        }
+
+    # 执行签到
+    sign_in_query = text("""
+        SELECT user_sign_in(:user_id, :ip_address, :user_agent) AS result
+    """)
+
+    result = await db.execute(sign_in_query, {
+        "user_id": current_user.id,
+        "ip_address": client_ip,
+        "user_agent": user_agent
+    })
+
+    sign_in_result = result.scalar_one()
+
+    # 解析 JSON 结果
+    import json
+    sign_in_data = json.loads(sign_in_result)
+
+    return {
+        "success": True,
+        "message": "签到成功",
+        "data": sign_in_data
+    }
+
+
+@router.get("/sign-in/status", response_model=dict)
+async def get_sign_in_status(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取今日签到状态
+    """
+    query = text("""
+        SELECT
+            EXISTS(
+                SELECT 1 FROM sign_in_records
+                WHERE user_id = :user_id AND sign_in_date = CURRENT_DATE
+            ) AS signed_in_today,
+            COALESCE(
+                (SELECT consecutive_days FROM sign_in_records
+                 WHERE user_id = :user_id AND sign_in_date = CURRENT_DATE),
+                0
+            ) AS consecutive_days,
+            COALESCE(
+                (SELECT MAX(consecutive_days) FROM sign_in_records
+                 WHERE user_id = :user_id),
+                0
+            ) AS max_consecutive_days
+    """)
+
+    result = await db.execute(query, {"user_id": current_user.id})
+    row = result.fetchone()
+
+    return {
+        "success": True,
+        "data": {
+            "signed_in_today": row[0],
+            "consecutive_days": row[1],
+            "max_consecutive_days": row[2]
+        }
+    }
+
+
+@router.get("/sign-in/calendar", response_model=dict)
+async def get_sign_in_calendar(
+    year: int = Query(None, description="年份"),
+    month: int = Query(None, description="月份"),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取签到日历
+    """
+    if year is None:
+        year = datetime.now().year
+    if month is None:
+        month = datetime.now().month
+
+    query = text("""
+        SELECT
+            sign_in_date,
+            consecutive_days,
+            points_earned
+        FROM sign_in_records
+        WHERE user_id = :user_id
+          AND EXTRACT(YEAR FROM sign_in_date) = :year
+          AND EXTRACT(MONTH FROM sign_in_date) = :month
+        ORDER BY sign_in_date ASC
+    """)
+
+    result = await db.execute(query, {
+        "user_id": current_user.id,
+        "year": year,
+        "month": month
+    })
+
+    rows = result.fetchall()
+
+    calendar = []
+    for row in rows:
+        calendar.append({
+            "date": row[0].isoformat(),
+            "consecutive_days": row[1],
+            "points_earned": row[2]
+        })
+
+    return {
+        "success": True,
+        "data": {
+            "year": year,
+            "month": month,
+            "records": calendar
+        }
+    }
+
+
+# ============================================
+# 每日任务 API
+# ============================================
+
+@router.get("/daily", response_model=dict)
+async def get_daily_tasks(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取今日任务列表
+    """
+    query = text("""
+        SELECT
+            task_id,
+            task_key,
+            task_name,
+            task_description,
+            task_type,
+            task_target,
+            task_reward_points,
+            icon,
+            color,
+            progress,
+            is_completed,
+            is_rewarded
+        FROM v_user_daily_tasks
+        WHERE user_id = :user_id
+        ORDER BY display_order ASC
+    """)
+
+    result = await db.execute(query, {"user_id": current_user.id})
+    rows = result.fetchall()
+
+    tasks = []
+    for row in rows:
+        tasks.append({
+            "id": row[0],
+            "task_key": row[1],
+            "task_name": row[2],
+            "task_description": row[3],
+            "task_type": row[4],
+            "target": row[6],
+            "reward_points": row[7],
+            "icon": row[8],
+            "color": row[9],
+            "progress": row[10],
+            "is_completed": row[12],
+            "is_rewarded": row[13]
+        })
+
+    # 统计今日任务完成情况
+    stats_query = text("""
+        SELECT
+            COUNT(*) FILTER (WHERE is_completed = TRUE) AS completed_count,
+            SUM(task_reward_points) FILTER (WHERE is_completed = TRUE AND is_rewarded = FALSE) AS pending_points
+        FROM v_user_daily_tasks
+        WHERE user_id = :user_id
+    """)
+
+    stats_result = await db.execute(stats_query, {"user_id": current_user.id})
+    stats = stats_result.fetchone()
+
+    return {
+        "success": True,
+        "data": {
+            "tasks": tasks,
+            "stats": {
+                "completed_count": stats[0] or 0,
+                "pending_points": float(stats[1]) or 0
+            }
+        }
+    }
+
+
+@router.post("/daily/{task_id}/claim", response_model=dict)
+async def claim_task_reward(
+    task_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    领取任务奖励
+
+    验证任务完成并发放积分奖励
+    """
+    # 检查任务是否存在
+    task_query = text("""
+        SELECT task_key, task_name, task_reward_points
+        FROM daily_tasks
+        WHERE id = :task_id AND is_active = TRUE
+    """)
+
+    task_result = await db.execute(task_query, {"task_id": task_id})
+    task = task_result.fetchone()
+
+    if not task:
+        raise HTTPException(status_code=404, detail="任务不存在")
+
+    # 检查用户今日任务进度
+    progress_query = text("""
+        SELECT progress, target, is_completed, is_rewarded
+        FROM user_task_progress
+        WHERE user_id = :user_id
+          AND task_id = :task_id
+          AND completion_date = CURRENT_DATE
+    """)
+
+    progress_result = await db.execute(progress_query, {
+        "user_id": current_user.id,
+        "task_id": task_id
+    })
+    progress = progress_result.fetchone()
+
+    if not progress:
+        raise HTTPException(status_code=400, detail="今日尚未开始此任务")
+
+    if not progress[2]:  # is_completed
+        raise HTTPException(status_code=400, detail="任务未完成")
+
+    if progress[3]:  # is_rewarded
+        raise HTTPException(status_code=400, detail="奖励已领取")
+
+    # 发放奖励
+    async with db.begin():
+        # 更新用户积分
+        await db.execute(
+            text("""
+                UPDATE user_points
+                SET
+                    balance = balance + :points,
+                    total_earned = total_earned + :points
+                WHERE user_id = :user_id
+            """),
+            {"user_id": current_user.id, "points": task[2]}
+        )
+
+        # 记录积分交易
+        await db.execute(
+            text("""
+                INSERT INTO point_transactions (
+                    user_id, transaction_type, transaction_source, amount,
+                    balance_before, balance_after, description
+                )
+                SELECT
+                    :user_id,
+                    'earn',
+                    'task_reward',
+                    :points,
+                    balance - :points,
+                    balance,
+                    :description
+                FROM user_points
+                WHERE user_id = :user_id
+            """),
+            {
+                "user_id": current_user.id,
+                "points": task[2],
+                "description": f"任务奖励：{task[1]}"
+            }
+        )
+
+        # 标记为已奖励
+        await db.execute(
+            text("""
+                UPDATE user_task_progress
+                SET is_rewarded = TRUE, reward_given_at = CURRENT_TIMESTAMP
+                WHERE user_id = :user_id
+                  AND task_id = :task_id
+                  AND completion_date = CURRENT_DATE
+            """),
+            {"user_id": current_user.id, "task_id": task_id}
+        )
+
+    logger.info(f"用户 {current_user.id} 领取任务奖励: {task[1]}, 积分: {task[2]}")
+
+    return {
+        "success": True,
+        "message": f"成功领取 {task[2]} 积分",
+        "data": {
+            "task_id": task_id,
+            "points_earned": task[2]
+        }
+    }
+
+
+# ============================================
+# 成就 API
+# ============================================
+
+@router.get("/achievements", response_model=dict)
+async def get_achievements(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取成就列表
+    """
+    query = text("""
+        SELECT
+            a.id,
+            a.achievement_key,
+            a.achievement_name,
+            a.achievement_name_en,
+            a.description,
+            a.achievement_type,
+            a.requirement_type,
+            a.requirement_target,
+            a.reward_points,
+            a.reward_title,
+            a.reward_badge,
+            a.icon,
+            a.color,
+            a.is_secret,
+            COALESCE(ua.progress, 0) AS progress,
+            a.requirement_target AS target,
+            COALESCE(ua.is_unlocked, FALSE) AS is_unlocked,
+            COALESCE(ua.unlocked_at::TEXT, NULL) AS unlocked_at
+        FROM achievements a
+        LEFT JOIN user_achievements ua ON (
+            ua.achievement_id = a.id
+            AND ua.user_id = :user_id
+        )
+        WHERE a.is_active = TRUE
+        ORDER BY a.display_order ASC
+    """)
+
+    result = await db.execute(query, {"user_id": current_user.id})
+    rows = result.fetchall()
+
+    achievements = []
+    for row in rows:
+        achievements.append({
+            "id": row[0],
+            "achievement_key": row[1],
+            "achievement_name": row[2],
+            "achievement_name_en": row[3],
+            "description": row[4],
+            "achievement_type": row[5],
+            "requirement_type": row[6],
+            "target": row[8],
+            "reward_points": row[9],
+            "reward_title": row[10],
+            "reward_badge": row[11],
+            "icon": row[12],
+            "color": row[13],
+            "is_secret": row[14] and not row[17],  # 隐藏成就只对已解锁显示
+            "progress": row[15],
+            "is_unlocked": row[17]
+        })
+
+    return {
+        "success": True,
+        "data": achievements
+    }
+
+
+@router.get("/achievements/unlocked", response_model=dict)
+async def get_unlocked_achievements(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取已解锁的成就
+    """
+    query = text("""
+        SELECT
+            ua.id,
+            ua.user_id,
+            a.achievement_key,
+            a.achievement_name,
+            a.description,
+            a.reward_points,
+            a.reward_title,
+            a.reward_badge,
+            a.icon,
+            a.color,
+            ua.progress,
+            ua.unlocked_at
+        FROM user_achievements ua
+        JOIN achievements a ON ua.achievement_id = a.id
+        WHERE ua.user_id = :user_id AND ua.is_unlocked = TRUE
+        ORDER BY ua.unlocked_at DESC
+    """)
+
+    result = await db.execute(query, {"user_id": current_user.id})
+    rows = result.fetchall()
+
+    unlocked = []
+    for row in rows:
+        unlocked.append({
+            "id": row[0],
+            "achievement_key": row[2],
+            "achievement_name": row[3],
+            "description": row[4],
+            "reward_points": row[5],
+            "reward_title": row[6],
+            "reward_badge": row[7],
+            "icon": row[8],
+            "color": row[9],
+            "progress": row[10],
+            "unlocked_at": row[11].isoformat() if row[11] else None
+        })
+
+    return {
+        "success": True,
+        "data": unlocked
+    }
+
+
+# ============================================
+# 统计 API
+# ============================================
+
+@router.get("/stats", response_model=dict)
+async def get_user_task_stats(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取用户任务统计
+    """
+    query = text("""
+        SELECT
+            -- 今日完成任务数
+            COALESCE(
+                (SELECT COUNT(*) FROM user_task_progress
+                 WHERE user_id = :user_id
+                   AND completion_date = CURRENT_DATE
+                   AND is_completed = TRUE),
+                0
+            ) AS total_completed_today,
+
+            -- 今日获得积分
+            COALESCE(
+                (SELECT COALESCE(SUM(pt.amount), 0)
+                 FROM point_transactions pt
+                 WHERE pt.user_id = :user_id
+                   AND pt.transaction_type = 'earn'
+                   AND DATE(pt.created_at) = CURRENT_DATE),
+                0
+            ) AS total_points_earned_today,
+
+            -- 当前连续签到天数
+            COALESCE(
+                (SELECT consecutive_days FROM sign_in_records
+                 WHERE user_id = :user_id
+                 AND sign_in_date = (
+                     SELECT MAX(sign_in_date) FROM sign_in_records
+                     WHERE user_id = :user_id AND sign_in_date <= CURRENT_DATE
+                 )
+                 ORDER BY sign_in_date DESC
+                 LIMIT 1),
+                0
+            ) AS current_streak,
+
+            -- 历史最高连续天数
+            COALESCE(
+                (SELECT MAX(consecutive_days) FROM sign_in_records
+                 WHERE user_id = :user_id),
+                0
+            ) AS max_streak,
+
+            -- 已解锁成就数
+            COALESCE(
+                (SELECT COUNT(*) FROM user_achievements
+                 WHERE user_id = :user_id AND is_unlocked = TRUE),
+                0
+            ) AS total_achievements_unlocked,
+
+            -- 成就获得的积分
+            COALESCE(
+                (SELECT COALESCE(SUM(a.reward_points), 0)
+                 FROM user_achievements ua
+                 JOIN achievements a ON ua.achievement_id = a.id
+                 WHERE ua.user_id = :user_id AND ua.is_unlocked = TRUE),
+                0
+            ) AS total_points_from_achievements
+    """)
+
+    result = await db.execute(query, {"user_id": current_user.id})
+    row = result.fetchone()
+
+    return {
+        "success": True,
+        "data": {
+            "total_completed_today": row[0],
+            "total_points_earned_today": float(row[1]),
+            "current_streak": row[2],
+            "max_streak": row[3],
+            "total_achievements_unlocked": row[4],
+            "total_points_from_achievements": float(row[5])
+        }
+    }
+
+
+# ============================================
+# Admin API
+# ============================================
+
+@router.get("/admin/daily-tasks", response_model=dict)
+async def admin_list_daily_tasks(
+    current_admin: User = Depends(get_current_admin),
+    is_active: Optional[bool] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取所有每日任务（管理员）
+    """
+    query = text("""
+        SELECT
+            id, task_key, task_name, task_type, task_target,
+            task_reward_points, is_active, display_order,
+            created_at, updated_at
+        FROM daily_tasks
+        WHERE (:is_active IS NULL OR is_active = :is_active)
+        ORDER BY display_order ASC
+    """)
+
+    result = await db.execute(query, {"is_active": is_active})
+    rows = result.fetchall()
+
+    tasks = []
+    for row in rows:
+        tasks.append({
+            "id": row[0],
+            "task_key": row[1],
+            "task_name": row[2],
+            "task_type": row[3],
+            "task_target": row[4],
+            "task_reward_points": row[5],
+            "is_active": row[6],
+            "display_order": row[7],
+            "created_at": row[8].isoformat() if row[8] else None,
+            "updated_at": row[9].isoformat() if row[9] else None
+        })
+
+    return {
+        "success": True,
+        "data": tasks
+    }
+
+
+@router.post("/admin/daily-tasks", response_model=dict)
+async def admin_create_daily_task(
+    task_data: dict,
+    current_admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    创建每日任务（管理员）
+    """
+    query = text("""
+        INSERT INTO daily_tasks (
+            task_key, task_name, task_name_en, task_description,
+            task_type, task_target, task_reward_points,
+            is_active, display_order, icon, color
+        ) VALUES (
+            :task_key, :task_name, :task_name_en, :task_description,
+            :task_type, :task_target, :task_reward_points,
+            :is_active, :display_order, :icon, :color
+        )
+        RETURNING id
+    """)
+
+    try:
+        result = await db.execute(query, task_data)
+        await db.commit()
+
+        new_id = result.scalar_one()
+
+        return {
+            "success": True,
+            "message": "任务创建成功",
+            "data": {"id": new_id}
+        }
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"创建失败: {str(e)}")
+
+
+@router.get("/admin/achievements", response_model=dict)
+async def admin_list_achievements(
+    current_admin: User = Depends(get_current_admin),
+    is_active: Optional[bool] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    获取所有成就（管理员）
+    """
+    query = text("""
+        SELECT
+            id, achievement_key, achievement_name, achievement_type,
+            requirement_type, requirement_target, reward_points,
+            is_active, is_secret, display_order, created_at
+        FROM achievements
+        WHERE (:is_active IS NULL OR is_active = :is_active)
+        ORDER BY display_order ASC
+    """)
+
+    result = await db.execute(query, {"is_active": is_active})
+    rows = result.fetchall()
+
+    achievements = []
+    for row in rows:
+        achievements.append({
+            "id": row[0],
+            "achievement_key": row[1],
+            "achievement_name": row[2],
+            "achievement_type": row[3],
+            "requirement_type": row[4],
+            "requirement_target": row[5],
+            "reward_points": row[6],
+            "is_active": row[7],
+            "is_secret": row[8],
+            "display_order": row[9],
+            "created_at": row[10].isoformat() if row[10] else None
+        })
+
+    return {
+        "success": True,
+        "data": achievements
+    }

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 主题色 -->
+    <color name="primary">#6200EE</color>
+    <color name="primary_dark">#3700B3</color>
+    <color name="accent">#03DAC5</color>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+
+    <!-- 背景色 -->
+    <color name="background">#F5F5F5</color>
+    <color name="background_light">#FAFAFA</color>
+    <color name="background_dark">#121212</color>
+    <color name="surface">#FFFFFF</color>
+
+    <!-- 标题栏和特殊颜色 -->
+    <color name="title_bar">#6200EE</color>
+    <color name="accent_color">#03DAC5</color>
+    <color name="error_color">#F44336</color>
+
+    <!-- 文字颜色 -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_hint">#9E9E9E</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="textPrimary">#212121</color>
+    <color name="textSecondary">#757575</color>
+
+    <!-- 状态色 -->
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FFC107</color>
+    <color name="error">#F44336</color>
+    <color name="info">#2196F3</color>
+    <color name="color_success">#4CAF50</color>
+    <color name="color_warning">#FFC107</color>
+    <color name="color_error">#F44336</color>
+    <color name="color_info">#2196F3</color>
+
+    <!-- 离线模式 -->
+    <color name="offline_bg">#FFF59D</color>
+    <color name="offline_text">#F57F17</color>
+
+    <!-- 按钮颜色 -->
+    <color name="button_primary">#6200EE</color>
+    <color name="button_secondary">#03DAC5</color>
+    <color name="button_disabled">#E0E0E0</color>
+
+    <!-- 分隔线 -->
+    <color name="divider">#E0E0E0</color>
+
+    <!-- 启动图标背景 -->
+    <color name="ic_launcher_background">#6200EE</color>
+    <color name="white">#FFFFFF</color>
+
+    <!-- 抽奖模式颜色 -->
+    <color name="mode_random">#FF9800</color>      <!-- 彩旗模式：橙色 -->
+    <color name="mode_rigged">#9E9E9E</color>      <!-- 灰度模式：灰色 -->
+
+    <!-- 进度条和卡片颜色 -->
+    <color name="card_background">#F5F5F5</color>  <!-- 卡片背景 -->
+    <color name="primary_text">#000000</color>      <!-- 主要文字 -->
+    <color name="secondary_text">#666666</color>    <!-- 次要文字 -->
+    <color name="primary_color">#6200EE</color>     <!-- 主色调 -->
+    <color name="progress_background">#E0E0E0</color> <!-- 进度条背景 -->
+    <color name="progress_secondary">#BB86FC</color> <!-- 次级进度 -->
+
+    <!-- 模块颜色 -->
+    <color name="module_warmup">#FF9800</color>     <!-- 暖场秀：橙色 -->
+    <color name="module_hosting">#2196F3</color>    <!-- 主持秀：蓝色 -->
+    <color name="module_teabreak">#4CAF50</color>   <!-- 茶歇秀：绿色 -->
+
+    <!-- 科技蓝 -->
+    <color name="tech_blue">#00BFFF</color>         <!-- 科技蓝：DeepSkyBlue -->
+    <color name="tech_blue_70percent">#B300BFFF</color> <!-- 科技蓝70%透明度 -->
+
+    <!-- Additional colors for compatibility -->
+    <color name="black">#000000</color>
+    <color name="backgroundLight">#FAFAFA</color>   <!-- Alias for background_light -->
+
+    <!-- 人形引导框颜色 -->
+    <color name="guidance_outline">#FFFFFF</color>    <!-- 轮廓线：白色 -->
+    <color name="guidance_fill">#FFFFFF</color>       <!-- 填充：白色 -->
+    <color name="guidance_shoulder">#03DAC5</color>   <!-- 肩线：青色（强调色） -->
+
+    <!-- 半透明背景 -->
+    <color name="background_with_alpha">#80000000</color> <!-- 50% 透明度的黑色 -->
+</resources>

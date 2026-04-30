@@ -1,0 +1,24 @@
+id: marketplace
+name: 交易市场模块
+version: 1.0.0
+description: 提供商品上架、浏览、搜索、购买功能
+dependencies: [auth, goods, transaction]
+
+config:
+  listing:
+    max_per_vendor: 100
+    featured_limit: 20
+    search_results_limit: 100
+  purchase:
+    allow_oversell: false
+    max_quantity_per_order: 99
+  payment:
+    escrow_enabled: true
+    release_on_delivery: true
+  review:
+    allow_review: true
+    review_window_days: 14
+
+routes:
+  prefix: /api/marketplace
+  tags: [交易市场]

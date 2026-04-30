@@ -1,0 +1,19 @@
+id: payment
+name: 支付模块
+version: 1.0.0
+description: 提供微信、支付宝、PayPal 支付功能
+dependencies: [auth, transaction]
+
+config:
+  wechat:
+    app_id: ${WECHAT_APP_ID}
+    mch_id: ${WECHAT_MCH_ID}
+    api_key: ${WECHAT_API_KEY}
+  alipay:
+    app_id: ${ALIPAY_APP_ID}
+    private_key: ${ALIPAY_PRIVATE_KEY}
+    alipay_public_key: ${ALIPAY_PUBLIC_KEY}
+  paypal:
+    client_id: ${PAYPAL_CLIENT_ID}
+    client_secret: ${PAYPAL_CLIENT_SECRET}
+    mode: sandbox  # or live

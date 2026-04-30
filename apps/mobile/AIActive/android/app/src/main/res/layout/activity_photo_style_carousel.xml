@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:clipChildren="false">
+
+    <!-- 背景遮罩图片 -->
+    <ImageView
+        android:id="@+id/iv_background_mask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@android:color/transparent"
+        android:alpha="0.3"
+        android:contentDescription="背景遮罩" />
+
+    <!-- 离线模式提示 -->
+    <TextView
+        android:id="@+id/tv_offline_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/offline_mode"
+        android:textColor="@color/offline_text"
+        android:background="@color/offline_bg"
+        android:padding="8dp"
+        android:gravity="center"
+        android:visibility="gone" />
+
+    <!-- 返回按钮 - 左上角 -->
+    <Button
+        android:id="@+id/btn_back_to_main"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:text="←"
+        android:textColor="#FFFFFF"
+        android:background="@android:color/transparent"
+        android:textSize="24sp"
+        android:elevation="10dp"
+        android:padding="0dp"
+        android:gravity="center" />
+
+    <!-- 图层切换触发区域 - 右上角25%宽度 -->
+    <View
+        android:id="@+id/layer_switch_trigger"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="0dp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- 主内容区域 - 垂直布局 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- 顶部活动轮播区域 - 15%高度 -->
+        <FrameLayout
+            android:id="@+id/banner_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="15"
+            android:background="#FF000000"
+            android:elevation="0dp">
+
+            <!-- 活动轮播 ViewPager2 -->
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewpager_banner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:elevation="0dp" />
+
+        </FrameLayout>
+
+        <!-- 渐变色间隔带 - 6px -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:background="@drawable/gradient_divider" />
+
+        <!-- 风格轮播区域 - 85%高度 -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewpager_styles"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="85" />
+
+    </LinearLayout>
+
+    <!-- 数字人显示区域（使用DigitalHumanView组件，左下角） -->
+    <com.jcoding.aiactivity.widget.DigitalHumanView
+        android:id="@+id/digital_human_view"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="16dp"
+        android:background="@android:color/transparent"
+        android:visibility="gone"
+        android:elevation="5dp" />
+
+    <!-- 数字人锁定/解锁控制按钮（右下角，无背景色） -->
+    <Button
+        android:id="@+id/btn_toggle_digital_human_lock"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:padding="0dp"
+        android:text="🔒"
+        android:textSize="28sp"
+        android:textColor="#FFFFFF"
+        android:background="@android:color/transparent"
+        android:elevation="100dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:contentDescription="切换数字人锁定状态" />
+
+    <!-- 功能控制区 - 可拖拽 -->
+    <LinearLayout
+        android:id="@+id/button_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="250dp"
+        android:orientation="vertical"
+        android:background="#00000000"
+        android:padding="0dp"
+        android:gravity="center"
+        android:elevation="100dp"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+
+        <!-- 开始生成按钮 - 圆形，居中显示，蓝色底色80%透明度 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_start"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="@string/start_generate"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#CC2196F3"
+            app:cornerRadius="90dp"
+            app:elevation="20dp" />
+
+        <!-- 风格名称 -->
+        <TextView
+            android:id="@+id/tv_style_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="风格名称"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp" />
+
+        <!-- 提示文字 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="← 左右滑动切换风格，点击暂停/继续 →"
+            android:textSize="14sp"
+            android:textColor="#CCCCCC" />
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="tech-blue">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>挺傻的 - AI Skills 托管中心</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="../image/logo-1.png" type="image/png">
+  <script src="js/config.js"></script>
+  <style>
+    /* ============================================
+       CSS Variables - Multiple Themes
+       ============================================ */
+    :root {
+      /* Primary Theme: Tech Blue */
+      --primary: #0066FF;
+      --primary-dark: #0052CC;
+      --primary-light: #4D94FF;
+      --secondary: #00D4FF;
+      --accent: #00FF88;
+      --bg-dark: #0A1628;
+      --bg-dark-secondary: #111D2E;
+      --bg-dark-tertiary: #1A2842;
+      --bg-light: #F0F7FF;
+      --bg-white: #FFFFFF;
+      --text-primary: #1A2842;
+      --text-secondary: #5A6A7A;
+      --text-light: #8A9AAA;
+      --text-white: #FFFFFF;
+      --border-light: rgba(0, 102, 255, 0.2);
+      --border-medium: rgba(0, 102, 255, 0.4);
+      --gradient-primary: linear-gradient(135deg, #0066FF 0%, #00D4FF 100%);
+      --gradient-dark: linear-gradient(180deg, #0A1628 0%, #111D2E 100%);
+      --shadow-md: 0 4px 16px rgba(0, 102, 255, 0.2);
+      --shadow-lg: 0 8px 32px rgba(0, 102, 255, 0.3);
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    /* Ocean Theme */
+    [data-theme="ocean"] {
+      --primary: #0EA5E9;
+      --primary-dark: #0284C7;
+      --primary-light: #38BDF8;
+      --secondary: #06B6D4;
+      --accent: #14B8A6;
+      --bg-dark: #0C4A6E;
+      --bg-dark-secondary: #075985;
+      --bg-dark-tertiary: #0369A1;
+      --bg-light: #F0F9FF;
+      --gradient-primary: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%);
+      --gradient-dark: linear-gradient(180deg, #0C4A6E 0%, #075985 100%);
+    }
+
+    /* Forest Theme */
+    [data-theme="forest"] {
+      --primary: #10B981;
+      --primary-dark: #059669;
+      --primary-light: #34D399;
+      --secondary: #065F46;
+      --accent: #84CC16;
+      --bg-dark: #064E3B;
+      --bg-dark-secondary: #065F46;
+      --bg-dark-tertiary: #047857;
+      --bg-light: #ECFDF5;
+      --gradient-primary: linear-gradient(135deg, #10B981 0%, #065F46 100%);
+      --gradient-dark: linear-gradient(180deg, #064E3B 0%, #065F46 100%);
+    }
+
+    /* Sunset Theme */
+    [data-theme="sunset"] {
+      --primary: #F59E0B;
+      --primary-dark: #D97706;
+      --primary-light: #FBBF24;
+      --secondary: #FB923C;
+      --accent: #F97316;
+      --bg-dark: #78350F;
+      --bg-dark-secondary: #92400E;
+      --bg-dark-tertiary: #A16207;
+      --bg-light: #FFFBEB;
+      --gradient-primary: linear-gradient(135deg, #F59E0B 0%, #FB923C 100%);
+      --gradient-dark: linear-gradient(180deg, #78350F 0%, #92400E 100%);
+    }
+
+    /* Purple Theme */
+    [data-theme="purple"] {
+      --primary: #8B5CF6;
+      --primary-dark: #7C3AED;
+      --primary-light: #A78BFA;
+      --secondary: #C084FC;
+      --accent: #EC4899;
+      --bg-dark: #5B21B6;
+      --bg-dark-secondary: #6D28D9;
+      --bg-dark-tertiary: #7C3AED;
+      --bg-light: #F5F3FF;
+      --gradient-primary: linear-gradient(135deg, #8B5CF6 0%, #C084FC 100%);
+      --gradient-dark: linear-gradient(180deg, #5B21B6 0%, #6D28D9 100%);
+    }
+
+    /* Dark Cyberpunk Theme */
+    [data-theme="cyberpunk"] {
+      --primary: #00F0FF;
+      --primary-dark: #00D0DD;
+      --primary-light: #38BDF8;
+      --secondary: #FF00FF;
+      --accent: #00FF88;
+      --bg-dark: #0A0A0F;
+      --bg-dark-secondary: #12121A;
+      --bg-dark-tertiary: #1A1A25;
+      --bg-light: #0A0A0F;
+      --gradient-primary: linear-gradient(135deg, #00F0FF 0%, #FF00FF 100%);
+      --gradient-dark: linear-gradient(180deg, #0A0A0F 0%, #12121A 100%);
+    }
+
+    /* ============================================
+       Base Styles
+       ============================================ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-dark);
+      color: var(--text-white);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    img { max-width: 100%; height: auto; }
+    a { text-decoration: none; color: inherit; transition: all 0.3s; }
+    ul { list-style: none; }
+
+    /* Loading Spinner */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 40px;
+    }
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border-light);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    /* Error Message */
+    .error-message {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: var(--radius-md);
+      color: #fca5a5;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    @media (max-width: 768px) {
+      .container { padding: 0 16px; }
+    }
+
+    /* ============================================
+       Navbar
+       ============================================ */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 22, 40, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-light);
+      z-index: 1000;
+      height: 80px;
+      display: flex;
+      align-items: flex-start;
+      overflow: visible;
+      padding-top: 0;
+    }
+    .navbar-content {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      width: 100%;
+      overflow: visible;
+      padding-top: 0;
+    }
+    .logo {
+      display: flex;
+      align-items: flex-start;
+      height: 100%;
+    }
+    .logo img {
+      height: 120px;
+      width: auto;
+      object-fit: contain;
+    }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      height: 80px;
+    }
+    .nav-link {
+      color: var(--text-light);
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 8px 0;
+      position: relative;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+      transition: width 0.3s;
+    }
+    .nav-link:hover { color: var(--text-white); }
+    .nav-link:hover::after { width: 100%; }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 80px;
+    }
+
+    /* Language Selector */
+    .lang-selector {
+      position: relative;
+    }
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      color: var(--text-white);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .lang-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--primary-light);
+    }
+    .lang-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: var(--bg-dark-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      min-width: 150px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s;
+      box-shadow: var(--shadow-lg);
+    }
+    .lang-selector:hover .lang-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .lang-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-option:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-white);
+    }
+    .lang-option.active {
+      background: rgba(0, 102, 255, 0.1);
+      color: var(--primary-light);
+    }
+
+    /* Theme Selector */
+    .theme-selector {
+      position: relative;
+    }
+    .theme-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      color: var(--text-white);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .theme-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--primary-light);
+    }
+    .theme-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: var(--bg-dark-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      min-width: 200px;
+      padding: 12px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s;
+      box-shadow: var(--shadow-lg);
+    }
+    .theme-selector:hover .theme-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .theme-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .theme-option:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .theme-option.active {
+      background: rgba(0, 102, 255, 0.1);
+    }
+    .theme-color {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--border-light);
+    }
+    .theme-name {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+    .theme-option.active .theme-name {
+      color: var(--text-white);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: var(--radius-lg);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--gradient-primary);
+      color: var(--text-white);
+      box-shadow: var(--shadow-md);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-white);
+      border: 1px solid var(--border-light);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--primary-light);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-light);
+      padding: 8px;
+    }
+    .btn-ghost:hover {
+      color: var(--text-white);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .btn-sm { padding: 8px 16px; font-size: 0.85rem; }
+    .btn-lg { padding: 16px 32px; font-size: 1.1rem; }
+
+    /* Mobile Menu */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-white);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 8px;
+    }
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 72px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-dark);
+      padding: 24px;
+      overflow-y: auto;
+      z-index: 999;
+    }
+    .mobile-nav.active { display: block; }
+
+    /* ============================================
+       Hero Carousel
+       ============================================ */
+    .hero-carousel {
+      position: relative;
+      height: 600px;
+      overflow: hidden;
+      margin-top: 80px;
+    }
+    .carousel-slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    .carousel-slide.active { opacity: 1; z-index: 1; }
+    .carousel-slide img,
+    .carousel-slide video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .carousel-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(10, 22, 40, 0.7) 0%, rgba(10, 22, 40, 0.9) 100%);
+      z-index: 2;
+    }
+    .carousel-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 3;
+      text-align: center;
+      max-width: 800px;
+      padding: 0 24px;
+    }
+    .carousel-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      background: rgba(0, 102, 255, 0.2);
+      border: 1px solid var(--border-medium);
+      border-radius: 20px;
+      margin-bottom: 24px;
+      color: var(--text-white);
+      font-size: 0.9rem;
+    }
+    .carousel-badge span.pulse {
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+    .carousel-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 24px;
+    }
+    .text-gradient {
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .carousel-desc {
+      font-size: 1.25rem;
+      color: var(--text-light);
+      margin-bottom: 40px;
+      line-height: 1.8;
+    }
+    .carousel-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    /* Video Mute Button */
+    .video-mute-btn {
+      position: absolute;
+      bottom: 100px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      color: var(--text-white);
+      font-size: 1.3rem;
+      cursor: pointer;
+      z-index: 5;
+      transition: all 0.3s;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .carousel-slide.active .video-mute-btn {
+      display: flex;
+    }
+    .video-mute-btn:hover {
+      background: rgba(0, 0, 0, 0.8);
+      border-color: var(--primary-light);
+      transform: scale(1.1);
+    }
+    .video-mute-btn.muted::after {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 20px;
+      background: var(--text-white);
+      transform: rotate(45deg);
+    }
+
+    /* Carousel Navigation */
+    .carousel-nav {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 4;
+    }
+    .carousel-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .carousel-dot.active {
+      background: var(--primary);
+      border-color: var(--primary-light);
+    }
+    .carousel-dot:hover {
+      background: var(--primary-light);
+    }
+    .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      border-radius: 50%;
+      color: var(--text-white);
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 4;
+      transition: all 0.3s;
+    }
+    .carousel-arrow:hover {
+      background: rgba(0, 0, 0, 0.7);
+    }
+    .carousel-arrow.prev { left: 30px; }
+    .carousel-arrow.next { right: 30px; }
+
+    /* ============================================
+       Stats Section
+       ============================================ */
+    .stats-section {
+      padding: 60px 0;
+      background: var(--bg-dark-secondary);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .stat-card {
+      text-align: center;
+      padding: 32px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      transition: all 0.3s;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary-light);
+      box-shadow: var(--shadow-lg);
+    }
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label {
+      color: var(--text-light);
+      font-size: 0.95rem;
+    }
+
+    /* ============================================
+       Skills Carousel Section
+       ============================================ */
+    .skills-section {
+      padding: 80px 0;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .section-subtitle {
+      color: var(--text-light);
+      font-size: 1rem;
+    }
+    .section-nav {
+      display: flex;
+      gap: 12px;
+    }
+    .nav-arrow {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      color: var(--text-white);
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-arrow:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .nav-arrow:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Skills Horizontal Carousel */
+    .skills-carousel-wrapper {
+      position: relative;
+      overflow: hidden;
+      margin: 0 -24px;
+      padding: 0 24px;
+    }
+    .skills-carousel {
+      display: flex;
+      gap: 24px;
+      transition: transform 0.5s ease;
+    }
+    .skill-card {
+      flex: 0 0 350px;
+      background: var(--bg-dark-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .skill-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--primary-light);
+      box-shadow: var(--shadow-lg);
+    }
+    .skill-image {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      background: var(--gradient-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+    .skill-content {
+      padding: 20px;
+    }
+    .skill-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .skill-category {
+      padding: 4px 12px;
+      background: rgba(0, 102, 255, 0.1);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--primary-light);
+    }
+    .skill-type {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .skill-type.free {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10B981;
+    }
+    .skill-type.commercial {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #F59E0B;
+    }
+    .skill-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.85rem;
+      color: #FFB800;
+      margin-left: auto;
+    }
+    .skill-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .skill-description {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .skill-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-light);
+    }
+    .skill-author {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .skill-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border-light);
+    }
+    .skill-author-name {
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+    .skill-stats {
+      display: flex;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    /* ============================================
+       Vendor Carousel Section
+       ============================================ */
+    .vendor-section {
+      padding: 80px 0;
+      background: var(--bg-dark-secondary);
+    }
+    .vendor-carousel-wrapper {
+      position: relative;
+      overflow: hidden;
+      margin: 0 -24px;
+      padding: 0 24px;
+    }
+    .vendor-carousel {
+      display: flex;
+      gap: 24px;
+      transition: transform 0.5s ease;
+    }
+    .vendor-card {
+      flex: 0 0 300px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .vendor-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--primary-light);
+      box-shadow: var(--shadow-lg);
+    }
+    .vendor-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 16px;
+      margin-bottom: 20px;
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+    .vendor-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      object-fit: cover;
+      border: 3px solid var(--border-light);
+    }
+    .vendor-name {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .vendor-title {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+    .vendor-bio {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .vendor-stats {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-light);
+    }
+    .vendor-stat {
+      text-align: center;
+    }
+    .vendor-stat-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary-light);
+    }
+    .vendor-stat-label {
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+
+    /* ============================================
+       Footer
+       ============================================ */
+    .footer {
+      background: var(--bg-dark-secondary);
+      padding: 60px 0 30px;
+      border-top: 1px solid var(--border-light);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+    .footer-brand .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .footer-brand p {
+      color: var(--text-light);
+      line-height: 1.8;
+      margin-bottom: 24px;
+    }
+    .footer-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .footer-links a {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+    .footer-links a:hover {
+      color: var(--primary-light);
+    }
+
+    /* Social QR Codes */
+    .social-qr {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      padding: 40px 0;
+      border-top: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+      margin-bottom: 30px;
+    }
+    .qr-item {
+      text-align: center;
+    }
+    .qr-code {
+      width: 120px;
+      height: 120px;
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-code img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .qr-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-white);
+      font-size: 0.75rem;
+      text-align: center;
+      padding: 8px;
+    }
+    .qr-label {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+    .qr-icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-light);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-copy {
+      color: var(--text-light);
+      font-size: 0.85rem;
+    }
+    .footer-icp {
+      display: flex;
+      gap: 24px;
+    }
+    .footer-icp a {
+      color: var(--text-light);
+      font-size: 0.85rem;
+    }
+    .footer-icp a:hover {
+      color: var(--primary-light);
+    }
+
+    /* ============================================
+       Responsive Design
+       ============================================ */
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .carousel-title { font-size: 2.5rem; }
+      .skill-card { flex: 0 0 300px; }
+      .vendor-card { flex: 0 0 260px; }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: block; }
+      .hero-carousel { height: 500px; }
+      .carousel-title { font-size: 2rem; }
+      .carousel-desc { font-size: 1rem; }
+      .carousel-actions { flex-direction: column; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .section-header { flex-direction: column; gap: 16px; align-items: flex-start; }
+      .skill-card { flex: 0 0 280px; }
+      .vendor-card { flex: 0 0 240px; }
+      .social-qr { gap: 16px; }
+      .qr-code { width: 100px; height: 100px; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+      .carousel-arrow { width: 40px; height: 40px; }
+      .carousel-arrow.prev { left: 16px; }
+      .carousel-arrow.next { right: 16px; }
+      .video-mute-btn { width: 40px; height: 40px; bottom: 80px; right: 16px; font-size: 1rem; }
+    }
+
+    @media (max-width: 480px) {
+      .nav-actions { gap: 8px; }
+      .btn { padding: 10px 16px; font-size: 0.85rem; }
+      .lang-btn, .theme-btn { padding: 6px 12px; font-size: 0.85rem; }
+      .hero-carousel { height: 450px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <a href="#" class="logo">
+        <img src="../image/logo-1.png" alt="挺傻的">
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#" class="nav-link">探索 Skills</a></li>
+        <li><a href="#" class="nav-link">供应商市场</a></li>
+        <li><a href="#" class="nav-link">团队协作</a></li>
+        <li><a href="#" class="nav-link">文档</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <!-- Language Selector -->
+        <div class="lang-selector">
+          <button class="lang-btn">
+            <i class="fas fa-globe"></i>
+            <span id="currentLang">中文</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="lang-dropdown">
+            <div class="lang-option active" data-lang="zh">
+              <span>🇨🇳</span>
+              <span>中文</span>
+            </div>
+            <div class="lang-option" data-lang="en">
+              <span>🇺🇸</span>
+              <span>English</span>
+            </div>
+            <div class="lang-option" data-lang="ja">
+              <span>🇯🇵</span>
+              <span>日本語</span>
+            </div>
+            <div class="lang-option" data-lang="ko">
+              <span>🇰🇷</span>
+              <span>한국어</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Theme Selector -->
+        <div class="theme-selector">
+          <button class="theme-btn">
+            <i class="fas fa-palette"></i>
+            <span>主题</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="theme-dropdown">
+            <div class="theme-option active" data-theme="tech-blue">
+              <div class="theme-color" style="background: linear-gradient(135deg, #0066FF 0%, #00D4FF 100%);"></div>
+              <span class="theme-name">科技蓝</span>
+            </div>
+            <div class="theme-option" data-theme="ocean">
+              <div class="theme-color" style="background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%);"></div>
+              <span class="theme-name">海洋</span>
+            </div>
+            <div class="theme-option" data-theme="forest">
+              <div class="theme-color" style="background: linear-gradient(135deg, #10B981 0%, #065F46 100%);"></div>
+              <span class="theme-name">森林</span>
+            </div>
+            <div class="theme-option" data-theme="sunset">
+              <div class="theme-color" style="background: linear-gradient(135deg, #F59E0B 0%, #FB923C 100%);"></div>
+              <span class="theme-name">日落</span>
+            </div>
+            <div class="theme-option" data-theme="purple">
+              <div class="theme-color" style="background: linear-gradient(135deg, #8B5CF6 0%, #C084FC 100%);"></div>
+              <span class="theme-name">紫韵</span>
+            </div>
+            <div class="theme-option" data-theme="cyberpunk">
+              <div class="theme-color" style="background: linear-gradient(135deg, #00F0FF 0%, #FF00FF 100%);"></div>
+              <span class="theme-name">赛博</span>
+            </div>
+          </div>
+        </div>
+
+        <a href="#" class="btn btn-ghost"><i class="fas fa-search"></i></a>
+        <a href="#" class="btn btn-secondary btn-sm">登录</a>
+        <a href="#" class="btn btn-primary btn-sm">注册</a>
+        <button class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav" id="mobileNav">
+    <ul class="nav-links" style="flex-direction: column; gap: 16px;">
+      <li><a href="#" class="nav-link">探索 Skills</a></li>
+      <li><a href="#" class="nav-link">供应商市场</a></li>
+      <li><a href="#" class="nav-link">团队协作</a></li>
+      <li><a href="#" class="nav-link">文档</a></li>
+    </ul>
+  </div>
+
+  <!-- Hero Carousel -->
+  <section class="hero-carousel" id="heroCarousel">
+    <!-- Slide 1: Video -->
+    <div class="carousel-slide active" data-type="video">
+      <video id="video1" autoplay muted playsinline data-oss-path="hero/lay-1080.mp4">
+      </video>
+      <button class="video-mute-btn muted" data-video="video1">
+        <i class="fas fa-volume-mute"></i>
+      </button>
+      <div class="carousel-overlay"></div>
+      <div class="carousel-content">
+        <div class="carousel-badge">
+          <span class="pulse"></span>
+          <span id="heroSkillsCount">加载中...</span>
+        </div>
+        <h1 class="carousel-title">
+          <span class="text-gradient">挺傻的</span> Skills<br>全域资产托管平台
+        </h1>
+        <p class="carousel-desc">
+          承认自己有时候挺傻的，这是智慧的开始。<br>
+          打造全球首个 AI Skills 供应商市场，让 AI 能力资产化、可交易、可复用
+        </p>
+        <div class="carousel-actions">
+          <a href="#" class="btn btn-primary btn-lg">
+            <i class="fas fa-rocket"></i> 开始探索
+          </a>
+          <a href="#" class="btn btn-secondary btn-lg">
+            <i class="fas fa-store"></i> 成为供应商
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2: Video -->
+    <div class="carousel-slide" data-type="video">
+      <video id="video2" autoplay muted playsinline data-oss-path="hero/man-1080.mp4">
+      </video>
+      <button class="video-mute-btn muted" data-video="video2">
+        <i class="fas fa-volume-mute"></i>
+      </button>
+      <div class="carousel-overlay"></div>
+      <div class="carousel-content">
+        <div class="carousel-badge">
+          <span class="pulse"></span>
+          <span>智能 AI 审核系统</span>
+        </div>
+        <h1 class="carousel-title">
+          <span class="text-gradient">AI 驱动</span><br>内容安全保障
+        </h1>
+        <p class="carousel-desc">
+          三级审核流程，确保每一份 Skill 都经过严格的质量检查<br>
+          准确率高达 99.9%，让您使用更放心
+        </p>
+        <div class="carousel-actions">
+          <a href="#" class="btn btn-primary btn-lg">
+            <i class="fas fa-shield-alt"></i> 了解审核流程
+          </a>
+          <a href="#" class="btn btn-secondary btn-lg">
+            <i class="fas fa-play-circle"></i> 观看演示
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Image -->
+    <div class="carousel-slide" data-type="image">
+      <img data-oss-path="hero/chapter3-features.png" alt="多领域协作">
+      <div class="carousel-overlay"></div>
+      <div class="carousel-content">
+        <div class="carousel-badge">
+          <span class="pulse"></span>
+          <span>多领域协作</span>
+        </div>
+        <h1 class="carousel-title">
+          团队协作<br><span class="text-gradient">无界连接</span>
+        </h1>
+        <p class="carousel-desc">
+          打破技术、产品、设计、市场、运营之间的壁垒<br>
+          用统一的标准管理所有项目协作
+        </p>
+        <div class="carousel-actions">
+          <a href="#" class="btn btn-primary btn-lg">
+            <i class="fas fa-users"></i> 创建团队
+          </a>
+          <a href="#" class="btn btn-secondary btn-lg">
+            <i class="fas fa-book"></i> 查看文档
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <button class="carousel-arrow prev" id="carouselPrev"><i class="fas fa-chevron-left"></i></button>
+    <button class="carousel-arrow next" id="carouselNext"><i class="fas fa-chevron-right"></i></button>
+    <div class="carousel-nav" id="carouselNav">
+      <div class="carousel-dot active" data-slide="0"></div>
+      <div class="carousel-dot" data-slide="1"></div>
+      <div class="carousel-dot" data-slide="2"></div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid" id="statsGrid">
+        <div class="loading" style="grid-column: 1 / -1;">
+          <div class="loading-spinner"></div>
+          <span class="loading-text">正在加载统计数据...</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Carousel Section - Free -->
+  <section class="skills-section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">🎉 免费热门 Skills</h2>
+          <p class="section-subtitle">开源共享，社区贡献，完全免费使用</p>
+        </div>
+        <div class="section-nav">
+          <button class="nav-arrow" id="freeSkillsPrev"><i class="fas fa-chevron-left"></i></button>
+          <button class="nav-arrow" id="freeSkillsNext"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+
+      <div class="skills-carousel-wrapper">
+        <div class="skills-carousel" id="freeSkillsCarousel">
+          <div class="loading" style="width: 100%;">
+            <div class="loading-spinner"></div>
+            <span class="loading-text">正在加载免费 Skills...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Carousel Section - Commercial -->
+  <section class="skills-section" style="background: var(--bg-dark-secondary);">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">💎 商用精选 Skills</h2>
+          <p class="section-subtitle">专业打造，企业级品质，授权即可使用</p>
+        </div>
+        <div class="section-nav">
+          <button class="nav-arrow" id="commercialSkillsPrev"><i class="fas fa-chevron-left"></i></button>
+          <button class="nav-arrow" id="commercialSkillsNext"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+
+      <div class="skills-carousel-wrapper">
+        <div class="skills-carousel" id="commercialSkillsCarousel">
+          <div class="loading" style="width: 100%;">
+            <div class="loading-spinner"></div>
+            <span class="loading-text">正在加载商用 Skills...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vendor Carousel Section -->
+  <section class="vendor-section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">优质供应商</h2>
+          <p class="section-subtitle">来自全球的顶级 Skills 创作者</p>
+        </div>
+        <div class="section-nav">
+          <button class="nav-arrow" id="vendorPrev"><i class="fas fa-chevron-left"></i></button>
+          <button class="nav-arrow" id="vendorNext"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+
+      <div class="vendor-carousel-wrapper">
+        <div class="vendor-carousel" id="vendorCarousel">
+          <div class="loading" style="width: 100%;">
+            <div class="loading-spinner"></div>
+            <span class="loading-text">正在加载供应商...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">
+            <img src="../image/logo-1.png" alt="挺傻的" style="height: 40px;">
+          </div>
+          <p>
+            承认自己有时候挺傻的，这是智慧的开始。<br>
+            SillyMD 是全球首个 AI Skills 供应商市场，致力于让 AI 能力资产化、可交易、可复用。
+          </p>
+        </div>
+        <div>
+          <h4 class="footer-title">平台</h4>
+          <div class="footer-links">
+            <a href="#">探索 Skills</a>
+            <a href="#">供应商市场</a>
+            <a href="#">团队协作</a>
+            <a href="#">定价</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-title">资源</h4>
+          <div class="footer-links">
+            <a href="#">开发文档</a>
+            <a href="#">API 参考</a>
+            <a href="#">社区论坛</a>
+            <a href="#">帮助中心</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-title">关于</h4>
+          <div class="footer-links">
+            <a href="#">关于我们</a>
+            <a href="#">联系我们</a>
+            <a href="#">隐私政策</a>
+            <a href="#">服务条款</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social QR Codes -->
+      <div class="social-qr">
+        <div class="qr-item">
+          <div class="qr-code">
+            <div class="qr-placeholder">
+              <div>
+                <div class="qr-icon"><i class="fab fa-tiktok"></i></div>
+                抖音二维码
+              </div>
+            </div>
+          </div>
+          <div class="qr-label">抖音</div>
+        </div>
+        <div class="qr-item">
+          <div class="qr-code">
+            <div class="qr-placeholder">
+              <div>
+                <div class="qr-icon"><i class="fas fa-book-open"></i></div>
+                小红书二维码
+              </div>
+            </div>
+          </div>
+          <div class="qr-label">小红书</div>
+        </div>
+        <div class="qr-item">
+          <div class="qr-code">
+            <div class="qr-placeholder">
+              <div>
+                <div class="qr-icon"><i class="fas fa-video"></i></div>
+                视频号二维码
+              </div>
+            </div>
+          </div>
+          <div class="qr-label">视频号</div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="footer-copy">
+          © 2026 SillyMD. All rights reserved.
+        </div>
+        <div class="footer-icp">
+          <a href="https://beian.miit.gov.cn/" target="_blank">沪ICP备2025133866号-2</a>
+          <a href="#">浙公网安备 33010002000000号</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ============================================
+    // Configuration
+    // ============================================
+    const CONFIG = {
+      API_BASE: 'http://47.96.133.238:8000/api',
+      API_TIMEOUT: 10000,
+    };
+
+    // ============================================
+    // API Helper Functions
+    // ============================================
+    async function fetchAPI(endpoint, options = {}) {
+      const url = `${CONFIG.API_BASE}${endpoint}`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), CONFIG.API_TIMEOUT);
+
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+            ...options.headers,
+          },
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          throw new Error('请求超时');
+        }
+        throw error;
+      }
+    }
+
+    function formatNumber(num) {
+      if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K+';
+      }
+      return num.toString();
+    }
+
+    function getCategoryEmoji(category) {
+      const emojis = {
+        'tech': '🔧',
+        'product': '📋',
+        'design': '🎨',
+        'marketing': '📱',
+        'operations': '📊',
+        'default': '📦'
+      };
+      return emojis[category] || emojis['default'];
+    }
+
+    // ============================================
+    // Load Stats Data
+    // ============================================
+    async function loadStats() {
+      const statsGrid = document.getElementById('statsGrid');
+
+      try {
+        const data = await fetchAPI('/market/stats');
+
+        if (!data.success) {
+          throw new Error(data.message || '获取统计数据失败');
+        }
+
+        const stats = data.data;
+        statsGrid.innerHTML = `
+          <div class="stat-card">
+            <div class="stat-value">${formatNumber(stats.total_skills || 0)}</div>
+            <div class="stat-label">Skills 资产</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${formatNumber(stats.total_vendors || 0)}</div>
+            <div class="stat-label">认证供应商</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${formatNumber(stats.total_teams || 0)}</div>
+            <div class="stat-label">企业团队</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${stats.ai_accuracy || '99.9%'}</div>
+            <div class="stat-label">AI 审核准确率</div>
+          </div>
+        `;
+
+        // Update hero carousel badge
+        const heroBadge = document.getElementById('heroSkillsCount');
+        if (heroBadge) {
+          heroBadge.textContent = `现已支持 ${formatNumber(stats.total_skills || 0)}+ Skills`;
+        }
+      } catch (error) {
+        console.error('加载统计数据失败:', error);
+        statsGrid.innerHTML = `
+          <div class="error-message" style="grid-column: 1 / -1;">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>加载统计数据失败: ${error.message}</span>
+          </div>
+        `;
+      }
+    }
+
+    // ============================================
+    // Load Skills Data
+    // ============================================
+    async function loadSkills(type, containerId) {
+      const container = document.getElementById(containerId);
+
+      try {
+        const data = await fetchAPI(`/skills?type=${type}&status=approved&is_featured=true&limit=10&sort=download_count`);
+
+        if (!data.success) {
+          throw new Error(data.message || '获取 Skills 数据失败');
+        }
+
+        const skills = data.data || [];
+
+        if (skills.length === 0) {
+          container.innerHTML = `
+            <div style="width: 100%; text-align: center; padding: 40px; color: var(--text-light);">
+              <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 16px;"></i>
+              <p>暂无${type === 'free' ? '免费' : '商用'} Skills</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = skills.map(skill => `
+          <div class="skill-card">
+            <div class="skill-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+              ${getCategoryEmoji(skill.category || 'tech')}
+            </div>
+            <div class="skill-content">
+              <div class="skill-meta">
+                <span class="skill-category">${skill.category || '技术'}</span>
+                <span class="skill-type ${skill.type === 'free' ? 'free' : 'commercial'}">
+                  ${skill.type === 'free' ? '免费' : `¥${skill.price || 0}`}
+                </span>
+                <div class="skill-rating">
+                  <i class="fas fa-star"></i>
+                  <span>${skill.rating_avg || '4.5'}</span>
+                </div>
+              </div>
+              <h3 class="skill-title">${skill.name}</h3>
+              <p class="skill-description">
+                ${skill.description || '暂无描述'}
+              </p>
+              <div class="skill-footer">
+                <div class="skill-author">
+                  <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(skill.author_name || 'User')}&background=0066FF&color=fff&size=128" class="skill-avatar" alt="作者">
+                  <span class="skill-author-name">作者 #${skill.author_id || '未知'}</span>
+                </div>
+                <div class="skill-stats">
+                  <span><i class="fas fa-download"></i> ${formatNumber(skill.download_count || 0)}</span>
+                  <span><i class="fas fa-heart"></i> ${formatNumber(skill.favorite_count || 0)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error(`加载${type} Skills失败:`, error);
+        container.innerHTML = `
+          <div class="error-message" style="width: 100%;">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>加载失败: ${error.message}</span>
+          </div>
+        `;
+      }
+    }
+
+    // ============================================
+    // Load Vendors Data
+    // ============================================
+    async function loadVendors() {
+      const container = document.getElementById('vendorCarousel');
+
+      try {
+        const data = await fetchAPI('/vendors?is_verified=true&limit=10&sort=rating');
+
+        if (!data.success) {
+          throw new Error(data.message || '获取供应商数据失败');
+        }
+
+        const vendors = data.data || [];
+
+        if (vendors.length === 0) {
+          container.innerHTML = `
+            <div style="width: 100%; text-align: center; padding: 40px; color: var(--text-light);">
+              <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 16px;"></i>
+              <p>暂无供应商数据</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = vendors.map(vendor => `
+          <div class="vendor-card">
+            <div class="vendor-badge"><i class="fas fa-award"></i> ${vendor.is_verified ? '认证供应商' : '供应商'}</div>
+            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(vendor.username || 'User')}&background=10B981&color=fff&size=128" class="vendor-avatar" alt="${vendor.username || '供应商'}">
+            <h3 class="vendor-name">${vendor.username || '未知供应商'}</h3>
+            <p class="vendor-title">${vendor.bio || '优质创作者'}</p>
+            <p class="vendor-bio">
+              ${vendor.bio || '专注于高质量 Skills 创作，为社区提供优质内容。'}
+            </p>
+            <div class="vendor-stats">
+              <div class="vendor-stat">
+                <div class="vendor-stat-value">${vendor.total_skills || 0}</div>
+                <div class="vendor-stat-label">Skills</div>
+              </div>
+              <div class="vendor-stat">
+                <div class="vendor-stat-value">${formatNumber(vendor.total_downloads || 0)}</div>
+                <div class="vendor-stat-label">下载</div>
+              </div>
+              <div class="vendor-stat">
+                <div class="vendor-stat-value">${vendor.rating_avg || '4.5'}</div>
+                <div class="vendor-stat-label">评分</div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('加载供应商数据失败:', error);
+        container.innerHTML = `
+          <div class="error-message" style="width: 100%;">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>加载失败: ${error.message}</span>
+          </div>
+        `;
+      }
+    }
+
+    // ============================================
+    // Hero Carousel
+    // ============================================
+    const carousel = {
+      slides: document.querySelectorAll('.carousel-slide'),
+      dots: document.querySelectorAll('.carousel-dot'),
+      prevBtn: document.getElementById('carouselPrev'),
+      nextBtn: document.getElementById('carouselNext'),
+      currentSlide: 0,
+      interval: null,
+      videos: {},
+
+      init() {
+        this.slides.forEach((slide, index) => {
+          const video = slide.querySelector('video');
+          if (video) {
+            this.videos[index] = video;
+            video.addEventListener('ended', () => {
+              this.next();
+            });
+          }
+        });
+
+        this.prevBtn.addEventListener('click', () => this.prev());
+        this.nextBtn.addEventListener('click', () => this.next());
+        this.dots.forEach((dot, index) => {
+          dot.addEventListener('click', () => this.goTo(index));
+        });
+
+        this.initVideoMuteButtons();
+        this.start();
+      },
+
+      goTo(index) {
+        const currentVideo = this.videos[this.currentSlide];
+        if (currentVideo) {
+          currentVideo.pause();
+          currentVideo.currentTime = 0;
+        }
+
+        this.slides[this.currentSlide].classList.remove('active');
+        this.dots[this.currentSlide].classList.remove('active');
+        this.currentSlide = index;
+        this.slides[this.currentSlide].classList.add('active');
+        this.dots[this.currentSlide].classList.add('active');
+
+        const newVideo = this.videos[this.currentSlide];
+        if (newVideo) {
+          newVideo.play().catch(err => // console.log('Video play failed:', err));
+          this.reset();
+        } else {
+          this.reset();
+        }
+      },
+
+      next() {
+        const next = (this.currentSlide + 1) % this.slides.length;
+        this.goTo(next);
+      },
+
+      prev() {
+        const prev = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+        this.goTo(prev);
+      },
+
+      start() {
+        const currentSlideType = this.slides[this.currentSlide].dataset.type;
+        if (currentSlideType === 'video') {
+          return;
+        }
+        this.interval = setTimeout(() => this.next(), 5000);
+      },
+
+      reset() {
+        if (this.interval) {
+          clearTimeout(this.interval);
+        }
+        this.start();
+      },
+
+      initVideoMuteButtons() {
+        const muteBtns = document.querySelectorAll('.video-mute-btn');
+        muteBtns.forEach(btn => {
+          const videoId = btn.dataset.video;
+          const video = document.getElementById(videoId);
+          if (video && video.muted) {
+            const icon = btn.querySelector('i');
+            icon.className = 'fas fa-volume-mute';
+          }
+
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const video = document.getElementById(videoId);
+
+            if (video) {
+              video.muted = !video.muted;
+              btn.classList.toggle('muted', video.muted);
+
+              const icon = btn.querySelector('i');
+              if (video.muted) {
+                icon.className = 'fas fa-volume-mute';
+              } else {
+                icon.className = 'fas fa-volume-up';
+              }
+            }
+          });
+        });
+      }
+    };
+
+    // ============================================
+    // Skills Carousel
+    // ============================================
+    class HorizontalCarousel {
+      constructor(containerId, prevBtnId, nextBtnId, itemWidth = 374) {
+        this.container = document.getElementById(containerId);
+        this.prevBtn = document.getElementById(prevBtnId);
+        this.nextBtn = document.getElementById(nextBtnId);
+        this.itemWidth = itemWidth;
+        this.currentPosition = 0;
+        this.init();
+      }
+
+      init() {
+        this.prevBtn.addEventListener('click', () => this.scroll('prev'));
+        this.nextBtn.addEventListener('click', () => this.scroll('next'));
+        this.updateButtons();
+      }
+
+      scroll(direction) {
+        const containerWidth = this.container.parentElement.offsetWidth;
+        const visibleItems = Math.floor(containerWidth / this.itemWidth);
+        const scrollAmount = visibleItems * this.itemWidth;
+
+        if (direction === 'next') {
+          this.currentPosition -= scrollAmount;
+        } else {
+          this.currentPosition += scrollAmount;
+        }
+
+        const maxScroll = this.container.scrollWidth - containerWidth;
+        this.currentPosition = Math.max(-maxScroll, Math.min(0, this.currentPosition));
+
+        this.container.style.transform = `translateX(${this.currentPosition}px)`;
+        this.updateButtons();
+      }
+
+      updateButtons() {
+        const containerWidth = this.container.parentElement.offsetWidth;
+        const maxScroll = this.container.scrollWidth - containerWidth;
+        this.prevBtn.disabled = this.currentPosition >= 0;
+        this.nextBtn.disabled = this.currentPosition <= -maxScroll;
+      }
+    }
+
+    // ============================================
+    // Theme Selector
+    // ============================================
+    const themeOptions = document.querySelectorAll('.theme-option');
+    const html = document.documentElement;
+
+    themeOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        const theme = option.dataset.theme;
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+
+        themeOptions.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+      });
+    });
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      html.setAttribute('data-theme', savedTheme);
+      themeOptions.forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.theme === savedTheme);
+      });
+    }
+
+    // ============================================
+    // Language Selector
+    // ============================================
+    const langOptions = document.querySelectorAll('.lang-option');
+    const currentLangSpan = document.getElementById('currentLang');
+
+    const langNames = {
+      'zh': '中文',
+      'en': 'English',
+      'ja': '日本語',
+      'ko': '한국어'
+    };
+
+    langOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        const lang = option.dataset.lang;
+        currentLangSpan.textContent = langNames[lang];
+        localStorage.setItem('lang', lang);
+
+        langOptions.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+      });
+    });
+
+    const savedLang = localStorage.getItem('lang');
+    if (savedLang) {
+      currentLangSpan.textContent = langNames[savedLang];
+      langOptions.forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.lang === savedLang);
+      });
+    }
+
+    // ============================================
+    // Mobile Menu
+    // ============================================
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const mobileNav = document.getElementById('mobileNav');
+
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileNav.classList.toggle('active');
+      const icon = mobileMenuBtn.querySelector('i');
+      icon.classList.toggle('fa-bars');
+      icon.classList.toggle('fa-times');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.nav-actions') && mobileNav.classList.contains('active')) {
+        mobileNav.classList.remove('active');
+        const icon = mobileMenuBtn.querySelector('i');
+        icon.classList.add('fa-bars');
+        icon.classList.remove('fa-times');
+      }
+    });
+
+    // ============================================
+    // Smooth Scroll
+    // ============================================
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href !== '#') {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      });
+    });
+
+    // ============================================
+    // Initialize OSS Resources
+    // ============================================
+    function initializeOSSResources() {
+      // 设置所有带有 data-oss-path 属性的元素的 src
+      const ossElements = document.querySelectorAll('[data-oss-path]');
+
+      ossElements.forEach(element => {
+        const ossPath = element.getAttribute('data-oss-path');
+
+        // 使用 config.js 中的 getFileProxyUrl 函数
+        if (typeof getFileProxyUrl === 'function') {
+          const proxyUrl = getFileProxyUrl(ossPath);
+          element.src = proxyUrl;
+          // console.log(`✓ 加载OSS资源: ${ossPath} -> ${proxyUrl}`);
+        } else {
+          // 如果 config.js 未加载，回退到直接URL
+          console.warn('⚠️ config.js 未加载，使用直接URL');
+          element.src = `https://jc-st.oss-cn-shanghai.aliyuncs.com/sillymd/${ossPath}`;
+        }
+      });
+    }
+
+    // ============================================
+    // Initialize Page
+    // ============================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 初始化OSS资源
+      initializeOSSResources();
+      // Initialize carousel
+      carousel.init();
+
+      // Load all data
+      await Promise.all([
+        loadStats(),
+        loadSkills('free', 'freeSkillsCarousel'),
+        loadSkills('commercial', 'commercialSkillsCarousel'),
+        loadVendors()
+      ]);
+
+      // Initialize carousels after data is loaded
+      const freeSkillsCarousel = new HorizontalCarousel('freeSkillsCarousel', 'freeSkillsPrev', 'freeSkillsNext');
+      const commercialSkillsCarousel = new HorizontalCarousel('commercialSkillsCarousel', 'commercialSkillsPrev', 'commercialSkillsNext');
+      const vendorCarousel = new HorizontalCarousel('vendorCarousel', 'vendorPrev', 'vendorNext', 324);
+    });
+  </script>
+</body>
+</html>

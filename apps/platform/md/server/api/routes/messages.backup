@@ -1,0 +1,575 @@
+"""
+消息系统路由
+提供对话和消息相关的 API 接口
+"""
+
+from fastapi import APIRouter, HTTPException, Depends, Query
+from typing import List, Optional
+from datetime import datetime
+from pydantic import BaseModel
+
+from database import get_db
+from psycopg2.extras import RealDictCursor
+
+router = APIRouter(prefix="/api", tags=["messages"])
+
+# 数据库配置（从主应用获取）
+def get_db_config():
+    import os
+    return {
+        "host": os.getenv("DB_HOST"),
+        "port": int(os.getenv("DB_PORT")),
+        "database": os.getenv("DB_NAME"),
+        "user": os.getenv("DB_USER"),
+        "password": os.getenv("DB_PASSWORD")
+    }
+
+
+# ============================================
+# 请求/响应模型
+# ============================================
+
+class ConversationListResponse(BaseModel):
+    """对话列表响应"""
+    id: int
+    conversation_type: str
+    title: Optional[str]
+    is_group: bool
+    last_message_at: Optional[datetime]
+    last_message_content: Optional[str]
+    last_message_sender: Optional[str]
+    has_unread: bool
+    unread_count: int
+    participants: List[dict]
+
+    class Config:
+        from_attributes = True
+
+
+class MessageResponse(BaseModel):
+    """消息响应"""
+    id: int
+    conversation_id: int
+    sender_id: int
+    sender_username: str
+    sender_avatar: Optional[str]
+    content: str
+    message_type: str
+    reply_to_id: Optional[int]
+    attachments: Optional[dict]
+    is_deleted: bool
+    is_system: bool
+    created_at: datetime
+    is_own: bool = False  # 是否为当前用户发送的消息
+
+    class Config:
+        from_attributes = True
+
+
+class CreateConversationRequest(BaseModel):
+    """创建对话请求"""
+    conversation_type: str = "direct"  # direct 或 group
+    title: Optional[str] = None
+    participant_ids: List[int]
+    initial_message: Optional[str] = None
+
+
+class SendMessageRequest(BaseModel):
+    """发送消息请求"""
+    conversation_id: int
+    content: str
+    message_type: str = "text"
+    reply_to_id: Optional[int] = None
+    attachments: Optional[dict] = None
+
+
+class MarkReadRequest(BaseModel):
+    """标记已读请求"""
+    message_id: int
+
+
+# ============================================
+# 辅助函数
+# ============================================
+
+def get_current_user_id():
+    """
+    获取当前用户 ID
+    TODO: 从 JWT token 或 session 中获取真实用户 ID
+    目前暂时返回测试用户 ID
+    """
+    return 1  # 测试用户 ID
+
+
+# ============================================
+# API 端点
+# ============================================
+
+@router.get("/conversations", response_model=List[ConversationListResponse])
+async def get_conversations(
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0)
+):
+    """
+    获取用户的对话列表
+
+    参数:
+    - limit: 返回数量
+    - offset: 偏移量
+    """
+    try:
+        user_id = get_current_user_id()
+
+        db_config = get_db_config()
+        with get_db(db_config) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 查询用户参与的对话
+                query = """
+                    SELECT DISTINCT
+                        c.id,
+                        c.conversation_type,
+                        c.title,
+                        c.is_group,
+                        c.last_message_at,
+                        cp.has_unread,
+                        COALESCE(
+                            (SELECT COUNT(*)
+                             FROM messages m
+                             WHERE m.conversation_id = c.id
+                             AND m.created_at > COALESCE(cp.last_read_at, '1970-01-01'::timestamptz)
+                             AND m.sender_id != %s
+                            ), 0
+                        ) as unread_count,
+                        (
+                            SELECT json_agg(
+                                json_build_object(
+                                    'user_id', u.id,
+                                    'username', u.username,
+                                    'avatar_url', u.avatar_url
+                                )
+                            )
+                            FROM conversation_participants cp2
+                            JOIN users u ON cp2.user_id = u.id
+                            WHERE cp2.conversation_id = c.id
+                        ) as participants,
+                        (
+                            SELECT m.content
+                            FROM messages m
+                            WHERE m.conversation_id = c.id
+                            ORDER BY m.created_at DESC
+                            LIMIT 1
+                        ) as last_message_content,
+                        (
+                            SELECT u.username
+                            FROM messages m
+                            JOIN users u ON m.sender_id = u.id
+                            WHERE m.conversation_id = c.id
+                            ORDER BY m.created_at DESC
+                            LIMIT 1
+                        ) as last_message_sender
+                    FROM conversations c
+                    JOIN conversation_participants cp ON c.id = cp.conversation_id
+                    WHERE cp.user_id = %s
+                      AND c.is_active = TRUE
+                    ORDER BY c.last_message_at DESC NULLS LAST, c.created_at DESC
+                    LIMIT %s OFFSET %s
+                """
+
+                cur.execute(query, (user_id, user_id, limit, offset))
+                rows = cur.fetchall()
+
+                return [ConversationListResponse(**row) for row in rows]
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/conversations/{conversation_id}/messages", response_model=List[MessageResponse])
+async def get_conversation_messages(
+    conversation_id: int,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    before_id: Optional[int] = None
+):
+    """
+    获取对话的消息历史
+
+    参数:
+    - conversation_id: 对话 ID
+    - limit: 返回数量
+    - offset: 偏移量
+    - before_id: 获取此消息之前的消息（用于分页）
+    """
+    try:
+        user_id = get_current_user_id()
+
+        db_config = get_db_config()
+        with get_db(db_config) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 验证用户是否是对话参与者
+                cur.execute(
+                    "SELECT 1 FROM conversation_participants WHERE conversation_id = %s AND user_id = %s",
+                    (conversation_id, user_id)
+                )
+                if not cur.fetchone():
+                    raise HTTPException(status_code=403, detail="Not a participant of this conversation")
+
+                # 查询消息
+                query = """
+                    SELECT
+                        m.id,
+                        m.conversation_id,
+                        m.sender_id,
+                        m.content,
+                        m.message_type,
+                        m.reply_to_id,
+                        m.attachments,
+                        m.is_deleted,
+                        m.is_system,
+                        m.created_at,
+                        u.username as sender_username,
+                        u.avatar_url as sender_avatar
+                    FROM messages m
+                    JOIN users u ON m.sender_id = u.id
+                    WHERE m.conversation_id = %s
+                      AND m.is_deleted = FALSE
+                """
+
+                params = [conversation_id]
+
+                if before_id:
+                    query += " AND m.id < %s"
+                    params.append(before_id)
+
+                query += " ORDER BY m.created_at DESC LIMIT %s OFFSET %s"
+                params.extend([limit, offset])
+
+                cur.execute(query, params)
+                rows = cur.fetchall()
+
+                # 添加 is_own 标记并反转顺序（使最新的消息在底部）
+                messages = []
+                for row in reversed(rows):
+                    row['is_own'] = row['sender_id'] == user_id
+                    messages.append(MessageResponse(**row))
+
+                return messages
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/conversations")
+async def create_conversation(request: CreateConversationRequest):
+    """
+    创建新对话
+
+    参数:
+    - conversation_type: 对话类型 (direct/group)
+    - title: 对话标题（群聊时使用）
+    - participant_ids: 参与者 ID 列表
+    - initial_message: 初始消息（可选）
+    """
+    try:
+        user_id = get_current_user_id()
+
+        db_config = get_db_config()
+        with get_db(db_config) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 验证参与者
+                participant_ids = list(set(request.participant_ids + [user_id]))
+                if len(participant_ids) < 2:
+                    raise HTTPException(status_code=400, detail="At least 2 participants required")
+
+                cur.execute(
+                    "SELECT id, username FROM users WHERE id = ANY(%s)",
+                    (participant_ids,)
+                )
+                participants = cur.fetchall()
+
+                if len(participants) != len(participant_ids):
+                    raise HTTPException(status_code=400, detail="Some participants not found")
+
+                # 检查是否已存在相同的单聊
+                if request.conversation_type == "direct" and len(participant_ids) == 2:
+                    cur.execute("""
+                        SELECT c.id
+                        FROM conversations c
+                        WHERE c.conversation_type = 'direct'
+                          AND c.is_group = FALSE
+                          AND c.id IN (
+                              SELECT cp1.conversation_id
+                              FROM conversation_participants cp1
+                              WHERE cp1.user_id = %s
+                              AND cp1.conversation_id IN (
+                                  SELECT cp2.conversation_id
+                                  FROM conversation_participants cp2
+                                  WHERE cp2.user_id = %s
+                              )
+                          )
+                    """, (participant_ids[0], participant_ids[1]))
+
+                    existing = cur.fetchone()
+                    if existing:
+                        return {"conversation_id": existing['id'], "created": False}
+
+                # 创建对话
+                cur.execute("""
+                    INSERT INTO conversations (conversation_type, title, created_by, is_group)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING id
+                """, (request.conversation_type, request.title, user_id, request.conversation_type == "group"))
+
+                conversation_id = cur.fetchone()['id']
+
+                # 添加参与者
+                for pid in participant_ids:
+                    role = 'owner' if pid == user_id else 'member'
+                    cur.execute("""
+                        INSERT INTO conversation_participants (conversation_id, user_id, role)
+                        VALUES (%s, %s, %s)
+                    """, (conversation_id, pid, role))
+
+                # 发送初始消息
+                if request.initial_message:
+                    cur.execute("""
+                        INSERT INTO messages (conversation_id, sender_id, content, message_type)
+                        VALUES (%s, %s, %s, 'text')
+                    """, (conversation_id, user_id, request.initial_message))
+
+                    # 更新对话的最后消息时间
+                    cur.execute("""
+                        UPDATE conversations
+                        SET last_message_at = CURRENT_TIMESTAMP
+                        WHERE id = %s
+                    """, (conversation_id,))
+
+                conn.commit()
+
+                return {"conversation_id": conversation_id, "created": True}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/messages")
+async def send_message(request: SendMessageRequest):
+    """
+    发送消息
+
+    参数:
+    - conversation_id: 对话 ID
+    - content: 消息内容
+    - message_type: 消息类型 (text/image/file)
+    - reply_to_id: 回复的消息 ID（可选）
+    - attachments: 附件信息（可选）
+    """
+    try:
+        user_id = get_current_user_id()
+
+        db_config = get_db_config()
+        with get_db(db_config) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 验证用户是否是对话参与者
+                cur.execute(
+                    "SELECT 1 FROM conversation_participants WHERE conversation_id = %s AND user_id = %s",
+                    (request.conversation_id, user_id)
+                )
+                if not cur.fetchone():
+                    raise HTTPException(status_code=403, detail="Not a participant of this conversation")
+
+                # 插入消息
+                cur.execute("""
+                    INSERT INTO messages (conversation_id, sender_id, content, message_type, reply_to_id, attachments)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING id, created_at
+                """, (
+                    request.conversation_id,
+                    user_id,
+                    request.content,
+                    request.message_type,
+                    request.reply_to_id,
+                    request.attachments
+                ))
+
+                message = cur.fetchone()
+
+                # 更新对话的最后消息时间
+                cur.execute("""
+                    UPDATE conversations
+                    SET last_message_at = %s
+                    WHERE id = %s
+                """, (message['created_at'], request.conversation_id))
+
+                # 标记其他参与者有未读消息
+                cur.execute("""
+                    UPDATE conversation_participants
+                    SET has_unread = TRUE
+                    WHERE conversation_id = %s AND user_id != %s
+                """, (request.conversation_id, user_id))
+
+                conn.commit()
+
+                return {
+                    "message_id": message['id'],
+                    "created_at": message['created_at'],
+                    "success": True
+                }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/messages/{message_id}/read")
+async def mark_message_read(message_id: int):
+    """
+    标记消息为已读
+
+    参数:
+    - message_id: 消息 ID
+    """
+    try:
+        user_id = get_current_user_id()
+
+        db_config = get_db_config()
+        with get_db(db_config) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 获取消息的对话 ID
+                cur.execute(
+                    "SELECT conversation_id, created_at FROM messages WHERE id = %s",
+                    (message_id,)
+                )
+                message = cur.fetchone()
+
+                if not message:
+                    raise HTTPException(status_code=404, detail="Message not found")
+
+                # 更新用户的已读状态
+                cur.execute("""
+                    UPDATE conversation_participants
+                    SET last_read_at = %s,
+                        has_unread = FALSE
+                    WHERE conversation_id = %s AND user_id = %s
+                """, (message['created_at'], message['conversation_id'], user_id))
+
+                conn.commit()
+
+                return {"success": True}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/conversations/{conversation_id}/read")
+async def mark_conversation_read(conversation_id: int):
+    """
+    标记整个对话为已读
+
+    参数:
+    - conversation_id: 对话 ID
+    """
+    try:
+        user_id = get_current_user_id()
+
+        db_config = get_db_config()
+        with get_db(db_config) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 验证用户是否是对话参与者
+                cur.execute(
+                    "SELECT 1 FROM conversation_participants WHERE conversation_id = %s AND user_id = %s",
+                    (conversation_id, user_id)
+                )
+                if not cur.fetchone():
+                    raise HTTPException(status_code=403, detail="Not a participant of this conversation")
+
+                # 获取对话最后消息时间
+                cur.execute("""
+                    SELECT MAX(created_at) as last_message_at
+                    FROM messages
+                    WHERE conversation_id = %s
+                """, (conversation_id,))
+
+                result = cur.fetchone()
+
+                # 更新已读状态
+                cur.execute("""
+                    UPDATE conversation_participants
+                    SET last_read_at = %s,
+                        has_unread = FALSE
+                    WHERE conversation_id = %s AND user_id = %s
+                """, (result['last_message_at'], conversation_id, user_id))
+
+                conn.commit()
+
+                return {"success": True}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/conversations/unread-count")
+async def get_unread_count():
+    """
+    获取用户的未读消息总数
+    """
+    try:
+        user_id = get_current_user_id()
+
+        db_config = get_db_config()
+        with get_db(db_config) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT COALESCE(SUM(
+                        (SELECT COUNT(*)
+                         FROM messages m
+                         WHERE m.conversation_id = cp.conversation_id
+                         AND m.created_at > COALESCE(cp.last_read_at, '1970-01-01'::timestamptz)
+                         AND m.sender_id != %s)
+                    ), 0) as total_unread
+                    FROM conversation_participants cp
+                    WHERE cp.user_id = %s AND cp.has_unread = TRUE
+                """, (user_id, user_id))
+
+                result = cur.fetchone()
+                return {"unread_count": result['total_unread']}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/conversations/{conversation_id}")
+async def delete_conversation(conversation_id: int):
+    """
+    删除对话（软删除，仅对当前用户隐藏）
+
+    参数:
+    - conversation_id: 对话 ID
+    """
+    try:
+        user_id = get_current_user_id()
+
+        db_config = get_db_config()
+        with get_db(db_config) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # 将对话标记为非激活状态（仅移除参与者）
+                cur.execute("""
+                    DELETE FROM conversation_participants
+                    WHERE conversation_id = %s AND user_id = %s
+                """, (conversation_id, user_id))
+
+                conn.commit()
+
+                return {"success": True}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

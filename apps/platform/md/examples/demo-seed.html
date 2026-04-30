@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>探索 Skills - SillyMD (演示版)</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 演示页面特有样式 */
+    .demo-banner {
+      background: linear-gradient(90deg, #FF6B6B, #FFA500);
+      color: white;
+      padding: 12px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .demo-banner i {
+      margin-right: 8px;
+    }
+    .demo-controls {
+      background: var(--bg-dark-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .demo-controls h4 {
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+    .demo-btn {
+      padding: 8px 16px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      background: var(--bg-dark-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      color: var(--text-white);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .demo-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .demo-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .author-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <!-- 演示横幅 -->
+  <div class="demo-banner">
+    <i class="fas fa-flask"></i>
+    演示模式：当前展示的是自动生成的模拟数据 | 
+    <a href="#" style="color: white; text-decoration: underline;">查看生成脚本</a>
+  </div>
+
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">🥚</div>
+        <span>SillyMD</span>
+      </a>
+      
+      <ul class="nav-links">
+        <li><a href="skills.html" class="nav-link">探索 Skills</a></li>
+        <li><a href="marketplace.html" class="nav-link">供应商市场</a></li>
+        <li><a href="teams.html" class="nav-link">团队协作</a></li>
+        <li><a href="docs.html" class="nav-link">文档</a></li>
+      </ul>
+      
+      <div class="nav-actions">
+        <a href="search.html" class="btn btn-ghost"><i class="fas fa-search"></i></a>
+        <a href="login.html" class="btn btn-secondary btn-sm">登录</a>
+        <a href="register.html" class="btn btn-primary btn-sm">注册</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 页面内容 -->
+  <div style="padding-top: 72px;">
+    <!-- 搜索头部 -->
+    <section style="padding: 60px 0; background: linear-gradient(180deg, #0A1628 0%, #111D2E 100%);">
+      <div class="container">
+        <h1 style="font-size: 2.5rem; font-weight: 700; text-align: center; margin-bottom: 16px;">
+          探索 <span class="text-gradient">Skills</span>
+        </h1>
+        <p style="text-align: center; color: var(--text-light); margin-bottom: 40px;">
+          发现优质 AI Skills，提升你的工作效率
+        </p>
+        
+        <div class="search-box" style="max-width: 700px;">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="search-input" placeholder="搜索 Skills、行业、应用场景...">
+        </div>
+        
+        <!-- 热门搜索 -->
+        <div style="text-align: center; margin-top: 24px;">
+          <span style="color: var(--text-light); font-size: 0.9rem;">热门搜索：</span>
+          <a href="#" class="tag" style="margin-left: 8px;">数据分析</a>
+          <a href="#" class="tag">自动化</a>
+          <a href="#" class="tag">代码审查</a>
+          <a href="#" class="tag">交易机器人</a>
+          <a href="#" class="tag">文档生成</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 筛选和列表 -->
+    <section style="padding: 40px 0;">
+      <div class="container">
+        <div style="display: grid; grid-template-columns: 280px 1fr; gap: 32px;">
+          <!-- 侧边筛选栏 -->
+          <aside style="background: var(--bg-dark-secondary); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 24px; height: fit-content;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+              <h3 style="font-size: 1.1rem; font-weight: 600;">筛选条件</h3>
+              <a href="#" onclick="SillyMDDemo.setFilter('industry', null); SillyMDDemo.setFilter('scenario', null); SillyMDDemo.setFilter('price', null); SillyMDDemo.setFilter('rating', null); return false;" 
+                 style="font-size: 0.85rem; color: var(--primary-light);">重置</a>
+            </div>
+            
+            <!-- 动态筛选器 -->
+            <div data-demo-filters>
+              <!-- 由 demo-loader.js 渲染 -->
+              <p style="color: var(--text-light); text-align: center; padding: 20px;">
+                <i class="fas fa-spinner fa-spin"></i> 加载筛选条件...
+              </p>
+            </div>
+
+            <!-- 演示控制 -->
+            <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-light);">
+              <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; color: var(--accent);">
+                <i class="fas fa-magic"></i> 演示控制
+              </h4>
+              <button class="demo-btn" onclick="location.reload()">
+                <i class="fas fa-sync"></i> 刷新数据
+              </button>
+              <button class="demo-btn" onclick="generateNewData()">
+                <i class="fas fa-plus"></i> 生成新数据
+              </button>
+              <a href="../seeds/seed-generator.js" target="_blank" class="demo-btn" style="display: inline-block; text-decoration: none;">
+                <i class="fas fa-code"></i> 查看源码
+              </a>
+            </div>
+          </aside>
+          
+          <!-- 列表区域 -->
+          <div>
+            <!-- 排序工具栏 -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 16px 20px; background: var(--bg-dark-secondary); border: 1px solid var(--border-light); border-radius: var(--radius-md);">
+              <span style="color: var(--text-light); font-size: 0.9rem;" data-demo-count>
+                正在加载...
+              </span>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="color: var(--text-light); font-size: 0.9rem;">排序：</span>
+                <select id="sortSelect" onchange="handleSort(this.value)" style="padding: 8px 12px; background: var(--bg-dark-tertiary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); color: var(--text-white); font-size: 0.9rem;">
+                  <option value="default">综合排序</option>
+                  <option value="newest">最新发布</option>
+                  <option value="downloads">最多下载</option>
+                  <option value="price-asc">价格从低到高</option>
+                  <option value="price-desc">价格从高到低</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Skills 网格 -->
+            <div class="grid grid-3" style="margin-bottom: 32px;" data-demo-skills>
+              <!-- 由 demo-loader.js 渲染 -->
+              <div style="grid-column: 1 / -1; text-align: center; padding: 60px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary); margin-bottom: 16px;"></i>
+                <p style="color: var(--text-light);">正在加载模拟数据...</p>
+              </div>
+            </div>
+            
+            <!-- 分页 -->
+            <div style="display: flex; justify-content: center; gap: 8px;" data-demo-pagination>
+              <!-- 由 demo-loader.js 渲染 -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 数据统计展示 -->
+    <section style="padding: 40px 0; background: var(--bg-dark-secondary);">
+      <div class="container">
+        <h2 style="text-align: center; margin-bottom: 32px;">平台数据概览</h2>
+        <div class="grid grid-4" data-demo-stats>
+          <!-- 由 demo-loader.js 渲染 -->
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <div class="logo-icon">🥚</div>
+            <span>SillyMD</span>
+          </div>
+          <p class="footer-desc">
+            承认自己有时候挺傻的，这是智慧的开始。
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="footer-title">产品</h4>
+          <ul class="footer-links">
+            <li class="footer-link"><a href="skills.html">探索 Skills</a></li>
+            <li class="footer-link"><a href="marketplace.html">供应商市场</a></li>
+            <li class="footer-link"><a href="teams.html">团队协作</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="footer-title">开发者</h4>
+          <ul class="footer-links">
+            <li class="footer-link"><a href="docs.html">文档</a></li>
+            <li class="footer-link"><a href="api.html">API</a></li>
+            <li class="footer-link"><a href="sdk.html">SDK</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="footer-title">支持</h4>
+          <ul class="footer-links">
+            <li class="footer-link"><a href="help.html">帮助中心</a></li>
+            <li class="footer-link"><a href="contact.html">联系我们</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 SillyMD. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 加载演示数据 -->
+  <script src="../seeds/demo-loader.js"></script>
+  <script src="js/mobile-menu.js"></script>
+  
+  <!-- 模拟数据（实际使用时可以改为 fetch 加载 JSON） -->
+  <script>
+    // 这里嵌入生成的演示数据
+    // 实际使用时，运行 node seed-generator.js 生成后复制到这里
+    // 或通过 fetch 加载 ../seeds/output/demo-data.json
+    
+    // 示例数据结构（会被真实数据覆盖）
+    window.SILLY_MOCK_DATA = {
+      users: [],
+      skills: [],
+      stats: {
+        totalUsers: 0,
+        totalSkills: 0,
+        totalVendors: 0,
+        freeSkills: 0,
+        paidSkills: 0
+      }
+    };
+
+    // 尝试加载本地生成的数据
+    async function loadLocalData() {
+      try {
+        const response = await fetch('../seeds/output/demo-data.json');
+        if (response.ok) {
+          window.SILLY_MOCK_DATA = await response.json();
+          // console.log('✅ 已加载本地生成的数据');
+        }
+      } catch (e) {
+        // console.log('⚠️ 未找到本地数据，使用示例数据');
+        // 使用内置示例数据
+        loadExampleData();
+      }
+      
+      // 初始化演示
+      SillyMDDemo.init();
+    }
+
+    // 加载示例数据（20个用户 + 50个 Skills）
+    function loadExampleData() {
+      // 这里生成一些示例数据用于演示
+      const exampleUsers = Array.from({ length: 20 }, (_, i) => ({
+        id: `user_${String(i + 1).padStart(3, '0')}`,
+        username: `demo_user_${i + 1}`,
+        displayName: ['开发大师', 'AI极客', '设计达人', '产品专家', '数据分析师'][i % 5],
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`,
+        bio: '专注AI领域的技术极客，热爱创新',
+        role: i < 15 ? 'vendor' : 'user',
+        vendorLevel: ['normal', 'premium', 'gold'][Math.floor(Math.random() * 3)],
+        joinDate: '2026-01-15',
+        stats: { totalSkills: randomInt(1, 20), totalSales: randomInt(0, 50000), rating: (4 + Math.random()).toFixed(1) }
+      }));
+
+      const industries = ['金融', '电商', '教育', '医疗', '制造', '旅游', '娱乐', '餐饮'];
+      const scenarios = ['数据分析', '自动化', '客户服务', '市场营销', '产品开发', '项目管理', '内容创作'];
+      
+      const exampleSkills = Array.from({ length: 50 }, (_, i) => ({
+        id: `skill_${String(i + 1).padStart(3, '0')}`,
+        name: ['AI交易机器人', '代码审查工具', '数据分析大师', '自动化测试', '文档生成器'][i % 5] + (i > 4 ? ` ${i}` : ''),
+        description: '专业级工具，支持多种功能，适用于各行业的数据分析场景。',
+        authorId: exampleUsers[i % exampleUsers.length].id,
+        authorName: exampleUsers[i % exampleUsers.length].displayName,
+        authorAvatar: exampleUsers[i % exampleUsers.length].avatar,
+        authorLevel: exampleUsers[i % exampleUsers.length].vendorLevel,
+        type: ['code', 'design', 'product', 'marketing'][i % 4],
+        industry: industries[i % industries.length],
+        industryIcon: ['🟣', '🟢', '🟡', '🟣', '🟠', '🔵', '🟣', '🟧'][i % 8],
+        scenario: scenarios[i % scenarios.length],
+        scenarioIcon: ['📊', '🤖', '🎧', '📱', '💻', '📋', '✍️'][i % 7],
+        pricing: { type: i % 3 === 0 ? 'free' : 'onetime', price: i % 3 === 0 ? 0 : randomInt(100, 5000) },
+        rating: (3.5 + Math.random() * 1.5).toFixed(1),
+        downloads: randomInt(0, 5000),
+        tags: ['AI', '自动化', 'Python', '数据分析'],
+        icon: ['fa-robot', 'fa-code', 'fa-chart-line', 'fa-bug', 'fa-file-alt'][i % 5],
+        status: 'approved',
+        createdAt: '2026-01-20'
+      }));
+
+      window.SILLY_MOCK_DATA = {
+        users: exampleUsers,
+        skills: exampleSkills,
+        stats: {
+          totalUsers: 50,
+          totalSkills: 200,
+          totalVendors: 35,
+          freeSkills: 70,
+          paidSkills: 130
+        }
+      };
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // 排序处理
+    function handleSort(sortType) {
+      const skills = [...SillyMDDemo.data.skills];
+      
+      switch(sortType) {
+        case 'newest':
+          skills.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          break;
+        case 'downloads':
+          skills.sort((a, b) => b.downloads - a.downloads);
+          break;
+        case 'price-asc':
+          skills.sort((a, b) => a.pricing.price - b.pricing.price);
+          break;
+        case 'price-desc':
+          skills.sort((a, b) => b.pricing.price - a.pricing.price);
+          break;
+        default:
+          // 综合排序 - 使用加权评分
+          skills.sort((a, b) => {
+            const scoreA = a.rating * 0.4 + Math.log(a.downloads + 1) * 0.6;
+            const scoreB = b.rating * 0.4 + Math.log(b.downloads + 1) * 0.6;
+            return scoreB - scoreA;
+          });
+      }
+      
+      SillyMDDemo.data.skills = skills;
+      SillyMDDemo.renderSkills();
+    }
+
+    // 生成新数据提示
+    function generateNewData() {
+      alert('请运行: node seed-generator.js --users 50 --skills 200\n\n然后将生成的 demo-data.json 复制到 frontend/js/ 目录');
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', loadLocalData);
+  </script>
+</body>
+</html>
