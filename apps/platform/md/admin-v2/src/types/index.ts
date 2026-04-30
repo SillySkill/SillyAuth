@@ -33,16 +33,16 @@ export interface User {
 }
 
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface LoginResponse {
-  success: boolean;
-  data: {
-    token: string;
-    user: User;
-  };
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+  user: User;
 }
 
 // ---- Query Parameter Types ----

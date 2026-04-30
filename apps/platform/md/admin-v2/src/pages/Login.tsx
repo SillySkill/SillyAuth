@@ -15,20 +15,20 @@ const LoginPage: React.FC = () => {
   const onFinish = async (values: LoginRequest) => {
     setLoading(true);
     try {
-      const response = await login(values.username, values.password);
-      if (response.success) {
-        localStorage.setItem('sillymd_admin_token', response.data.token);
-        localStorage.setItem('sillymd_admin_user', JSON.stringify(response.data.user));
-        message.success('Login successful');
+      const response = await login(values.email, values.password);
+      if (response.access_token) {
+        localStorage.setItem('sillymd_admin_token', response.access_token);
+        localStorage.setItem('sillymd_admin_user', JSON.stringify(response.user));
+        message.success('登录成功');
         navigate('/dashboard', { replace: true });
       } else {
-        message.error(response.message || 'Login failed');
+        message.error(response.message || '登录失败');
       }
     } catch (error: any) {
       const errorMsg =
         error?.response?.data?.message ||
         error?.message ||
-        'Login failed, please check your credentials';
+        '登录失败，请检查账号密码';
       message.error(errorMsg);
     } finally {
       setLoading(false);
@@ -51,13 +51,13 @@ const LoginPage: React.FC = () => {
           borderRadius: 12,
           boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
         }}
-        bodyStyle={{ padding: 40 }}
+        styles={{ body: { padding: 40 } }}
       >
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <Title level={2} style={{ marginBottom: 4, color: '#302b63' }}>
             SillyMD
           </Title>
-          <Text type="secondary">Admin Panel v2</Text>
+          <Text type="secondary">管理后台 v2</Text>
         </div>
 
         <Form<LoginRequest>
@@ -66,19 +66,19 @@ const LoginPage: React.FC = () => {
           onFinish={onFinish}
           size="large"
           layout="vertical"
-          initialValues={{ username: '', password: '' }}
+          initialValues={{ email: '', password: '' }}
           autoComplete="off"
         >
           <Form.Item
-            name="username"
+            name="email"
             rules={[
-              { required: true, message: 'Please enter your username' },
-              { min: 3, message: 'Username must be at least 3 characters' },
+              { required: true, message: '请输入邮箱地址' },
+              { type: 'email', message: '请输入有效的邮箱地址' },
             ]}
           >
             <Input
               prefix={<UserOutlined style={{ color: '#bfbfbf' }} />}
-              placeholder="Username"
+              placeholder="邮箱地址"
               autoFocus
             />
           </Form.Item>
@@ -86,13 +86,13 @@ const LoginPage: React.FC = () => {
           <Form.Item
             name="password"
             rules={[
-              { required: true, message: 'Please enter your password' },
-              { min: 6, message: 'Password must be at least 6 characters' },
+              { required: true, message: '请输入密码' },
+              { min: 6, message: '密码至少需要 6 个字符' },
             ]}
           >
             <Input.Password
               prefix={<LockOutlined style={{ color: '#bfbfbf' }} />}
-              placeholder="Password"
+              placeholder="密码"
             />
           </Form.Item>
 
@@ -109,14 +109,14 @@ const LoginPage: React.FC = () => {
                 borderRadius: 8,
               }}
             >
-              Sign In
+              登录
             </Button>
           </Form.Item>
         </Form>
 
         <div style={{ textAlign: 'center' }}>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            SillyMD Admin v2 - Secure Management Console
+            SillyMD 管理后台 - 安全管理系统
           </Text>
         </div>
       </Card>

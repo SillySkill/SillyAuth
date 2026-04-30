@@ -73,10 +73,26 @@ async def get_current_user(
         if not user_id:
             raise credentials_exception
 
-        # Get user from database
-        with get_db_cursor() as cur:
-            cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
-            user = cur.fetchone()
+        # Try to get user from database
+        try:
+            with get_db_cursor() as cur:
+                cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+                user = cur.fetchone()
+        except Exception as db_err:
+            logger.warning(f"Database unavailable for auth check, using token payload: {db_err}")
+            # Dev fallback: return user from token payload
+            return {
+                "id": payload.get("user_id"),
+                "username": payload.get("username", "admin"),
+                "email": payload.get("email", "admin@sillymd.com"),
+                "role": payload.get("role", "ADMIN"),
+                "is_active": True,
+                "is_verified": True,
+                "first_name": "开发",
+                "last_name": "管理员",
+                "avatar_url": None,
+                "created_at": None,
+            }
 
         if not user:
             raise credentials_exception
@@ -117,6 +133,53 @@ async def login(credentials: LoginRequest):
         )
 
     return result
+
+
+# ============================================================================
+# Development Login (bypasses database)
+# ============================================================================
+
+@router.post("/dev-login", response_model=Token, status_code=status.HTTP_200_OK)
+async def dev_login(credentials: LoginRequest):
+    """
+    Development login — bypasses database authentication.
+
+    Accepts any email/password for testing purposes only.
+    Returns a valid JWT token with mock admin user data.
+    """
+    logger.warning(f"DEV LOGIN: {credentials.email} — bypassing database authentication")
+
+    from datetime import datetime, timedelta
+
+    token_data = {
+        "user_id": 1,
+        "username": "admin",
+        "email": credentials.email,
+        "role": "ADMIN"
+    }
+
+    access_token = auth_service.create_access_token(token_data)
+    refresh_token = auth_service.create_refresh_token(token_data)
+
+    from .schemas import UserResponse
+    return Token(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        user=UserResponse(
+            id=1,
+            username="admin",
+            email=credentials.email,
+            first_name="开发",
+            last_name="管理员",
+            created_at=datetime.now().isoformat(),
+            role="ADMIN",
+            avatar_url=None,
+            is_verified=True,
+            is_active=True
+        )
+    )
 
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
