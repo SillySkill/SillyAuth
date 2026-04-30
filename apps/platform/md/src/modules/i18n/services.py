@@ -171,7 +171,7 @@ class I18nService:
                 lang = lang.strip()
                 try:
                     q = float(q.split('=')[1])
-                except:
+                except Exception:
                     q = 1.0
             else:
                 lang = part

@@ -8,7 +8,7 @@ Provides express companies, shipping templates, tracking, and label generation
 import logging
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 
 from .schemas import (
     ExpressCompanyResponse,
@@ -36,18 +36,30 @@ router = APIRouter(prefix="/api/v1/logistics", tags=["物流管理"])
 # Helper Functions
 # ============================================================================
 
-def get_current_user_id() -> int:
+def get_current_user_id(request: Request) -> int:
     """
-    Get current authenticated user ID.
+    Get current authenticated user ID from JWT token.
 
-    For demonstration, returns a mock user ID.
-    In production, this would extract user ID from JWT token.
+    Args:
+        request: FastAPI request object with Authorization header
 
     Returns:
         User ID of the authenticated user.
+
+    Raises:
+        HTTPException: If token is missing or invalid
     """
-    # TODO: Implement proper JWT authentication
-    return 1
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid token")
+    token = auth_header.replace("Bearer ", "")
+    try:
+        from modules.auth.services import SECRET_KEY, ALGORITHM
+        from jose import jwt
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload.get("user_id", 0)
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 def get_logistics_svc() -> LogisticsService:

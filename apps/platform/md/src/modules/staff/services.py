@@ -11,25 +11,16 @@ Provides services for:
 """
 
 import hashlib
+from passlib.hash import bcrypt
 import secrets
 import json
 import logging
 import os
 import re
-import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple
 
-# Add project root to path for server module imports
-# __file__ is src/modules/staff/services.py
-# dirname 1: src/modules/staff
-# dirname 2: src/modules
-# dirname 3: src
-# dirname 4: sillymd (project root, where server/ directory is)
-_project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-if _project_root not in sys.path:
-    sys.path.insert(0, _project_root)
 
 from .schemas import (
     StaffStatus,
@@ -65,25 +56,16 @@ def _load_env():
 # Load environment on module import
 _load_env()
 
-# Database configuration
-DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "localhost"),
-    "port": int(os.getenv("DB_PORT", 5432)),
-    "database": os.getenv("DB_NAME", "sillymd"),
-    "user": os.getenv("DB_USER", "sillyAdmin"),
-    "password": os.getenv("DB_PASSWORD", "")
-}
-
 # JWT configuration
-JWT_SECRET = os.getenv("JWT_SECRET", "staff-module-jwt-secret-change-in-production")
+JWT_SECRET = os.getenv("JWT_SECRET", "CHANGE-ME-IN-PRODUCTION")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "43200"))
 
 
 def get_db_cursor():
     """Get database cursor"""
-    from server.api.database import get_db_cursor
-    return get_db_cursor(DB_CONFIG)
+    from core.db_adapter import get_db_cursor
+    return get_db_cursor()
 
 
 # ============================================================================
@@ -225,13 +207,19 @@ SYSTEM_ROLES = [
 # ============================================================================
 
 def hash_password(password: str) -> str:
-    """Hash password using SHA256"""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash password using bcrypt."""
+    return bcrypt.hash(password)
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    """Verify password against hash"""
-    return hash_password(password) == password_hash
+    """Verify password against hash. Supports both bcrypt and legacy SHA-256."""
+    # bcrypt hashes start with $2b$ or $2a$
+    if password_hash.startswith("$2"):
+        return bcrypt.verify(password, password_hash)
+    # Legacy SHA-256 hash (64 hex characters)
+    if len(password_hash) == 64 and all(c in "0123456789abcdef" for c in password_hash.lower()):
+        return hashlib.sha256(password.encode()).hexdigest() == password_hash
+    return False
 
 
 def generate_temp_password(length: int = 12) -> str:
@@ -1217,7 +1205,7 @@ class StaffAuditLogService:
             if details_json:
                 try:
                     details = json.loads(details_json)
-                except:
+                except Exception:
                     details = {"raw": details_json}
 
             logs.append(AuditLogEntry(

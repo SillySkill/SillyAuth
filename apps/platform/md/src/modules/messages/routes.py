@@ -37,17 +37,8 @@ router = APIRouter(prefix="/api/v1/messages", tags=["消息"])
 # HTTP Bearer security scheme
 security = HTTPBearer()
 
-# Database configuration
-DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "localhost"),
-    "port": int(os.getenv("DB_PORT", 5432)),
-    "database": os.getenv("DB_NAME", "sillymd"),
-    "user": os.getenv("DB_USER", "sillyAdmin"),
-    "password": os.getenv("DB_PASSWORD", "")
-}
-
 # JWT configuration
-SECRET_KEY = os.getenv("JWT_SECRET", "your-super-secret-jwt-key-change-this-in-production-2024-sillymd-api")
+SECRET_KEY = os.getenv("JWT_SECRET", "CHANGE-ME-IN-PRODUCTION")
 ALGORITHM = "HS256"
 
 
@@ -57,8 +48,8 @@ ALGORITHM = "HS256"
 
 def get_db_cursor():
     """Get database cursor"""
-    from server.api.database import get_db_cursor
-    return get_db_cursor(DB_CONFIG)
+    from core.db_adapter import get_db_cursor
+    return get_db_cursor()
 
 
 async def get_current_user(

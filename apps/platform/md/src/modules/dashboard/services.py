@@ -6,7 +6,7 @@
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 
-from src.core.db_adapter import get_db_cursor
+from core.db_adapter import get_db_cursor
 
 
 class DashboardService:

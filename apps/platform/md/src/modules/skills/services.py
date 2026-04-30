@@ -146,49 +146,16 @@ MOCK_SKILLS = [
 # Configuration
 # ============================================================================
 
-DB_CONFIG = {
-    "host": "localhost",
-    "port": 5432,
-    "database": "sillymd",
-    "user": "sillyAdmin",
-    "password": ""
-}
-
-
 def get_db_config() -> Dict[str, Any]:
-    """Get database configuration from .env"""
-    from core.config import get_db_config as get_config
-    db_cfg = get_config()
-    return {
-        "host": db_cfg.host,
-        "port": db_cfg.port,
-        "database": db_cfg.database,
-        "user": db_cfg.user,
-        "password": db_cfg.password
-    }
+    """Get database configuration from environment variables."""
+    from core.db_adapter import get_default_config
+    return get_default_config()
 
 
 def get_db_cursor():
     """Get database cursor with auto-commit"""
-    try:
-        from server.api.database import get_db_cursor as server_get_db_cursor
-        return server_get_db_cursor(get_db_config())
-    except ImportError:
-        # Fallback: use psycopg2 directly
-        import psycopg2
-        from psycopg2.extras import RealDictCursor
-
-        config = get_db_config()
-        conn = psycopg2.connect(
-            host=config["host"],
-            port=config["port"],
-            database=config["database"],
-            user=config["user"],
-            password=config["password"]
-        )
-        conn.autocommit = True
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        return cur
+    from core.db_adapter import get_db_cursor as _get_db_cursor
+    return _get_db_cursor()
 
 
 # ============================================================================

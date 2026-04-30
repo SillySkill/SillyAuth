@@ -423,7 +423,7 @@ class PaymentService:
         logger.info(f"查询支付: payment_id={payment_id}, order_id={order_id}")
 
         try:
-            from src.core.db_adapter import get_db_cursor as _get_db
+            from core.db_adapter import get_db_cursor as _get_db
             with _get_db() as cur:
                 if payment_id:
                     cur.execute("SELECT * FROM payment_records WHERE payment_id = %s", (payment_id,))
@@ -511,7 +511,7 @@ class PaymentService:
             order_id = data.get("out_trade_no")
             transaction_id = data.get("transaction_id")
             try:
-                from src.core.db_adapter import get_db_cursor as _get_db
+                from core.db_adapter import get_db_cursor as _get_db
                 with _get_db() as cur:
                     cur.execute(
                         "UPDATE payment_records SET status = %s, transaction_id = %s, updated_at = NOW() WHERE order_id = %s",
@@ -547,7 +547,7 @@ class PaymentService:
             order_id = data.get("out_trade_no")
             transaction_id = data.get("trade_no")
             try:
-                from src.core.db_adapter import get_db_cursor as _get_db
+                from core.db_adapter import get_db_cursor as _get_db
                 with _get_db() as cur:
                     cur.execute(
                         "UPDATE payment_records SET status = %s, transaction_id = %s, updated_at = NOW() WHERE order_id = %s",
@@ -580,7 +580,7 @@ class PaymentService:
             order_id = resource.get("custom_id") or resource.get("invoice_id")
             transaction_id = resource.get("id")
             try:
-                from src.core.db_adapter import get_db_cursor as _get_db
+                from core.db_adapter import get_db_cursor as _get_db
                 with _get_db() as cur:
                     cur.execute(
                         "UPDATE payment_records SET status = %s, transaction_id = %s, updated_at = NOW() WHERE order_id = %s",
@@ -618,7 +618,7 @@ class PaymentService:
 
         # 从数据库查询原始订单
         try:
-            from src.core.db_adapter import get_db_cursor as _get_db
+            from core.db_adapter import get_db_cursor as _get_db
             with _get_db() as cur:
                 cur.execute(
                     "SELECT * FROM payment_records WHERE payment_id = %s",
@@ -724,7 +724,7 @@ class PaymentService:
         page_size: int = 20
     ) -> Dict[str, Any]:
         """Get user orders (paginated)."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             # Count query
@@ -793,7 +793,7 @@ class PaymentService:
         content_type: Optional[str] = None
     ) -> list:
         """Get user's purchased content (unlocked and not expired)."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             sql = """
@@ -838,7 +838,7 @@ class PaymentService:
 
     def create_submission(self, user_id: int, username: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a user submission for review."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             sql = """
@@ -878,7 +878,7 @@ class PaymentService:
         status: Optional[str] = None
     ) -> list:
         """Get user's submissions."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             sql = """
@@ -927,7 +927,7 @@ class PaymentService:
         page_size: int = 20
     ) -> Dict[str, Any]:
         """Get pending submissions (admin view)."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             cur.execute("SELECT COUNT(*) as cnt FROM user_submissions WHERE status = 'pending'")
@@ -966,7 +966,7 @@ class PaymentService:
 
     def approve_submission(self, submission_id: int, admin_id: int) -> Dict[str, Any]:
         """Approve a pending submission."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             cur.execute("SELECT id FROM user_submissions WHERE id = %s", (submission_id,))
@@ -987,7 +987,7 @@ class PaymentService:
 
     def reject_submission(self, submission_id: int, admin_id: int, reason: str) -> Dict[str, Any]:
         """Reject a pending submission."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             cur.execute("SELECT id FROM user_submissions WHERE id = %s", (submission_id,))
@@ -1013,7 +1013,7 @@ class PaymentService:
 
     def get_revenue_stats(self, days: int = 30) -> Dict[str, Any]:
         """Get revenue statistics for admin."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             cur.execute(
@@ -1058,7 +1058,7 @@ class PaymentService:
         is_active: Optional[bool] = None
     ) -> list:
         """List payment accounts (admin)."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             sql = """
@@ -1108,7 +1108,7 @@ class PaymentService:
 
     def create_payment_account(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a payment account (admin)."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             # Store credentials as JSON string (basic storage -- real impl would encrypt)
@@ -1139,7 +1139,7 @@ class PaymentService:
 
     def update_payment_account(self, account_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
         """Update a payment account (admin)."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             cur.execute("SELECT id FROM payment_accounts WHERE id = %s", (account_id,))
@@ -1182,7 +1182,7 @@ class PaymentService:
 
     def delete_payment_account(self, account_id: int) -> Dict[str, Any]:
         """Delete a payment account (admin)."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             cur.execute("DELETE FROM payment_accounts WHERE id = %s", (account_id,))
@@ -1198,7 +1198,7 @@ class PaymentService:
 
     def get_creator_settlement_preference(self, user_id: int) -> Dict[str, Any]:
         """Get creator settlement preference."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             cur.execute(
@@ -1234,7 +1234,7 @@ class PaymentService:
 
     def update_creator_settlement_preference(self, user_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
         """Update creator settlement preference."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             cur.execute(
@@ -1301,7 +1301,7 @@ class PaymentService:
         page_size: int = 20
     ) -> Dict[str, Any]:
         """Get creator earnings (paginated)."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             # Count
@@ -1360,7 +1360,7 @@ class PaymentService:
 
     def get_creator_earnings_summary(self, user_id: int) -> Dict[str, Any]:
         """Get creator earnings summary."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             # Try to use view first, fall back to direct query
@@ -1432,7 +1432,7 @@ class PaymentService:
         payment_account_id: str
     ) -> Dict[str, Any]:
         """Settle creator earnings."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             # Try batch settle function first
@@ -1499,7 +1499,7 @@ class PaymentService:
         page_size: int = 20
     ) -> Dict[str, Any]:
         """Get settlement records (paginated)."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             cur.execute(
@@ -1555,7 +1555,7 @@ class PaymentService:
 
     def get_pending_settlements(self) -> list:
         """Get pending settlements for admin."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             # Try view first
@@ -1630,7 +1630,7 @@ class PaymentService:
         payment_account_id: str
     ) -> Dict[str, Any]:
         """Admin manually settles a creator's earnings."""
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             # Try batch settle function first

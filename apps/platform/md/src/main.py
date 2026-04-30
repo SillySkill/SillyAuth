@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
     # 启动时: 加载所有模块
     logger.info("Starting SillyMD Modular API v2.0.0 ...")
     try:
-        from src.core.plugin_manager import PluginManager
+        from core.plugin_manager import PluginManager
         app.state.manager = PluginManager()
         app.state.manager.set_app(app)
         await app.state.manager.load_all_modules()
@@ -87,7 +87,7 @@ async def health_check():
     db_status = "unknown"
 
     try:
-        from src.core.db_adapter import get_db_cursor
+        from core.db_adapter import get_db_cursor
         with get_db_cursor() as cur:
             cur.execute("SELECT 1")
             db_status = "connected"

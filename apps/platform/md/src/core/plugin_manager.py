@@ -427,12 +427,15 @@ class PluginManager:
                                 # Register the module
                                 self.register_module(module_instance)
 
-                                # Install the module if method exists
-                                if self._app is not None and hasattr(module_instance, 'install'):
-                                    try:
-                                        module_instance.install(self._app)
-                                    except Exception as e:
-                                        logger.warning(f"Failed to install module {entry.name}: {e}")
+                                # Install the module - either via install() or auto-include router
+                                if self._app is not None:
+                                    if hasattr(module_instance, 'install'):
+                                        try:
+                                            module_instance.install(self._app)
+                                        except Exception as e:
+                                            logger.warning(f"Failed to install module {entry.name}: {e}")
+                                    elif hasattr(module_instance, 'router'):
+                                        self._app.include_router(module_instance.router)
 
                                 logger.info(f"Loaded module: {entry.name}")
                                 continue  # Skip to next module
@@ -502,12 +505,15 @@ class PluginManager:
                             # Register the module
                             self.register_module(module_instance)
 
-                            # Install the module if method exists
-                            if self._app is not None and hasattr(module_instance, 'install'):
-                                try:
-                                    module_instance.install(self._app)
-                                except Exception as e:
-                                    logger.warning(f"Failed to install module {entry.name}: {e}")
+                            # Install the module - either via install() or auto-include router
+                            if self._app is not None:
+                                if hasattr(module_instance, 'install'):
+                                    try:
+                                        module_instance.install(self._app)
+                                    except Exception as e:
+                                        logger.warning(f"Failed to install module {entry.name}: {e}")
+                                elif hasattr(module_instance, 'router'):
+                                    self._app.include_router(module_instance.router)
 
                             logger.info(f"Loaded module: {entry.name}")
                         else:

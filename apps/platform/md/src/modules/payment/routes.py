@@ -421,7 +421,7 @@ def create_order(
     """
     user_id = current_user["id"]
     try:
-        from src.core.db_adapter import get_db_cursor as _get_db
+        from core.db_adapter import get_db_cursor as _get_db
 
         with _get_db() as cur:
             # Check for existing pending order (idempotency)

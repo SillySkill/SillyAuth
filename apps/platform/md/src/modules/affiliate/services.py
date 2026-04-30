@@ -53,13 +53,8 @@ def get_db():
 
 def _get_db_config() -> Dict[str, Any]:
     """获取数据库配置"""
-    return {
-        "host": os.getenv("DB_HOST"),
-        "port": int(os.getenv("DB_PORT", "5432")),
-        "database": os.getenv("DB_NAME"),
-        "user": os.getenv("DB_USER"),
-        "password": os.getenv("DB_PASSWORD")
-    }
+    from core.db_adapter import get_default_config
+    return get_default_config()
 
 
 # ==================== 数据库初始化 ====================

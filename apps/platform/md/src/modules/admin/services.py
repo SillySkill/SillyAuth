@@ -6,7 +6,7 @@ Provides services for user management, content moderation,
 system statistics, and audit logging
 """
 
-import hashlib
+from passlib.hash import bcrypt
 import secrets
 import logging
 import os
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 # Configuration
 # ============================================================================
 
-from src.core.db_adapter import get_db_cursor
+from core.db_adapter import get_db_cursor
 
 
 # ============================================================================
@@ -191,7 +191,7 @@ class UserManagementService:
         """
         # Generate temporary password
         temp_password = secrets.token_urlsafe(12)
-        password_hash = hashlib.sha256(temp_password.encode()).hexdigest()
+        password_hash = bcrypt.hash(temp_password)
 
         with get_db_cursor() as cur:
             # Update password

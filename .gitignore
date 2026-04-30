@@ -41,3 +41,13 @@ nul
 
 # Server
 server.pid
+
+# Gradle build cache
+.gradle/
+
+# Large binary assets (use Git LFS or manual download)
+common/assets/screenshots/
+common/assets/banner/
+
+# TTS libraries
+apps/mobile/AIActive/android/app/libs/tts/*.zip

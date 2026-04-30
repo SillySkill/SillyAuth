@@ -13,18 +13,13 @@ from typing import List, Optional, Dict, Any
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.core.db_adapter import get_db_cursor, get_db
+from core.db_adapter import get_db_cursor, get_db
 
 # 配置
 def get_db_config() -> Dict[str, Any]:
     """获取数据库配置（从环境变量）"""
-    return {
-        "host": os.getenv("DB_HOST"),
-        "port": int(os.getenv("DB_PORT", "5432")),
-        "database": os.getenv("DB_NAME"),
-        "user": os.getenv("DB_USER"),
-        "password": os.getenv("DB_PASSWORD")
-    }
+    from core.db_adapter import get_default_config
+    return get_default_config()
 
 
 class PointsService:

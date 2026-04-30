@@ -52,20 +52,12 @@ router = APIRouter(prefix="/api/v1/admin", tags=["管理后台"])
 security = HTTPBearer()
 
 # JWT configuration (should match auth module)
-SECRET_KEY = os.getenv("JWT_SECRET", "your-super-secret-jwt-key-change-this-in-production-2024-sillymd-api")
+SECRET_KEY = os.getenv("JWT_SECRET", "CHANGE-ME-IN-PRODUCTION")
 ALGORITHM = "HS256"
 
 # Admin roles configuration
 ADMIN_ROLES = ['super_admin', 'content_admin', 'user_admin', 'finance_admin']
 
-# Database configuration
-DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "localhost"),
-    "port": int(os.getenv("DB_PORT", 5432)),
-    "database": os.getenv("DB_NAME", "sillymd"),
-    "user": os.getenv("DB_USER", "sillyAdmin"),
-    "password": os.getenv("DB_PASSWORD", "")
-}
 
 
 # ============================================================================
@@ -74,8 +66,8 @@ DB_CONFIG = {
 
 def get_db_cursor():
     """Get database cursor"""
-    from server.api.database import get_db_cursor
-    return get_db_cursor(DB_CONFIG)
+    from core.db_adapter import get_db_cursor
+    return get_db_cursor()
 
 
 async def get_current_admin(

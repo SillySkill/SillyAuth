@@ -3,6 +3,8 @@
 定义分析相关的Pydantic v2模型
 """
 
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -52,9 +54,9 @@ class HourlyStat(BaseModel):
 
 class ExportDataPoint(BaseModel):
     """导出数据点"""
-    date: str | None = None
+    date: Optional[str] = None
     hour: int = 0
-    action: str | None = None
-    entity: str | None = None
-    username: str | None = None
+    action: Optional[str] = None
+    entity: Optional[str] = None
+    username: Optional[str] = None
     count: int = 0

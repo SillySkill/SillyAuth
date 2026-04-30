@@ -9,7 +9,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
 
-from src.core.db_adapter import get_db_cursor
+from core.db_adapter import get_db_cursor
 
 logger = logging.getLogger(__name__)
 

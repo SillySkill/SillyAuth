@@ -61,13 +61,8 @@ logger = logging.getLogger(__name__)
 # Database configuration
 def get_db_config() -> Dict[str, Any]:
     """Get database configuration"""
-    return {
-        "host": os.getenv("DB_HOST"),
-        "port": int(os.getenv("DB_PORT")),
-        "database": os.getenv("DB_NAME"),
-        "user": os.getenv("DB_USER"),
-        "password": os.getenv("DB_PASSWORD")
-    }
+    from core.db_adapter import get_default_config
+    return get_default_config()
 
 
 # Default task configurations

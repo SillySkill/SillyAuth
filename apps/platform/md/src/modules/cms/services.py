@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 # Configuration
 # ============================================================================
 
-from src.core.db_adapter import get_db_cursor
+from core.db_adapter import get_db_cursor
 
 # Module configuration defaults
 MODULE_CONFIG = {

@@ -24,7 +24,7 @@ from .schemas import (
     ChangePasswordRequest,
 )
 from .services import auth_service, SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from src.core.db_adapter import get_db_cursor
+from core.db_adapter import get_db_cursor
 
 logger = logging.getLogger(__name__)
 

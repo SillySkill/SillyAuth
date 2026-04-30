@@ -34,7 +34,7 @@ from .schemas import (
 )
 
 from .services import article_service, category_service, ArticleService, CategoryService
-from src.core.db_adapter import get_db_cursor
+from core.db_adapter import get_db_cursor
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ async def get_current_user(
         try:
             from server.modules.auth.services import SECRET_KEY, ALGORITHM
         except ImportError:
-            SECRET_KEY = os.getenv("JWT_SECRET", "your-super-secret-jwt-key-change-this-in-production-2024-sillymd-api")
+            SECRET_KEY = os.getenv("JWT_SECRET", "CHANGE-ME-IN-PRODUCTION")
             ALGORITHM = "HS256"
 
         token = credentials.credentials

@@ -6,7 +6,7 @@
 import json
 from typing import Optional, Dict, Any, List
 
-from src.core.db_adapter import get_db_cursor
+from core.db_adapter import get_db_cursor
 
 
 class TutorialService:

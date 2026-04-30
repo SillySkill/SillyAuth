@@ -5,7 +5,7 @@ Business logic for authentication operations
 Provides login, registration, token management, and password verification
 """
 
-import hashlib
+from passlib.hash import bcrypt
 import secrets
 import os
 import logging
@@ -28,20 +28,12 @@ logger = logging.getLogger(__name__)
 # Configuration
 # ============================================================================
 
-SECRET_KEY = os.getenv("JWT_SECRET", "your-super-secret-jwt-key-change-this-in-production-2024-sillymd-api")
+SECRET_KEY = os.getenv("JWT_SECRET", "CHANGE-ME-IN-PRODUCTION")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 30
 ACCESS_TOKEN_EXPIRE_MINUTES = ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60  # 30 days in minutes
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
-# Database configuration
-DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "localhost"),
-    "port": int(os.getenv("DB_PORT", 5432)),
-    "database": os.getenv("DB_NAME", "sillymd"),
-    "user": os.getenv("DB_USER", "sillyAdmin"),
-    "password": os.getenv("DB_PASSWORD", "")
-}
 
 
 class AuthService:
@@ -49,17 +41,13 @@ class AuthService:
 
     @staticmethod
     def hash_password(password: str) -> str:
-        """
-        Hash password using SHA-256
-
-        Note: For production, consider using bcrypt or argon2
-        """
-        return hashlib.sha256(password.encode()).hexdigest()
+        """Hash password using bcrypt."""
+        return bcrypt.hash(password)
 
     @staticmethod
     def verify_password(password: str, password_hash: str) -> bool:
         """
-        Verify password against hash
+        Verify password against hash. Supports both bcrypt and legacy SHA-256.
 
         Args:
             password: Plain text password
@@ -68,8 +56,14 @@ class AuthService:
         Returns:
             True if password matches, False otherwise
         """
-        computed_hash = hashlib.sha256(password.encode()).hexdigest()
-        return computed_hash == password_hash
+        # bcrypt hashes start with $2b$ or $2a$
+        if password_hash.startswith("$2"):
+            return bcrypt.verify(password, password_hash)
+        # Legacy SHA-256 hash (64 hex characters)
+        if len(password_hash) == 64 and all(c in "0123456789abcdef" for c in password_hash.lower()):
+            import hashlib
+            return hashlib.sha256(password.encode()).hexdigest() == password_hash
+        return False
 
     @staticmethod
     def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
@@ -158,8 +152,8 @@ class AuthService:
         Yields:
             Database cursor
         """
-        from server.api.database import get_db_cursor
-        return get_db_cursor(DB_CONFIG)
+        from core.db_adapter import get_db_cursor
+        return get_db_cursor()
 
     def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
         """
@@ -231,8 +225,7 @@ class AuthService:
             return None
 
         # Verify password
-        password_hash = self.hash_password(password)
-        if user.get('password_hash') != password_hash:
+        if not self.verify_password(password, user.get('password_hash')):
             logger.warning(f"Invalid password attempt for email: {email}")
             return None
 

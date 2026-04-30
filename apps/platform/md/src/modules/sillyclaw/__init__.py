@@ -83,21 +83,8 @@ class SillyMDModule:
 
     def _get_db_config(self) -> Dict[str, Any]:
         """Get database configuration from environment variables."""
-        required_vars = ["DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD"]
-        missing = [v for v in required_vars if not os.getenv(v)]
-
-        if missing:
-            raise RuntimeError(
-                f"Missing required environment variables: {', '.join(missing)}"
-            )
-
-        return {
-            "host": os.getenv("DB_HOST"),
-            "port": int(os.getenv("DB_PORT")),
-            "database": os.getenv("DB_NAME"),
-            "user": os.getenv("DB_USER"),
-            "password": os.getenv("DB_PASSWORD")
-        }
+        from core.db_adapter import get_default_config
+        return get_default_config()
 
     def _get_tos_credentials(self) -> Dict[str, str]:
         """Get TOS credentials from environment variables."""

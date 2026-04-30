@@ -17,7 +17,7 @@ from typing import Optional, Dict, Any, List
 from fastapi import HTTPException
 from psycopg2.extras import RealDictCursor
 
-from src.core.db_adapter import get_db_cursor, get_db
+from core.db_adapter import get_db_cursor, get_db
 
 logger = logging.getLogger(__name__)
 

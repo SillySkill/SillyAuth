@@ -25,14 +25,6 @@ logger = logging.getLogger(__name__)
 # Configuration
 # ============================================================================
 
-DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "localhost"),
-    "port": int(os.getenv("DB_PORT", 5432)),
-    "database": os.getenv("DB_NAME", "sillymd"),
-    "user": os.getenv("DB_USER", "sillyAdmin"),
-    "password": os.getenv("DB_PASSWORD", "")
-}
-
 # Module configuration defaults
 MAX_MESSAGE_LENGTH = 5000
 MAX_ATTACHMENT_SIZE_MB = 10
@@ -41,8 +33,8 @@ RETENTION_DAYS = 90
 
 def get_db_cursor():
     """Get database cursor"""
-    from server.api.database import get_db_cursor
-    return get_db_cursor(DB_CONFIG)
+    from core.db_adapter import get_db_cursor
+    return get_db_cursor()
 
 
 # ============================================================================
