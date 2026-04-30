@@ -77,6 +77,26 @@ app.add_middleware(
 )
 
 # ---------------------------------------------------------------------------
+# 根路径 - 重定向到 API 文档
+# ---------------------------------------------------------------------------
+
+@app.get("/", include_in_schema=False)
+async def root():
+    """根路径 - 重定向到 Swagger API 文档"""
+    return RedirectResponse(url="/docs")
+
+
+@app.get("/api", include_in_schema=False)
+async def api_root():
+    """API 根路径"""
+    return JSONResponse({
+        "name": "SillyMD Modular API",
+        "version": "2.0.0",
+        "docs": "/docs",
+        "health": "/api/health",
+    })
+
+# ---------------------------------------------------------------------------
 # 过渡期兼容端点
 # ---------------------------------------------------------------------------
 

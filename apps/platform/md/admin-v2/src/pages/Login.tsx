@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { login } from '../api/auth';
+import { useAuthStore } from '../stores/authStore';
 import type { LoginRequest } from '../types';
 
 const { Title, Text } = Typography;
@@ -19,6 +20,13 @@ const LoginPage: React.FC = () => {
       if (response.access_token) {
         localStorage.setItem('sillymd_admin_token', response.access_token);
         localStorage.setItem('sillymd_admin_user', JSON.stringify(response.user));
+        // Update authStore so ProtectedRoute detects auth immediately
+        useAuthStore.setState({
+          token: response.access_token,
+          user: response.user,
+          isAuthenticated: true,
+          isLoading: false,
+        });
         message.success('登录成功');
         navigate('/dashboard', { replace: true });
       } else {
