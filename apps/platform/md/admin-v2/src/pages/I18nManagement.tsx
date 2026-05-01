@@ -93,7 +93,7 @@ const I18nManagement: React.FC = () => {
       setTranslations(Array.isArray(data) ? data : []);
       setPagination({ current: page, pageSize, total });
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to load translations';
+      const msg = error instanceof Error ? error.message : '加载翻译失败';
       message.error(msg);
     } finally {
       setLoading(false);
@@ -142,17 +142,17 @@ const I18nManagement: React.FC = () => {
 
       if (editingTranslation) {
         await api.put(`/i18n/translations/${editingTranslation.id}`, values);
-        message.success('Translation updated successfully');
+        message.success('翻译更新成功');
       } else {
         await api.post('/i18n/translations', values);
-        message.success('Translation created successfully');
+        message.success('翻译创建成功');
       }
 
       setModalVisible(false);
       loadTranslations(pagination.current, pagination.pageSize);
     } catch (error: unknown) {
       if (error instanceof Error && error.message?.includes('Validation')) return;
-      const msg = error instanceof Error ? error.message : 'Operation failed';
+      const msg = error instanceof Error ? error.message : '操作失败';
       message.error(msg);
     } finally {
       setSubmitting(false);
@@ -161,18 +161,18 @@ const I18nManagement: React.FC = () => {
 
   const handleDelete = (record: Translation) => {
     Modal.confirm({
-      title: 'Delete Translation',
-      content: `Are you sure you want to delete "${record.key}"?`,
-      okText: 'Delete',
+      title: '删除翻译',
+      content: `确定要删除 "${record.key}" 吗？`,
+      okText: '删除',
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: '取消',
       onOk: async () => {
         try {
           await api.delete(`/i18n/translations/${record.id}`);
-          message.success('Translation deleted successfully');
+          message.success('翻译删除成功');
           loadTranslations(pagination.current, pagination.pageSize);
         } catch (error: unknown) {
-          const msg = error instanceof Error ? error.message : 'Delete failed';
+          const msg = error instanceof Error ? error.message : '删除失败';
           message.error(msg);
         }
       },
@@ -180,7 +180,7 @@ const I18nManagement: React.FC = () => {
   };
 
   const handleImport = () => {
-    message.info('Import functionality is ready. Upload a JSON file to import translations.');
+    message.info('导入功能已就绪，上传JSON文件导入翻译。');
     // Placeholder: actual implementation would use a file input + JSON parse + batch POST
   };
 
@@ -197,9 +197,9 @@ const I18nManagement: React.FC = () => {
       a.download = `translations-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      message.success('Translations exported successfully');
+      message.success('翻译导出成功');
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Export failed';
+      const msg = error instanceof Error ? error.message : '导出失败';
       message.error(msg);
     }
   };
@@ -242,48 +242,51 @@ const I18nManagement: React.FC = () => {
       sorter: true,
     },
     {
-      title: 'Key',
+      title: '键名',
       dataIndex: 'key',
       key: 'key',
       width: 220,
       ellipsis: true,
     },
     {
-      title: 'Chinese (zh_CN)',
+      title: '中文',
       dataIndex: 'zh_CN',
       key: 'zh_CN',
       ellipsis: true,
     },
     {
-      title: 'English (en)',
+      title: '英文',
       dataIndex: 'en',
       key: 'en',
       ellipsis: true,
     },
     {
-      title: 'Module',
+      title: '模块',
       dataIndex: 'module',
       key: 'module',
       width: 120,
       render: (mod: string) => <Tag color={getModuleColor(mod)}>{mod}</Tag>,
       filters: [
-        { text: 'Common', value: 'common' },
+        { text: '通用', value: 'common' },
         { text: 'CMS', value: 'cms' },
-        { text: 'Skills', value: 'skills' },
-        { text: 'Store', value: 'store' },
+        { text: '技能', value: 'skills' },
+        { text: '商城', value: 'store' },
+        { text: '支付', value: 'payment' },
+        { text: '积分', value: 'points' },
+        { text: '管理', value: 'admin' },
       ],
       onFilter: (value, record) => record.module === value,
     },
     {
-      title: 'Created At',
+      title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 170,
       sorter: true,
-      render: (date: string) => (date ? new Date(date).toLocaleDateString() : 'N/A'),
+      render: (date: string) => (date ? new Date(date).toLocaleDateString() : '无'),
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 160,
       fixed: 'right',
@@ -295,13 +298,13 @@ const I18nManagement: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => handleOpenEdit(record)}
           >
-            Edit
+            编辑
           </Button>
           <Popconfirm
-            title="Delete this translation?"
+            title="确定删除此翻译？"
             onConfirm={() => handleDelete(record)}
-            okText="Yes"
-            cancelText="No"
+            okText="是"
+            cancelText="否"
           >
             <Button
               type="link"
@@ -309,7 +312,7 @@ const I18nManagement: React.FC = () => {
               danger
               icon={<DeleteOutlined />}
             >
-              Delete
+              删除
             </Button>
           </Popconfirm>
         </Space>
@@ -324,9 +327,9 @@ const I18nManagement: React.FC = () => {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <Title level={2}>i18n Management</Title>
+        <Title level={2}>国际化管理</Title>
         <p style={{ color: '#888' }}>
-          Manage translation strings across all modules. Supports search, CRUD, and import/export.
+          管理所有模块的翻译字符串。支持搜索、增删改查、导入和导出。
         </p>
       </div>
 
@@ -335,7 +338,7 @@ const I18nManagement: React.FC = () => {
         <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
           <Space wrap>
             <Input.Search
-              placeholder="Search by key"
+              placeholder="搜索键名"
               value={searchKey}
               onChange={(e) => setSearchKey(e.target.value)}
               onSearch={handleSearch}
@@ -344,37 +347,40 @@ const I18nManagement: React.FC = () => {
             />
             <Select
               allowClear
-              placeholder="Filter by module"
+              placeholder="按模块筛选"
               value={searchModule || undefined}
               onChange={(value) => setSearchModule(value || '')}
               style={{ width: 160 }}
               options={[
-                { label: 'Common', value: 'common' },
+                { label: '通用', value: 'common' },
                 { label: 'CMS', value: 'cms' },
-                { label: 'Skills', value: 'skills' },
-                { label: 'Store', value: 'store' },
+                { label: '技能', value: 'skills' },
+                { label: '商城', value: 'store' },
+                { label: '支付', value: 'payment' },
+                { label: '积分', value: 'points' },
+                { label: '管理', value: 'admin' },
               ]}
             />
             <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-              Search
+              搜索
             </Button>
             {(searchKey || searchModule) && (
-              <Button onClick={handleResetSearch}>Reset</Button>
+              <Button onClick={handleResetSearch}>重置</Button>
             )}
           </Space>
 
           <Space wrap>
             <Button icon={<DownloadOutlined />} onClick={handleExport}>
-              Export JSON
+              导出JSON
             </Button>
             <Button icon={<UploadOutlined />} onClick={handleImport}>
-              Import JSON
+              导入JSON
             </Button>
             <Button icon={<ReloadOutlined />} onClick={() => loadTranslations(pagination.current, pagination.pageSize)}>
-              Refresh
+              刷新
             </Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
-              Add Translation
+              添加翻译
             </Button>
           </Space>
         </div>
@@ -389,11 +395,11 @@ const I18nManagement: React.FC = () => {
             pagination={{
               ...pagination,
               showSizeChanger: true,
-              showTotal: (total) => `Total ${total} translations`,
+              showTotal: (total) => `共 ${total} 条翻译`,
             }}
             scroll={{ x: 1000 }}
             locale={{
-              emptyText: <Empty description="No translations found" />,
+              emptyText: <Empty description="暂无翻译" />,
             }}
           />
         </Spin>
@@ -401,7 +407,7 @@ const I18nManagement: React.FC = () => {
 
       {/* Create/Edit Modal */}
       <Modal
-        title={editingTranslation ? 'Edit Translation' : 'Add Translation'}
+        title={editingTranslation ? '编辑翻译' : '添加翻译'}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
@@ -412,42 +418,42 @@ const I18nManagement: React.FC = () => {
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item
             name="key"
-            label="Key"
-            rules={[{ required: true, message: 'Please enter the translation key' }]}
+            label="键名"
+            rules={[{ required: true, message: '请输入翻译键名' }]}
           >
             <Input
-              placeholder="e.g. nav.home"
+              placeholder="示例: nav.home"
               disabled={editingTranslation !== null}
             />
           </Form.Item>
           <Form.Item
             name="zh_CN"
-            label="Chinese (zh_CN)"
-            rules={[{ required: true, message: 'Please enter the Chinese translation' }]}
+            label="中文"
+            rules={[{ required: true, message: '请输入中文翻译' }]}
           >
-            <TextArea rows={2} placeholder="e.g. 首页" />
+            <TextArea rows={2} placeholder="示例: 首页" />
           </Form.Item>
           <Form.Item
             name="en"
-            label="English (en_US)"
-            rules={[{ required: true, message: 'Please enter the English translation' }]}
+            label="英文"
+            rules={[{ required: true, message: '请输入英文翻译' }]}
           >
-            <TextArea rows={2} placeholder="e.g. Home" />
+            <TextArea rows={2} placeholder="示例: Home" />
           </Form.Item>
           <Form.Item
             name="module"
-            label="Module"
-            rules={[{ required: true, message: 'Please select a module' }]}
+            label="模块"
+            rules={[{ required: true, message: '请选择模块' }]}
           >
             <Select
               options={[
-                { label: 'Common', value: 'common' },
+                { label: '通用', value: 'common' },
                 { label: 'CMS', value: 'cms' },
-                { label: 'Skills', value: 'skills' },
-                { label: 'Store', value: 'store' },
-                { label: 'Payment', value: 'payment' },
-                { label: 'Points', value: 'points' },
-                { label: 'Admin', value: 'admin' },
+                { label: '技能', value: 'skills' },
+                { label: '商城', value: 'store' },
+                { label: '支付', value: 'payment' },
+                { label: '积分', value: 'points' },
+                { label: '管理', value: 'admin' },
               ]}
             />
           </Form.Item>

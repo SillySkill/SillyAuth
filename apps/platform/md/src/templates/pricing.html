@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}定价方案 - {{ site_name }}{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ site_name }} 定价方案 - 选择合适的计划开始使用 AI Skills">
+{% endblock %}
+
+{% block content %}
+<!-- Pricing Hero -->
+<section style="padding: 120px 0 60px; text-align: center; background: var(--gradient-light);">
+  <div class="container">
+    <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">
+      <span class="text-gradient">定价方案</span>
+    </h1>
+    <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px;">
+      选择最适合你的计划，开始构建强大的 AI Skills 应用
+    </p>
+
+    {% if pricing_plans %}
+    <!-- Pricing Toggle -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 48px;">
+      <span style="font-weight: 600; color: var(--text-primary);">月付</span>
+      <label style="position: relative; display: inline-block; width: 52px; height: 28px;">
+        <input type="checkbox" id="billingToggle" style="opacity: 0; width: 0; height: 0;" onchange="toggleBilling()">
+        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-gray-dark); border-radius: 28px; transition: 0.3s;"></span>
+      </label>
+      <span style="font-weight: 600; color: var(--text-primary);">年付
+        <span style="padding: 2px 8px; background: rgba(55, 214, 122, 0.12); border: 1px solid rgba(55, 214, 122, 0.3); border-radius: 12px; font-size: 0.75rem; color: var(--accent); margin-left: 4px;">
+          省 20%
+        </span>
+      </span>
+    </div>
+
+    <!-- Pricing Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto;">
+      {% for plan in pricing_plans %}
+      <div class="pricing-card" style="position: relative; background: var(--bg-white); border: 2px solid {% if plan.featured %}var(--primary){% else %}var(--border-light){% endif %}; border-radius: var(--radius-lg); padding: 40px 32px; text-align: center; transition: all 0.3s; box-shadow: {% if plan.featured %}var(--shadow-card){% else %}var(--shadow-sm){% endif %}; {% if plan.featured %}transform: scale(1.03);{% endif %}">
+        {% if plan.badge %}
+        <div class="plan-badge" style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); padding: 6px 20px; background: var(--gradient-primary); color: white; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap;">
+          {{ plan.badge }}
+        </div>
+        {% endif %}
+
+        {% if plan.featured and not plan.badge %}
+        <div class="plan-badge" style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); padding: 6px 20px; background: var(--accent); color: white; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap;">
+          推荐
+        </div>
+        {% endif %}
+
+        <h3 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">{{ plan.name }}</h3>
+        <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 24px;">{{ plan.description }}</p>
+
+        <div class="price-display" style="margin-bottom: 24px;">
+          <span class="currency" style="font-size: 1.5rem; font-weight: 600; vertical-align: top; color: var(--text-primary);">{{ plan.currency }}</span>
+          <span class="amount" style="font-size: 3rem; font-weight: 700; color: var(--text-primary); line-height: 1;">{{ plan.amount }}</span>
+          <span class="period" style="font-size: 0.9rem; color: var(--text-light);">/{{ plan.period }}</span>
+        </div>
+
+        {% if plan.features_list %}
+        <ul class="pricing-features" style="list-style: none; padding: 0; margin: 0 0 32px; text-align: left;">
+          {% for feature in plan.features_list %}
+          <li style="display: flex; align-items: center; gap: 10px; padding: 8px 0; color: var(--text-secondary); font-size: 0.9rem;">
+            <i class="fas fa-check-circle" style="color: var(--accent); flex-shrink: 0;"></i>
+            {{ feature }}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div style="height: 48px;"></div>
+        {% endif %}
+
+        <a href="{{ plan.cta_url or '#' }}" class="btn {% if plan.featured %}btn-primary{% else %}btn-secondary{% endif %} btn-lg" style="width: 100%; justify-content: center;">
+          {{ plan.cta_text or '开始使用' }}
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div style="padding: 80px 20px; text-align: center; color: var(--text-light);">
+      <i class="fas fa-tags" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+      <p style="font-size: 1.1rem;">暂无定价方案</p>
+      <p style="font-size: 0.9rem; margin-top: 8px;">请联系我们获取最新报价</p>
+    </div>
+    {% endif %}
+
+    <!-- FAQ Section -->
+    <div style="margin-top: 80px; text-align: left; max-width: 800px; margin-left: auto; margin-right: auto;">
+      <h2 style="font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: 40px; color: var(--text-primary);">
+        常见问题
+      </h2>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="padding: 24px; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-md);">
+          <h4 style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">可以随时升级或降级套餐吗？</h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">是的，你可以随时在账户设置中更改套餐。升级即时生效，降级将在当前计费周期结束后应用。</p>
+        </div>
+        <div style="padding: 24px; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-md);">
+          <h4 style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">支持哪些支付方式？</h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">我们支持支付宝、微信支付、PayPal 以及国际信用卡 (Visa/Mastercard)。</p>
+        </div>
+        <div style="padding: 24px; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-md);">
+          <h4 style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">可以申请退款吗？</h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">我们提供 7 天无理由退款保障。如有任何问题，请与客服团队联系。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function toggleBilling() {
+  var toggle = document.getElementById('billingToggle');
+  var cards = document.querySelectorAll('.pricing-card .price-display');
+  cards.forEach(function(card) {
+    if (toggle.checked) {
+      // Annual billing logic can be implemented here
+      card.style.opacity = '1';
+    } else {
+      card.style.opacity = '1';
+    }
+  });
+}
+</script>
+{% endblock %}

@@ -24,7 +24,9 @@ from typing import Optional, Dict, Any
 from pathlib import Path
 import yaml
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from starlette.responses import HTMLResponse
+from core.template_helpers import render_template
 from pydantic import BaseModel
 
 # Import components
@@ -154,6 +156,11 @@ class SillyMDModule:
         app.include_router(messages_router)
 
         logger.info(f"Messages routes registered at {messages_router.prefix}")
+
+        # Page routes
+        @app.get("/messages", response_class=HTMLResponse, include_in_schema=False)
+        async def messages_page(request: Request):
+            return render_template(request, "user/messages.html")
 
     def install(self, app: FastAPI) -> None:
         """Alias for register() - for PluginManager compatibility."""

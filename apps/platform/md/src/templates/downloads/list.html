@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('downloads.title') }} - {{ _('site.name') }}{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ _('downloads.meta_description') }}">
+<meta name="keywords" content="{{ _('downloads.meta_keywords') }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="{{ _('downloads.title') }} - {{ _('site.name') }}">
+<meta property="og:description" content="{{ _('downloads.meta_description') }}">
+<meta property="og:image" content="/static/img/og-downloads.jpg">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="downloads-hero">
+  <div class="container">
+    <div class="hero-badge">
+      <i class="fas fa-cloud-download-alt"></i>
+      <span>{{ _('downloads.hero_badge') }}</span>
+    </div>
+    <h1>{{ _('downloads.hero_title') }}</h1>
+    <p>{{ _('downloads.hero_subtitle') }}</p>
+  </div>
+</section>
+
+<!-- Stats Bar -->
+<section class="stats-bar">
+  {% for stat in stats %}
+  <div class="stat-card">
+    <div class="stat-value">{{ stat.value }}</div>
+    <div class="stat-label">{{ stat.label }}</div>
+  </div>
+  {% endfor %}
+</section>
+
+<!-- Categories Section -->
+<section class="categories-section">
+  <div class="category-grid">
+    {% for category in categories %}
+    <a href="/downloads?category={{ category.slug }}" class="category-card {% if current_category == category.slug or (not current_category and loop.first) %}active{% endif %}">
+      <div class="category-icon">{{ category.icon }}</div>
+      <div class="category-name">{{ category.name }}</div>
+      <div class="category-count">{{ category.count }}+</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Platform Filter -->
+<div class="platform-tabs">
+  <a href="/downloads?category={{ current_category }}" class="platform-tab {% if current_platform == 'all' or not current_platform %}active{% endif %}">
+    <i class="fas fa-desktop"></i>
+    <span>{{ _('downloads.all_platforms') }}</span>
+  </a>
+  {% for platform in platforms %}
+  <a href="/downloads?category={{ current_category }}&platform={{ platform.slug }}" class="platform-tab {% if current_platform == platform.slug %}active{% endif %}">
+    <i class="{{ platform.icon }}"></i>
+    <span>{{ platform.name }}</span>
+  </a>
+  {% endfor %}
+</div>
+
+<!-- Downloads Section -->
+<section class="downloads-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">{{ _('downloads.popular_title') }}</h2>
+      <p class="section-subtitle">{{ _('downloads.popular_subtitle') }}</p>
+    </div>
+    <form method="GET" action="/downloads">
+      {% if current_category %}
+      <input type="hidden" name="category" value="{{ current_category }}">
+      {% endif %}
+      {% if current_platform %}
+      <input type="hidden" name="platform" value="{{ current_platform }}">
+      {% endif %}
+      <div class="search-box">
+        <input type="text" name="search" placeholder="{{ _('downloads.search_placeholder') }}" value="{{ search_query or '' }}">
+        <i class="fas fa-search"></i>
+      </div>
+    </form>
+  </div>
+
+  <div class="downloads-grid">
+    {% for download in downloads %}
+    <div class="download-card">
+      <div class="download-header">
+        <div class="download-icon">{{ download.category_icon }}</div>
+        <div class="download-info">
+          <h3 class="download-title">{{ download.name }}</h3>
+          <div class="download-version">
+            {{ _('downloads.version') }} {{ download.version }}
+            {% if download.is_official %}
+            <span class="official-badge">{{ _('downloads.official') }}</span>
+            {% endif %}
+          </div>
+          <div class="download-meta">
+            <span><i class="fas fa-laptop"></i> {{ download.platform_name }}</span>
+            <span><i class="fas fa-file"></i> {{ download.file_type }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="download-body">
+        <p class="download-description">{{ download.description }}</p>
+        <div class="download-links">
+          <a href="{{ download.file_url }}" class="download-link download-link-primary" download>
+            <div class="link-info">
+              <i class="fas fa-cloud-download-alt link-icon"></i>
+              <div>
+                <div class="link-name">{{ _('downloads.direct_download') }}</div>
+                <div class="link-size">{{ download.file_size }}</div>
+              </div>
+            </div>
+            <div class="link-action">
+              <i class="fas fa-download"></i>
+              <span>{{ _('downloads.download') }}</span>
+            </div>
+          </a>
+          {% if download.mirror_url %}
+          <a href="{{ download.mirror_url }}" class="download-link" target="_blank">
+            <div class="link-info">
+              <i class="fas fa-server link-icon"></i>
+              <div>
+                <div class="link-name">{{ download.mirror_name }}</div>
+              </div>
+            </div>
+            <div class="link-action">
+              <span class="mirror-badge">{{ _('downloads.mirror') }}</span>
+              <i class="fas fa-external-link-alt"></i>
+            </div>
+          </a>
+          {% endif %}
+          {% if download.github_url %}
+          <a href="{{ download.github_url }}" class="download-link" target="_blank">
+            <div class="link-info">
+              <i class="fab fa-github link-icon"></i>
+              <div class="link-name">{{ _('downloads.github') }}</div>
+            </div>
+            <div class="link-action">
+              <i class="fas fa-external-link-alt"></i>
+            </div>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="download-footer">
+        <div class="download-stats">
+          <span><i class="fas fa-download"></i> {{ download.download_count }}</span>
+          <span><i class="fas fa-eye"></i> {{ download.view_count }}</span>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-light);">
+      <i class="fas fa-download" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+      <p style="font-size: 1.1rem;">{{ _('downloads.no_results') }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if total_pages > 1 %}
+  <div style="margin-top: 40px;">
+    {% include "components/pagination.html" %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

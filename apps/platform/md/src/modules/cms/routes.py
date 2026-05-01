@@ -6,12 +6,14 @@ Provides article, tutorial, guide, and category management endpoints
 """
 
 import os
+import json
 import math
 import logging
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status, Header, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel
 
 from .schemas import (
     ArticleCreate,
@@ -64,8 +66,8 @@ async def get_current_user(
     Raises:
         HTTPException: If token is invalid or user not found
     """
-    from .services import SECRET_KEY, ALGORITHM
     from jose import jwt, JWTError
+    from modules.auth.services import SECRET_KEY, ALGORITHM
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -74,12 +76,6 @@ async def get_current_user(
     )
 
     try:
-        # Get secret key and algorithm from auth module
-        try:
-            from server.modules.auth.services import SECRET_KEY, ALGORITHM
-        except ImportError:
-            SECRET_KEY = os.getenv("JWT_SECRET", "CHANGE-ME-IN-PRODUCTION")
-            ALGORITHM = "HS256"
 
         token = credentials.credentials
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -735,4 +731,74 @@ async def get_article_stats(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="获取统计数据失败"
+        )
+
+
+# ============================================================================
+# Navigation Routes
+# ============================================================================
+
+class NavigationUpdateRequest(BaseModel):
+    """Request body for updating navigation items."""
+    items: List[dict]
+
+
+@router.get("/navigation")
+async def get_navigation():
+    """
+    Get navigation items from config_data.
+
+    Returns navbar items in admin-v2 NavigationEdit format:
+    [{id, label_zh, label_en, url, icon, sort_order, is_visible, children}]
+    """
+    try:
+        with get_db_cursor() as cur:
+            cur.execute(
+                "SELECT data FROM config_data WHERE category = %s AND name = %s",
+                ("navigation", "navbar")
+            )
+            row = cur.fetchone()
+            if row and row.get('data') is not None:
+                raw = row['data']
+                items = json.loads(raw) if isinstance(raw, str) else raw
+            else:
+                items = []
+        return {"success": True, "items": items}
+    except Exception as e:
+        logger.error(f"Failed to load navigation: {e}")
+        return {"success": True, "items": []}
+
+
+@router.put("/navigation")
+async def update_navigation(
+    update_data: NavigationUpdateRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Update navigation items. Requires admin/moderator role.
+
+    Request body: { items: [{id, label_zh, label_en, url, icon, sort_order, is_visible, children}] }
+    """
+    if not check_admin_permission(current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="需要管理员权限"
+        )
+
+    try:
+        items_json = json.dumps(update_data.items, ensure_ascii=False)
+        with get_db_cursor() as cur:
+            cur.execute("""
+                INSERT INTO config_data (category, name, data, updated_at)
+                VALUES (%s, %s, %s::jsonb, NOW())
+                ON CONFLICT (category, name)
+                DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()
+            """, ("navigation", "navbar", items_json))
+        logger.info(f"Navigation updated by user {current_user.get('id')}")
+        return {"success": True, "message": "导航保存成功"}
+    except Exception as e:
+        logger.error(f"Failed to update navigation: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="导航保存失败"
         )

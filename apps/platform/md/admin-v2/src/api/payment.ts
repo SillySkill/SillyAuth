@@ -58,7 +58,7 @@ export const getCreatorEarnings = async (
   params: CreatorEarningListParams = {}
 ): Promise<PaginatedResponse<CreatorEarning>> => {
   const response = await apiClient.get<PaginatedResponse<CreatorEarning>>(
-    '/payment/earnings',
+    '/payment/accounts/creator/earnings',
     { params }
   );
   return response.data;
@@ -68,7 +68,7 @@ export const getRevenueStats = async (
   days: number = 30
 ): Promise<ApiResponse<RevenueStats>> => {
   const response = await apiClient.get<ApiResponse<RevenueStats>>(
-    '/payment/revenue-stats',
+    '/payment/admin/revenue/stats',
     { params: { days } }
   );
   return response.data;
@@ -77,7 +77,7 @@ export const getRevenueStats = async (
 export const getPendingSettlements =
   async (): Promise<PaginatedResponse<CreatorEarning>> => {
     const response = await apiClient.get<PaginatedResponse<CreatorEarning>>(
-      '/payment/pending-settlements'
+      '/payment/accounts/admin/pending-settlements'
     );
     return response.data;
   };
@@ -87,7 +87,7 @@ export const settleCreator = async (
   data: SettleRequest
 ): Promise<ApiResponse<CreatorEarning>> => {
   const response = await apiClient.post<ApiResponse<CreatorEarning>>(
-    `/payment/settle/${userId}`,
+    `/payment/accounts/admin/settle/${userId}`,
     data
   );
   return response.data;

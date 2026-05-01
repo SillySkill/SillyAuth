@@ -63,26 +63,26 @@ const DashboardPage: React.FC = () => {
 
   const statCards = [
     {
-      title: 'Total Users',
+      title: '用户总数',
       value: overview?.stats?.total_users ?? 0,
       icon: <TeamOutlined />,
       color: '#1890ff',
     },
     {
-      title: 'Active Users',
+      title: '活跃用户',
       value: overview?.stats?.active_users_today ?? 0,
       icon: <UserOutlined />,
       color: '#52c41a',
     },
     {
-      title: 'Revenue',
+      title: '收入',
       value: overview?.stats?.total_revenue ?? 0,
       icon: <DollarOutlined />,
       color: '#faad14',
       formatter: formatCurrency,
     },
     {
-      title: 'Conversion Rate',
+      title: '转化率',
       value: overview?.stats?.active_users_today && overview?.stats?.total_users
         ? ((overview.stats.active_users_today / overview.stats.total_users) * 100).toFixed(1)
         : '0',
@@ -93,15 +93,15 @@ const DashboardPage: React.FC = () => {
   ] as const;
 
   const actionButtons = [
-    { key: 'content', label: 'Manage Content', path: '/content', icon: <ThunderboltOutlined />, color: '#1890ff' },
-    { key: 'users', label: 'Manage Users', path: '/users', icon: <UserOutlined />, color: '#52c41a' },
-    { key: 'tutorials', label: 'Manage Tutorials', path: '/tutorials', icon: <ThunderboltOutlined />, color: '#faad14' },
-    { key: 'downloads', label: 'Manage Downloads', path: '/downloads', icon: <ThunderboltOutlined />, color: '#722ed1' },
+    { key: 'content', label: '内容管理', path: '/content', icon: <ThunderboltOutlined />, color: '#1890ff' },
+    { key: 'users', label: '用户管理', path: '/users', icon: <UserOutlined />, color: '#52c41a' },
+    { key: 'tutorials', label: '教程管理', path: '/tutorials', icon: <ThunderboltOutlined />, color: '#faad14' },
+    { key: 'downloads', label: '下载管理', path: '/downloads', icon: <ThunderboltOutlined />, color: '#722ed1' },
   ] as const;
 
   const activityColumns: ColumnsType<RecentActivity> = [
     {
-      title: 'Action',
+      title: '操作',
       dataIndex: 'action',
       key: 'action',
       width: 160,
@@ -119,20 +119,20 @@ const DashboardPage: React.FC = () => {
       },
     },
     {
-      title: 'Description',
+      title: '描述',
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
     },
     {
-      title: 'User',
+      title: '用户',
       dataIndex: 'user',
       key: 'user',
       width: 120,
       render: (user: RecentActivity['user']) => user?.username || '-',
     },
     {
-      title: 'Time',
+      title: '时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 180,
@@ -143,7 +143,7 @@ const DashboardPage: React.FC = () => {
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
-        <Spin size="large" tip="Loading dashboard..." />
+        <Spin size="large" tip="加载中..." />
       </div>
     );
   }
@@ -151,7 +151,7 @@ const DashboardPage: React.FC = () => {
   return (
     <div>
       <Title level={2} style={{ marginBottom: 24 }}>
-        Dashboard
+        控制面板
       </Title>
 
       {/* Stat Cards */}
@@ -166,7 +166,7 @@ const DashboardPage: React.FC = () => {
                 suffix={card.suffix || undefined}
                 valueStyle={{ color: card.color }}
                 formatter={'formatter' in card ? card.formatter : undefined}
-                precision={card.title === 'Conversion Rate' ? 1 : 0}
+                precision={card.title === '转化率' ? 1 : 0}
               />
             </Card>
           </Col>
@@ -175,7 +175,7 @@ const DashboardPage: React.FC = () => {
 
       {/* Quick Actions */}
       <Card
-        title="Quick Actions"
+        title="快捷操作"
         style={{ marginTop: 24 }}
         styles={{ body: { padding: '16px 24px' } }}
       >
@@ -194,9 +194,9 @@ const DashboardPage: React.FC = () => {
       </Card>
 
       {/* Recent Activity Table */}
-      <Card title="Recent Activity" style={{ marginTop: 24 }}>
+      <Card title="最近活动" style={{ marginTop: 24 }}>
         {activities.length === 0 && !activityLoading ? (
-          <Empty description="No recent activity" />
+          <Empty description="暂无活动" />
         ) : (
           <Table<RecentActivity>
             columns={activityColumns}

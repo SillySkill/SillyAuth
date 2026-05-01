@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block header %}{% endblock %}
+
+{% block content %}
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <a href="/" class="logo">
+            <i class="fas fa-cube"></i>
+            <span>挺傻的网站</span>
+        </a>
+    </div>
+    {% include "components/sidebar.html" %}
+    <div class="sidebar-footer">
+        <div class="user-card">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-info">
+                <span class="user-name">{{ user.username if user else "访客" }}</span>
+                <span class="user-role">{{ user.role if user else "未登录" }}</span>
+            </div>
+            <button class="btn-icon" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </div>
+</aside>
+
+<div class="main-content">
+    {% include "components/topbar.html" %}
+    <div class="content-wrapper">
+        {% block dashboard_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}关于我们 - {{ site_name }}{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="了解 {{ site_name }} 的团队与使命">
+{% endblock %}
+
+{% block content %}
+<!-- About Hero -->
+<section style="padding: 120px 0 60px; text-align: center; background: var(--gradient-light);">
+  <div class="container">
+    <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">
+      关于<span class="text-gradient">我们</span>
+    </h1>
+    <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+      致力于打造最好的 AI Skills 托管平台
+    </p>
+  </div>
+</section>
+
+{% if about_data %}
+<!-- About Content -->
+<section style="padding: 60px 0;">
+  <div class="container" style="max-width: 900px;">
+
+    {% if about_data.title %}
+    <div style="margin-bottom: 48px;">
+      <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 24px; color: var(--text-primary);">
+        {{ about_data.title }}
+      </h2>
+      {% if about_data.content %}
+      <div style="color: var(--text-secondary); line-height: 1.9; font-size: 1.05rem;">
+        {{ about_data.content | safe }}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% if about_data.mission %}
+    <div style="margin-bottom: 48px; padding: 40px; background: linear-gradient(135deg, rgba(79, 110, 247, 0.05), rgba(132, 94, 247, 0.05)); border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+      <div style="display: flex; align-items: flex-start; gap: 20px;">
+        <div style="font-size: 2rem;">&#127919;</div>
+        <div>
+          <h3 style="font-weight: 700; margin-bottom: 12px; color: var(--text-primary);">我们的使命</h3>
+          <p style="color: var(--text-secondary); line-height: 1.9; font-size: 1.05rem;">{{ about_data.mission }}</p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if about_data.get('values') %}
+    <div style="margin-bottom: 48px;">
+      <h3 style="font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: 32px; color: var(--text-primary);">核心价值观</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px;">
+        {% for value in about_data['values'] %}
+        <div style="padding: 32px; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); text-align: center; transition: all 0.3s; box-shadow: var(--shadow-sm);">
+          {% if value.icon %}
+          <div style="font-size: 2rem; margin-bottom: 16px; color: var(--primary-light);">{{ value.icon }}</div>
+          {% endif %}
+          <h4 style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary); font-size: 1.1rem;">{{ value.title }}</h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7;">{{ value.description }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if about_data.team %}
+    <!-- Team Members -->
+    <div style="margin-bottom: 48px;">
+      <h3 style="font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: 32px; color: var(--text-primary);">团队成员</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px;">
+        {% for member in about_data.team %}
+        <div style="padding: 32px; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); text-align: center; transition: all 0.3s; box-shadow: var(--shadow-sm);">
+          {% if member.avatar %}
+          <img src="{{ member.avatar }}" alt="{{ member.name }}" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 16px; object-fit: cover; border: 3px solid var(--border-light);" onerror="this.src='/static/img/avatar-default.svg'">
+          {% else %}
+          <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--gradient-primary); margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8rem; font-weight: 600;">
+            {{ (member.name or '?')[0] | upper }}
+          </div>
+          {% endif %}
+          <h4 style="font-weight: 600; margin-bottom: 4px; color: var(--text-primary); font-size: 1.1rem;">{{ member.name }}</h4>
+          {% if member.role %}
+          <p style="color: var(--primary); font-size: 0.85rem; font-weight: 500; margin-bottom: 8px;">{{ member.role }}</p>
+          {% endif %}
+          {% if member.bio %}
+          <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6;">{{ member.bio }}</p>
+          {% endif %}
+          {% if member.social %}
+          <div style="display: flex; gap: 12px; justify-content: center; margin-top: 16px;">
+            {% for link in member.social %}
+            <a href="{{ link.url }}" target="_blank" rel="noopener" style="color: var(--text-light); transition: color 0.3s;" onmouseenter="this.style.color='var(--primary)'" onmouseleave="this.style.color='var(--text-light)'">
+              <i class="fab fa-{{ link.platform }}"></i>
+            </a>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if about_data.stats %}
+    <!-- Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 24px; margin-bottom: 48px;">
+      {% for stat in about_data.stats %}
+      <div class="stat-card" style="padding: 32px; text-align: center;">
+        <div class="stat-value" style="font-size: 2rem;">{{ stat.value }}</div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+{% else %}
+<!-- Empty State -->
+<section style="padding: 60px 0; text-align: center;">
+  <div class="container">
+    <div style="padding: 80px 20px; color: var(--text-light);">
+      <i class="fas fa-info-circle" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+      <p style="font-size: 1.1rem;">暂无关于信息</p>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

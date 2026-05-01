@@ -80,7 +80,7 @@ const SEOSettings: React.FC = () => {
         auto_generate_sitemap: data.auto_generate_sitemap ?? false,
       });
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to load SEO config';
+      const msg = error instanceof Error ? error.message : '加载SEO配置失败';
       message.error(msg);
     } finally {
       setLoading(false);
@@ -100,10 +100,10 @@ const SEOSettings: React.FC = () => {
       const values = await form.validateFields();
       setSaving(true);
       await api.put('/cms/seo', values);
-      message.success('SEO settings saved successfully');
+      message.success('SEO设置保存成功');
     } catch (error: unknown) {
       if (error instanceof Error && error.message?.includes('Validation')) return;
-      const msg = error instanceof Error ? error.message : 'Failed to save SEO settings';
+      const msg = error instanceof Error ? error.message : '保存SEO设置失败';
       message.error(msg);
     } finally {
       setSaving(false);
@@ -119,7 +119,7 @@ const SEOSettings: React.FC = () => {
       key: 'global',
       label: (
         <span>
-          <GlobalOutlined /> Global SEO
+          <GlobalOutlined /> 全局SEO
         </span>
       ),
       children: (
@@ -127,34 +127,34 @@ const SEOSettings: React.FC = () => {
           <Col span={24}>
             <Form.Item
               name="site_title"
-              label="Site Title"
-              rules={[{ required: true, message: 'Please enter the site title' }]}
+              label="站点标题"
+              rules={[{ required: true, message: '请输入站点标题' }]}
             >
-              <Input placeholder="e.g. SillyMD - Medical Knowledge Platform" />
+              <Input placeholder="例如：SillyMD - 医学知识平台" />
             </Form.Item>
           </Col>
           <Col span={24}>
             <Form.Item
               name="meta_description"
-              label="Meta Description"
-              rules={[{ required: true, message: 'Please enter meta description' }]}
+              label="元描述"
+              rules={[{ required: true, message: '请输入元描述' }]}
             >
-              <TextArea rows={3} placeholder="Brief description for search engines (150-160 chars recommended)" />
+              <TextArea rows={3} placeholder="搜索引擎的简短描述（建议150-160个字符）" />
             </Form.Item>
           </Col>
           <Col span={24}>
-            <Form.Item name="meta_keywords" label="Meta Keywords">
-              <Input placeholder="Comma-separated keywords: medical, health, education" />
+            <Form.Item name="meta_keywords" label="元关键词">
+              <Input placeholder="逗号分隔的关键词：医学，健康，教育" />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item name="google_analytics_id" label="Google Analytics ID">
-              <Input placeholder="UA-XXXXX-Y or G-XXXXXXXX" />
+              <Input placeholder="UA-XXXXX-Y 或 G-XXXXXXXX" />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="baidu_analytics_id" label="Baidu Analytics ID">
-              <Input placeholder="Baidu Tongji ID" />
+            <Form.Item name="baidu_analytics_id" label="百度统计ID">
+              <Input placeholder="百度统计ID" />
             </Form.Item>
           </Col>
         </Row>
@@ -164,24 +164,24 @@ const SEOSettings: React.FC = () => {
       key: 'og',
       label: (
         <span>
-          <ShareAltOutlined /> OG Meta (Open Graph)
+          <ShareAltOutlined /> OG元数据（Open Graph）
         </span>
       ),
       children: (
         <Row gutter={24}>
           <Col span={24}>
-            <Form.Item name="og_title" label="OG Title">
-              <Input placeholder="Open Graph title for social sharing" />
+            <Form.Item name="og_title" label="OG标题">
+              <Input placeholder="社交分享的Open Graph标题" />
             </Form.Item>
           </Col>
           <Col span={24}>
-            <Form.Item name="og_description" label="OG Description">
-              <TextArea rows={3} placeholder="Open Graph description for social sharing" />
+            <Form.Item name="og_description" label="OG描述">
+              <TextArea rows={3} placeholder="社交分享的Open Graph描述" />
             </Form.Item>
           </Col>
           <Col span={24}>
-            <Form.Item name="og_image" label="OG Image URL">
-              <Input placeholder="https://example.com/og-image.png (1200x630 recommended)" />
+            <Form.Item name="og_image" label="OG图片URL">
+              <Input placeholder="https://example.com/og-image.png（建议1200x630）" />
             </Form.Item>
           </Col>
         </Row>
@@ -207,7 +207,7 @@ const SEOSettings: React.FC = () => {
       key: 'sitemap',
       label: (
         <span>
-          <ApartmentOutlined /> Sitemap
+          <ApartmentOutlined /> 站点地图
         </span>
       ),
       children: (
@@ -215,11 +215,11 @@ const SEOSettings: React.FC = () => {
           <Col span={24}>
             <Form.Item
               name="auto_generate_sitemap"
-              label="Auto-Generate Sitemap"
+              label="自动生成站点地图"
               valuePropName="checked"
-              extra="Automatically generate and update sitemap.xml"
+              extra="自动生成并更新 sitemap.xml"
             >
-              <Switch checkedChildren="On" unCheckedChildren="Off" />
+              <Switch checkedChildren="开" unCheckedChildren="关" />
             </Form.Item>
           </Col>
         </Row>
@@ -230,9 +230,9 @@ const SEOSettings: React.FC = () => {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <Title level={2}>SEO Settings</Title>
+        <Title level={2}>SEO设置</Title>
         <p style={{ color: '#888' }}>
-          Configure global SEO metadata, Open Graph tags, robots.txt, and sitemap settings.
+          配置全局SEO元数据、Open Graph标签、robots.txt和站点地图设置。
         </p>
       </div>
 
@@ -241,7 +241,7 @@ const SEOSettings: React.FC = () => {
           extra={
             <Space>
               <Button icon={<ReloadOutlined />} onClick={loadConfig}>
-                Reload
+                重新加载
               </Button>
               <Button
                 type="primary"
@@ -249,7 +249,7 @@ const SEOSettings: React.FC = () => {
                 onClick={handleSave}
                 loading={saving}
               >
-                Save Settings
+                保存设置
               </Button>
             </Space>
           }

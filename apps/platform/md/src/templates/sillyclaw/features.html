@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}功能 - {{ platform_name if platform_name else '挺傻的网站' }}{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="探索我们平台的强大功能 - {{ platform_name if platform_name else '挺傻的网站' }}">
+<meta property="og:title" content="功能 - {{ platform_name if platform_name else '挺傻的网站' }}">
+<meta property="og:description" content="探索我们平台的强大功能">
+
+{% endblock %}
+
+{% block content %}
+<!-- Features Hero -->
+<section class="features-hero">
+    <div class="container">
+        <h1>强大功能，助力成长</h1>
+        <p>我们提供全方位的工具和服务</p>
+    </div>
+</section>
+
+<!-- Features Grid Section -->
+<section class="features-section">
+    <div class="container">
+        {% if features %}
+        <div class="features-grid">
+            {% for feature in features %}
+            <div class="feature-card">
+                <div class="feature-icon" {% if feature.icon_bg %}style="background:{{ feature.icon_bg }};"{% endif %}>
+                    <i class="{{ feature.icon_class if feature.icon_class else 'fas fa-star' }}"></i>
+                </div>
+                <h3>{{ feature.title }}</h3>
+                <p>{{ feature.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                <h3>极速性能</h3>
+                <p>采用最新技术架构，确保毫秒级响应速度</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #10b981, #34d399);"><i class="fas fa-shield-alt"></i></div>
+                <h3>企业级安全</h3>
+                <p>端到端加密保护您的数据安全</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);"><i class="fas fa-chart-line"></i></div>
+                <h3>数据分析</h3>
+                <p>深入了解用户行为和业务数据</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);"><i class="fas fa-puzzle-piece"></i></div>
+                <h3>轻松集成</h3>
+                <p>丰富的API接口，无缝对接现有系统</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #ec4899, #f472b6);"><i class="fas fa-users"></i></div>
+                <h3>团队协作</h3>
+                <p>邀请团队成员，实时协作</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #06b6d4, #22d3ee);"><i class="fas fa-headset"></i></div>
+                <h3>24/7 支持</h3>
+                <p>专业技术团队全天候服务</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Pricing Comparison Section -->
+<section class="pricing-section" id="pricing">
+    <div class="container">
+        <div class="pricing-header">
+            <h2>选择适合你的方案</h2>
+            <p>灵活的定价，满足不同规模的需求</p>
+        </div>
+        <div class="pricing-grid">
+            {% if pricing_plans %}
+                {% for plan in pricing_plans %}
+                <div class="pricing-card {% if plan.featured %}featured{% endif %}">
+                    {% if plan.badge %}
+                    <div class="pricing-badge">{{ plan.badge }}</div>
+                    {% endif %}
+                    <div class="pricing-name">{{ plan.name }}</div>
+                    <div class="pricing-amount">
+                        <span class="currency">{{ plan.currency if plan.currency else '¥' }}</span>{{ plan.amount }}
+                        <span class="period">/{{ plan.period if plan.period else '月' }}</span>
+                    </div>
+                    <div class="pricing-description">{{ plan.description }}</div>
+                    {% if plan.features_list %}
+                    <ul class="pricing-features">
+                        {% for item in plan.features_list %}
+                        <li>
+                            {% if item.available %}
+                            <i class="fas fa-check" style="color:#10B981;"></i>
+                            {% else %}
+                            <i class="fas fa-times" style="color:#EF4444;"></i>
+                            {% endif %}
+                            {{ item.label }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <a href="{{ plan.cta_url if plan.cta_url else '#' }}"
+                       class="btn {% if plan.featured %}btn-primary{% else %}btn-secondary{% endif %}"
+                       style="width:100%;justify-content:center;">
+                        {{ plan.cta_text if plan.cta_text else '开始使用' }}
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="pricing-card">
+                <div class="pricing-name">基础版</div>
+                <div class="pricing-amount">
+                    <span class="currency">¥</span>0
+                    <span class="period">/月</span>
+                </div>
+                <div class="pricing-description">适合个人开发者和小团队</div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check" style="color:#10B981;"></i> 基础功能</li>
+                    <li><i class="fas fa-check" style="color:#10B981;"></i> 5 个项目</li>
+                    <li><i class="fas fa-check" style="color:#10B981;"></i> 1 GB 存储</li>
+                    <li><i class="fas fa-times" style="color:#EF4444;"></i> 高级分析</li>
+                    <li><i class="fas fa-times" style="color:#EF4444;"></i> 优先支持</li>
+                </ul>
+                <a href="#" class="btn btn-secondary" style="width:100%;justify-content:center;">免费开始</a>
+            </div>
+            <div class="pricing-card featured">
+                <div class="pricing-badge">最受欢迎</div>
+                <div class="pricing-name">专业版</div>
+                <div class="pricing-amount">
+                    <span class="currency">¥</span>99
+                    <span class="period">/月</span>
+                </div>
+                <div class="pricing-description">适合成长中的企业</div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check" style="color:#10B981;"></i> 全部基础功能</li>
+                    <li><i class="fas fa-check" style="color:#10B981;"></i> 无限项目</li>
+                    <li><i class="fas fa-check" style="color:#10B981;"></i> 50 GB 存储</li>
+                    <li><i class="fas fa-check" style="color:#10B981;"></i> 高级分析</li>
+                    <li><i class="fas fa-times" style="color:#EF4444;"></i> 优先支持</li>
+                </ul>
+                <a href="#" class="btn btn-primary" style="width:100%;justify-content:center;">立即订阅</a>
+            </div>
+            <div class="pricing-card">
+                <div class="pricing-name">企业版</div>
+                <div class="pricing-amount">
+                    <span class="currency">¥</span>299
+                    <span class="period">/月</span>
+                </div>
+                <div class="pricing-description">适合大型组织和团队</div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check" style="color:#10B981;"></i> 全部专业版功能</li>
+                    <li><i class="fas fa-check" style="color:#10B981;"></i> 无限存储</li>
+                    <li><i class="fas fa-check" style="color:#10B981;"></i> 自定义域名</li>
+                    <li><i class="fas fa-check" style="color:#10B981;"></i> 高级分析</li>
+                    <li><i class="fas fa-check" style="color:#10B981;"></i> 优先支持</li>
+                </ul>
+                <a href="#" class="btn btn-secondary" style="width:100%;justify-content:center;">联系销售</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/features.js"></script>
+{% endblock %}

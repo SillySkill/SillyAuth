@@ -82,7 +82,7 @@ const ModuleManagement: React.FC = () => {
       );
       setModules(normalized);
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to load modules';
+      const msg = error instanceof Error ? error.message : '加载模块失败';
       message.error(msg);
     } finally {
       setLoading(false);
@@ -104,14 +104,14 @@ const ModuleManagement: React.FC = () => {
     try {
       if (checked) {
         await enableModule(moduleId);
-        message.success(`Module "${record.name}" enabled`);
+        message.success(`模块 "${record.name}" 已启用`);
       } else {
         await disableModule(moduleId);
-        message.success(`Module "${record.name}" disabled`);
+        message.success(`模块 "${record.name}" 已禁用`);
       }
       loadModules();
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Toggle failed';
+      const msg = error instanceof Error ? error.message : '切换失败';
       message.error(msg);
     } finally {
       setToggling((prev) => ({ ...prev, [moduleId]: false }));
@@ -131,27 +131,27 @@ const ModuleManagement: React.FC = () => {
 
   const columns: ColumnsType<ModuleItem> = [
     {
-      title: 'Module ID',
+      title: '模块ID',
       dataIndex: 'id',
       key: 'id',
       width: 100,
     },
     {
-      title: 'Name',
+      title: '名称',
       dataIndex: 'name',
       key: 'name',
       width: 180,
       ellipsis: true,
     },
     {
-      title: 'Version',
+      title: '版本号',
       dataIndex: 'version',
       key: 'version',
       width: 100,
       render: (version: string) => <Tag>{version || '1.0.0'}</Tag>,
     },
     {
-      title: 'Status',
+      title: '状态',
       dataIndex: 'status',
       key: 'status',
       width: 120,
@@ -159,7 +159,7 @@ const ModuleManagement: React.FC = () => {
         const enabled = status === 'enabled';
         return (
           <Space>
-            <Tag color={enabled ? 'green' : 'red'}>{enabled ? 'Enabled' : 'Disabled'}</Tag>
+            <Tag color={enabled ? 'green' : 'red'}>{enabled ? '已启用' : '已禁用'}</Tag>
             <Switch
               checked={enabled}
               size="small"
@@ -171,7 +171,7 @@ const ModuleManagement: React.FC = () => {
       },
     },
     {
-      title: 'Dependencies',
+      title: '依赖项',
       dataIndex: 'dependencies',
       key: 'dependencies',
       width: 250,
@@ -185,17 +185,17 @@ const ModuleManagement: React.FC = () => {
             ))}
           </Space>
         ) : (
-          <Tag color="default">None</Tag>
+          <Tag color="default">无</Tag>
         ),
     },
     {
-      title: 'Description',
+      title: '描述',
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 120,
       fixed: 'right',
@@ -210,7 +210,7 @@ const ModuleManagement: React.FC = () => {
             loading={toggling[record.id]}
             onClick={() => handleToggleModule(record, !enabled)}
           >
-            {enabled ? 'Disable' : 'Enable'}
+            {enabled ? '禁用' : '启用'}
           </Button>
         );
       },
@@ -224,9 +224,9 @@ const ModuleManagement: React.FC = () => {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <Title level={2}>Module Management</Title>
+        <Title level={2}>模块管理</Title>
         <p style={{ color: '#888' }}>
-          Enable or disable system modules and view their dependencies.
+          启用或禁用系统模块并查看依赖关系。
         </p>
       </div>
 
@@ -235,7 +235,7 @@ const ModuleManagement: React.FC = () => {
         <Col span={8}>
           <Card>
             <Statistic
-              title="Total Modules"
+              title="模块总数"
               value={modules.length}
               prefix={<AppstoreOutlined />}
               valueStyle={{ color: '#1890ff' }}
@@ -245,7 +245,7 @@ const ModuleManagement: React.FC = () => {
         <Col span={8}>
           <Card>
             <Statistic
-              title="Enabled"
+              title="已启用"
               value={enabledCount}
               valueStyle={{ color: '#52c41a' }}
               suffix={`/ ${modules.length}`}
@@ -255,7 +255,7 @@ const ModuleManagement: React.FC = () => {
         <Col span={8}>
           <Card>
             <Statistic
-              title="Disabled"
+              title="已禁用"
               value={disabledCount}
               valueStyle={{ color: '#ff4d4f' }}
               suffix={`/ ${modules.length}`}
@@ -268,7 +268,7 @@ const ModuleManagement: React.FC = () => {
       <Card
         extra={
           <Button icon={<ReloadOutlined />} onClick={loadModules}>
-            Refresh
+            刷新
           </Button>
         }
       >
@@ -281,11 +281,11 @@ const ModuleManagement: React.FC = () => {
             pagination={{
               pageSize: 20,
               showSizeChanger: true,
-              showTotal: (total) => `Total ${total} modules`,
+              showTotal: (total) => `共 ${total} 个模块`,
             }}
             scroll={{ x: 1000 }}
             locale={{
-              emptyText: <Empty description="No modules found" />,
+              emptyText: <Empty description="暂无模块" />,
             }}
           />
         </Spin>

@@ -54,9 +54,9 @@ const SkillsManagement: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const difficultyOptions = [
-    { label: 'Beginner', value: 'beginner' },
-    { label: 'Intermediate', value: 'intermediate' },
-    { label: 'Advanced', value: 'advanced' },
+    { label: '初级', value: 'beginner' },
+    { label: '中级', value: 'intermediate' },
+    { label: '高级', value: 'advanced' },
   ];
 
   const fetchSkills = useCallback(async () => {
@@ -75,7 +75,7 @@ const SkillsManagement: React.FC = () => {
         setPagination((prev) => ({ ...prev, total: response.data.total }));
       }
     } catch (error) {
-      message.error('Failed to load skills');
+      message.error('加载技能失败');
     } finally {
       setLoading(false);
     }
@@ -114,27 +114,27 @@ const SkillsManagement: React.FC = () => {
   const handleToggleActive = async (id: number, checked: boolean) => {
     try {
       await updateSkill(id, { is_active: checked });
-      message.success(`Skill ${checked ? 'activated' : 'deactivated'}`);
+      message.success(`技能${checked ? '已启用' : '已禁用'}`);
       fetchSkills();
     } catch (error) {
-      message.error('Failed to update status');
+      message.error('更新状态失败');
     }
   };
 
   const handleDelete = async (id: number) => {
     Modal.confirm({
-      title: 'Confirm Delete',
-      content: 'Are you sure you want to delete this skill? This cannot be undone.',
-      okText: 'Delete',
+      title: '确认删除',
+      content: '确定要删除此技能吗？此操作不可撤销。',
+      okText: '删除',
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: '取消',
       onOk: async () => {
         try {
           await deleteSkill(id);
-          message.success('Skill deleted successfully');
+          message.success('技能删除成功');
           fetchSkills();
         } catch (error) {
-          message.error('Failed to delete skill');
+          message.error('删除技能失败');
         }
       },
     });
@@ -146,16 +146,16 @@ const SkillsManagement: React.FC = () => {
       const values = await form.validateFields();
       if (editingSkill) {
         await updateSkill(editingSkill.id, values);
-        message.success('Skill updated successfully');
+        message.success('技能更新成功');
       } else {
         await createSkill(values);
-        message.success('Skill created successfully');
+        message.success('技能创建成功');
       }
       setModalVisible(false);
       fetchSkills();
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'errorFields' in error) return;
-      message.error('Operation failed');
+      message.error('操作失败');
     } finally {
       setSubmitting(false);
     }
@@ -173,7 +173,7 @@ const SkillsManagement: React.FC = () => {
       width: 70,
     },
     {
-      title: 'Name',
+      title: '名称',
       dataIndex: 'name',
       key: 'name',
       width: 180,
@@ -185,7 +185,7 @@ const SkillsManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Category',
+      title: '分类',
       dataIndex: 'category',
       key: 'category',
       width: 130,
@@ -193,28 +193,28 @@ const SkillsManagement: React.FC = () => {
         category ? <Tag color="purple">{category}</Tag> : <Tag color="default">-</Tag>,
     },
     {
-      title: 'Difficulty',
+      title: '难度',
       dataIndex: 'difficulty_level',
       key: 'difficulty_level',
       width: 110,
       render: (level: string) => {
         const config: Record<string, { color: string; label: string }> = {
-          beginner: { color: 'green', label: 'Beginner' },
-          intermediate: { color: 'orange', label: 'Intermediate' },
-          advanced: { color: 'red', label: 'Advanced' },
+          beginner: { color: 'green', label: '初级' },
+          intermediate: { color: 'orange', label: '中级' },
+          advanced: { color: 'red', label: '高级' },
         };
         const cfg = config[level] || { color: 'default', label: level };
         return <Tag color={cfg.color}>{cfg.label}</Tag>;
       },
     },
     {
-      title: 'Sort Order',
+      title: '排序',
       dataIndex: 'sort_order',
       key: 'sort_order',
       width: 100,
     },
     {
-      title: 'Status',
+      title: '状态',
       dataIndex: 'is_active',
       key: 'is_active',
       width: 90,
@@ -227,14 +227,14 @@ const SkillsManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Created At',
+      title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 180,
       render: (date: string) => formatDate(date),
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 180,
       fixed: 'right',
@@ -246,17 +246,17 @@ const SkillsManagement: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           >
-            Edit
+            编辑
           </Button>
           <Popconfirm
-            title="Delete this skill?"
+            title="删除此技能？"
             onConfirm={() => handleDelete(record.id)}
-            okText="Delete"
-            cancelText="Cancel"
+            okText="删除"
+            cancelText="取消"
             okType="danger"
           >
             <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              Delete
+              删除
             </Button>
           </Popconfirm>
         </Space>
@@ -267,16 +267,16 @@ const SkillsManagement: React.FC = () => {
   return (
     <div>
       <Title level={2} style={{ marginBottom: 24 }}>
-        Skills Management
+        技能管理
       </Title>
 
       <Card style={{ marginBottom: 16 }}>
         <Form layout="inline" onFinish={handleSearch}>
           <Form.Item name="search">
-            <Input placeholder="Search by name..." prefix={<SearchOutlined />} style={{ width: 220 }} allowClear />
+            <Input placeholder="按名称搜索..." prefix={<SearchOutlined />} style={{ width: 220 }} allowClear />
           </Form.Item>
           <Form.Item name="difficulty_level">
-            <Select placeholder="Difficulty" style={{ width: 160 }} allowClear>
+            <Select placeholder="难度" style={{ width: 160 }} allowClear>
               {difficultyOptions.map((opt) => (
                 <Option key={opt.value} value={opt.value}>{opt.label}</Option>
               ))}
@@ -285,7 +285,7 @@ const SkillsManagement: React.FC = () => {
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
-                Search
+                搜索
               </Button>
               <Button
                 icon={<ReloadOutlined />}
@@ -294,7 +294,7 @@ const SkillsManagement: React.FC = () => {
                   setPagination({ current: 1, pageSize: 10, total: 0 });
                 }}
               >
-                Reset
+                重置
               </Button>
             </Space>
           </Form.Item>
@@ -304,7 +304,7 @@ const SkillsManagement: React.FC = () => {
       <Card
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            Create Skill
+            创建技能
           </Button>
         }
       >
@@ -319,50 +319,50 @@ const SkillsManagement: React.FC = () => {
             pageSize: pagination.pageSize,
             total: pagination.total,
             showSizeChanger: true,
-            showTotal: (total) => `Total ${total} skills`,
+            showTotal: (total) => `共 ${total} 个技能`,
             onChange: (page, pageSize) => handleTableChange(page, pageSize),
           }}
-          locale={{ emptyText: 'No skills found' }}
+          locale={{ emptyText: '暂无技能' }}
         />
       </Card>
 
       <Modal
-        title={editingSkill ? 'Edit Skill' : 'Create Skill'}
+        title={editingSkill ? '编辑技能' : '创建技能'}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
         width={640}
         confirmLoading={submitting}
-        okText={editingSkill ? 'Update' : 'Create'}
-        cancelText="Cancel"
+        okText={editingSkill ? '更新' : '创建'}
+        cancelText="取消"
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item
-            label="Name"
+            label="名称"
             name="name"
-            rules={[{ required: true, message: 'Please enter the skill name' }]}
+            rules={[{ required: true, message: '请输入技能名称' }]}
           >
-            <Input placeholder="e.g. React, Python, Docker" />
+            <Input placeholder="例如：React、Python、Docker" />
           </Form.Item>
 
           <Form.Item
-            label="Description"
+            label="描述"
             name="description"
-            rules={[{ required: true, message: 'Please enter a description' }]}
+            rules={[{ required: true, message: '请输入描述' }]}
           >
-            <TextArea rows={3} placeholder="Brief description of this skill" showCount maxLength={500} />
+            <TextArea rows={3} placeholder="简要描述该技能" showCount maxLength={500} />
           </Form.Item>
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="Category" name="category">
-                <Input placeholder="e.g. Frontend, Backend, DevOps" />
+              <Form.Item label="分类" name="category">
+                <Input placeholder="例如：前端、后端、DevOps" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Difficulty Level" name="difficulty_level">
-                <Select placeholder="Select level">
+              <Form.Item label="难度级别" name="difficulty_level">
+                <Select placeholder="选择级别">
                   {difficultyOptions.map((lvl) => (
                     <Option key={lvl.value} value={lvl.value}>{lvl.label}</Option>
                   ))}
@@ -373,19 +373,19 @@ const SkillsManagement: React.FC = () => {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="Sort Order" name="sort_order">
-                <InputNumber min={0} max={9999} style={{ width: '100%' }} placeholder="Display order" />
+              <Form.Item label="排序" name="sort_order">
+                <InputNumber min={0} max={9999} style={{ width: '100%' }} placeholder="显示顺序" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Active" name="is_active" valuePropName="checked">
+              <Form.Item label="启用" name="is_active" valuePropName="checked">
                 <Switch />
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item label="Icon" name="icon">
-            <Input placeholder="Emoji or icon class name" />
+          <Form.Item label="图标" name="icon">
+            <Input placeholder="Emoji 或图标类名" />
           </Form.Item>
         </Form>
       </Modal>

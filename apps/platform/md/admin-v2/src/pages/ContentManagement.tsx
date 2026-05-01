@@ -72,7 +72,7 @@ const ContentManagement: React.FC = () => {
         setPagination((prev) => ({ ...prev, total: response.data.total }));
       }
     } catch (error) {
-      message.error('Failed to load articles');
+      message.error('加载文章列表失败');
     } finally {
       setLoading(false);
     }
@@ -82,10 +82,11 @@ const ContentManagement: React.FC = () => {
     try {
       const response = await getCategories();
       if (response.success) {
-        setCategories(response.data);
+        // Handle both flat array and paginated {items, total} responses
+        setCategories(response.data.items || response.data);
       }
     } catch (error) {
-      console.error('Failed to load categories');
+      console.error('加载分类失败');
     }
   }, []);
 
@@ -123,18 +124,18 @@ const ContentManagement: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     Modal.confirm({
-      title: 'Confirm Delete',
-      content: 'Are you sure you want to delete this article? This action cannot be undone.',
-      okText: 'Delete',
+      title: '确认删除',
+      content: '确定要删除此文章吗？此操作不可撤销。',
+      okText: '删除',
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: '取消',
       onOk: async () => {
         try {
           await deleteArticle(id);
-          message.success('Article deleted successfully');
+          message.success('文章已删除');
           fetchArticles();
         } catch (error) {
-          message.error('Failed to delete article');
+          message.error('删除文章失败');
         }
       },
     });
@@ -147,12 +148,12 @@ const ContentManagement: React.FC = () => {
       if (editingArticle) {
         const result = await updateArticle(editingArticle.id, values);
         if (result.success) {
-          message.success('Article updated successfully');
+          message.success('文章已更新');
         }
       } else {
         const result = await createArticle(values);
         if (result.success) {
-          message.success('Article created successfully');
+          message.success('文章已创建');
         }
       }
       setModalVisible(false);
@@ -162,7 +163,7 @@ const ContentManagement: React.FC = () => {
         // Form validation error, ignore
         return;
       }
-      message.error('Operation failed');
+      message.error('操作失败');
     } finally {
       setSubmitting(false);
     }
@@ -180,7 +181,7 @@ const ContentManagement: React.FC = () => {
       width: 70,
     },
     {
-      title: 'Title (zh_CN)',
+      title: '标题（中文）',
       dataIndex: 'title',
       key: 'title',
       width: 260,
@@ -195,44 +196,44 @@ const ContentManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Category',
+      title: '分类',
       dataIndex: 'category',
       key: 'category',
       width: 120,
       render: (category: Article['category']) =>
-        category ? <Tag color="blue">{category.name}</Tag> : <Tag color="default">Uncategorized</Tag>,
+        category ? <Tag color="blue">{category.name}</Tag> : <Tag color="default">未分类</Tag>,
     },
     {
-      title: 'Status',
+      title: '状态',
       dataIndex: 'status',
       key: 'status',
       width: 110,
       render: (status: string) => {
         const config: Record<string, { color: string; label: string }> = {
-          published: { color: 'green', label: 'Published' },
-          draft: { color: 'orange', label: 'Draft' },
-          archived: { color: 'default', label: 'Archived' },
+          published: { color: 'green', label: '已发布' },
+          draft: { color: 'orange', label: '草稿' },
+          archived: { color: 'default', label: '已归档' },
         };
         const cfg = config[status] || { color: 'default', label: status };
         return <Tag color={cfg.color}>{cfg.label}</Tag>;
       },
     },
     {
-      title: 'Author',
+      title: '作者',
       dataIndex: 'author',
       key: 'author',
       width: 130,
       render: (author: Article['author']) => author?.username || '-',
     },
     {
-      title: 'Created At',
+      title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 180,
       render: (date: string) => formatDate(date),
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 180,
       fixed: 'right',
@@ -244,18 +245,18 @@ const ContentManagement: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           >
-            Edit
+            编辑
           </Button>
           <Popconfirm
-            title="Delete this article?"
-            description="This action cannot be undone."
+            title="删除此文章？"
+            description="此操作不可撤销。"
             onConfirm={() => handleDelete(record.id)}
-            okText="Delete"
-            cancelText="Cancel"
+            okText="删除"
+            cancelText="取消"
             okType="danger"
           >
             <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              Delete
+              删除
             </Button>
           </Popconfirm>
         </Space>
@@ -266,17 +267,17 @@ const ContentManagement: React.FC = () => {
   return (
     <div>
       <Title level={2} style={{ marginBottom: 24 }}>
-        Content Management
+        内容管理
       </Title>
 
       {/* Search/Filter Bar */}
       <Card style={{ marginBottom: 16 }}>
         <Form layout="inline" onFinish={handleSearch}>
           <Form.Item name="title">
-            <Input placeholder="Search by title..." prefix={<SearchOutlined />} style={{ width: 220 }} allowClear />
+            <Input placeholder="搜索标题..." prefix={<SearchOutlined />} style={{ width: 220 }} allowClear />
           </Form.Item>
           <Form.Item name="category_id">
-            <Select placeholder="Category" style={{ width: 180 }} allowClear>
+            <Select placeholder="分类" style={{ width: 180 }} allowClear>
               {categories.map((cat) => (
                 <Option key={cat.id} value={cat.id}>
                   {cat.name}
@@ -285,16 +286,16 @@ const ContentManagement: React.FC = () => {
             </Select>
           </Form.Item>
           <Form.Item name="status">
-            <Select placeholder="Status" style={{ width: 140 }} allowClear>
-              <Option value="published">Published</Option>
-              <Option value="draft">Draft</Option>
-              <Option value="archived">Archived</Option>
+            <Select placeholder="状态" style={{ width: 140 }} allowClear>
+              <Option value="published">已发布</Option>
+              <Option value="draft">草稿</Option>
+              <Option value="archived">已归档</Option>
             </Select>
           </Form.Item>
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
-                Search
+                搜索
               </Button>
               <Button
                 icon={<ReloadOutlined />}
@@ -303,7 +304,7 @@ const ContentManagement: React.FC = () => {
                   setPagination({ current: 1, pageSize: 10, total: 0 });
                 }}
               >
-                Reset
+                重置
               </Button>
             </Space>
           </Form.Item>
@@ -314,7 +315,7 @@ const ContentManagement: React.FC = () => {
       <Card
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            Create Article
+            创建文章
           </Button>
         }
       >
@@ -329,46 +330,46 @@ const ContentManagement: React.FC = () => {
             pageSize: pagination.pageSize,
             total: pagination.total,
             showSizeChanger: true,
-            showTotal: (total) => `Total ${total} articles`,
+            showTotal: (total) => `共 ${total} 篇文章`,
             onChange: (page, pageSize) => handleTableChange(page, pageSize),
           }}
-          locale={{ emptyText: 'No articles found' }}
+          locale={{ emptyText: '暂无文章' }}
         />
       </Card>
 
       {/* Create/Edit Modal */}
       <Modal
-        title={editingArticle ? 'Edit Article' : 'Create Article'}
+        title={editingArticle ? '编辑文章' : '创建文章'}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
         width={800}
         confirmLoading={submitting}
-        okText={editingArticle ? 'Update' : 'Create'}
-        cancelText="Cancel"
+        okText={editingArticle ? '更新' : '创建'}
+        cancelText="取消"
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item
-            label="Title (zh_CN)"
+            label="标题（中文）"
             name="title"
-            rules={[{ required: true, message: 'Please enter the Chinese title' }]}
+            rules={[{ required: true, message: '请输入中文标题' }]}
           >
-            <Input placeholder="Enter Chinese title" />
+            <Input placeholder="请输入中文标题" />
           </Form.Item>
 
           <Form.Item
-            label="Content (zh_CN)"
+            label="内容（中文）"
             name="content"
-            rules={[{ required: true, message: 'Please enter the Chinese content' }]}
+            rules={[{ required: true, message: '请输入中文内容' }]}
           >
-            <TextArea rows={6} placeholder="Enter Chinese content" showCount maxLength={50000} />
+            <TextArea rows={6} placeholder="请输入中文内容" showCount maxLength={50000} />
           </Form.Item>
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="Category" name="category_id">
-                <Select placeholder="Select category" allowClear>
+              <Form.Item label="分类" name="category_id">
+                <Select placeholder="选择分类" allowClear>
                   {categories.map((cat) => (
                     <Option key={cat.id} value={cat.id}>
                       {cat.name}
@@ -378,32 +379,32 @@ const ContentManagement: React.FC = () => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Status" name="status" rules={[{ required: true }]}>
+              <Form.Item label="状态" name="status" rules={[{ required: true }]}>
                 <Select>
-                  <Option value="published">Published</Option>
-                  <Option value="draft">Draft</Option>
-                  <Option value="archived">Archived</Option>
+                  <Option value="published">已发布</Option>
+                  <Option value="draft">草稿</Option>
+                  <Option value="archived">已归档</Option>
                 </Select>
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item label="Excerpt" name="excerpt">
-            <TextArea rows={2} placeholder="Short description" maxLength={300} />
+          <Form.Item label="摘要" name="excerpt">
+            <TextArea rows={2} placeholder="简短描述" maxLength={300} />
           </Form.Item>
 
-          <Form.Item label="Tags" name="tags">
-            <Select mode="tags" placeholder="Type tag and press Enter" style={{ width: '100%' }} />
+          <Form.Item label="标签" name="tags">
+            <Select mode="tags" placeholder="输入标签后按回车" style={{ width: '100%' }} />
           </Form.Item>
 
-          <Form.Item label="Cover Image URL" name="cover_image">
+          <Form.Item label="封面图片URL" name="cover_image">
             <Input placeholder="https://example.com/image.jpg" />
           </Form.Item>
 
-          <Form.Item label="Featured" name="is_featured" valuePropName="checked">
+          <Form.Item label="推荐" name="is_featured" valuePropName="checked">
             <Select>
-              <Option value={true}>Yes</Option>
-              <Option value={false}>No</Option>
+              <Option value={true}>是</Option>
+              <Option value={false}>否</Option>
             </Select>
           </Form.Item>
         </Form>

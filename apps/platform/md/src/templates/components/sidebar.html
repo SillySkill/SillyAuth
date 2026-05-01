@@ -1,0 +1,38 @@
+<nav class="sidebar-nav">
+    <a href="/dashboard" class="nav-item{% if current_path == '/dashboard' %} active{% endif %}">
+        <i class="fas fa-home"></i>
+        <span>概览</span>
+    </a>
+    <a href="/analytics" class="nav-item{% if current_path.startswith('/analytics') %} active{% endif %}">
+        <i class="fas fa-chart-line"></i>
+        <span>分析</span>
+    </a>
+    <a href="/projects" class="nav-item{% if current_path.startswith('/projects') %} active{% endif %}">
+        <i class="fas fa-folder"></i>
+        <span>项目</span>
+    </a>
+    <a href="/creation" class="nav-item{% if current_path.startswith('/creation') %} active{% endif %}">
+        <i class="fas fa-pen-fancy"></i>
+        <span>创作中心</span>
+    </a>
+    <a href="/messages" class="nav-item{% if current_path.startswith('/messages') %} active{% endif %}">
+        <i class="fas fa-envelope"></i>
+        <span>消息</span>
+    </a>
+    <a href="/user-center" class="nav-item{% if current_path.startswith('/user-center') %} active{% endif %}">
+        <i class="fas fa-user"></i>
+        <span>用户中心</span>
+    </a>
+    <a href="/settings" class="nav-item{% if current_path.startswith('/settings') %} active{% endif %}">
+        <i class="fas fa-cog"></i>
+        <span>设置</span>
+    </a>
+    <a href="/tasks" class="nav-item{% if current_path.startswith('/tasks') %} active{% endif %}">
+        <i class="fas fa-tasks"></i>
+        <span>任务</span>
+    </a>
+    <a href="/points-mall" class="nav-item{% if current_path.startswith('/points-mall') %} active{% endif %}">
+        <i class="fas fa-gem"></i>
+        <span>积分商城</span>
+    </a>
+</nav>

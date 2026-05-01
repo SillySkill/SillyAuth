@@ -22,9 +22,17 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor: handle 401 and other errors
+// Response interceptor: normalize flat responses from backend to {success, data}
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Backend modules often return flat objects like {id, title, content} without
+    // the {success, data} wrapper.  Normalize them, but skip auth responses.
+    const body = response.data;
+    if (body && typeof body === 'object' && !('success' in body) && !('access_token' in body)) {
+      response.data = { success: true, data: body };
+    }
+    return response;
+  },
   (error) => {
     if (error.response) {
       const { status } = error.response;

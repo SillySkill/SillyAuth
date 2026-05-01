@@ -1,8 +1,8 @@
 /**
- * Points Management
+ * 积分管理
  *
- * Admin page for managing points mall: Products, Categories, and Exchange Records.
- * Three tabs with full CRUD operations.
+ * 管理积分商城商品、分类和兑换记录的管理页面。
+ * 三个标签页，支持完整的增删改查操作。
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -143,7 +143,7 @@ const PointsManagement: React.FC = () => {
       const data = response?.data?.items ?? response?.data ?? [];
       setProducts(Array.isArray(data) ? data : []);
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to load products';
+      const msg = error instanceof Error ? error.message : '加载商品失败';
       message.error(msg);
     } finally {
       setLoading(false);
@@ -157,7 +157,7 @@ const PointsManagement: React.FC = () => {
       const data = response?.data ?? [];
       setCategories(Array.isArray(data) ? data : []);
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to load categories';
+      const msg = error instanceof Error ? error.message : '加载分类失败';
       message.error(msg);
     } finally {
       setLoading(false);
@@ -171,7 +171,7 @@ const PointsManagement: React.FC = () => {
       const data = response?.data?.items ?? response?.data ?? [];
       setExchanges(Array.isArray(data) ? data : []);
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to load exchange records';
+      const msg = error instanceof Error ? error.message : '加载兑换记录失败';
       message.error(msg);
     } finally {
       setLoading(false);
@@ -216,17 +216,17 @@ const PointsManagement: React.FC = () => {
 
       if (editingProduct) {
         await updatePointsProduct(editingProduct.id, values);
-        message.success('Product updated successfully');
+        message.success('商品更新成功');
       } else {
         await createPointsProduct(values);
-        message.success('Product created successfully');
+        message.success('商品创建成功');
       }
 
       setProductModalVisible(false);
       loadProducts();
     } catch (error: unknown) {
       if (error instanceof Error && error.message?.includes('Validation')) return;
-      const msg = error instanceof Error ? error.message : 'Operation failed';
+      const msg = error instanceof Error ? error.message : '操作失败';
       message.error(msg);
     } finally {
       setProductSubmitting(false);
@@ -235,18 +235,18 @@ const PointsManagement: React.FC = () => {
 
   const handleDeleteProduct = (record: ProductItem) => {
     Modal.confirm({
-      title: 'Delete Product',
-      content: `Are you sure you want to delete "${record.name}"?`,
-      okText: 'Delete',
+      title: '删除商品',
+      content: `确定要删除"${record.name}"吗？`,
+      okText: '删除',
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: '取消',
       onOk: async () => {
         try {
           await deletePointsProduct(record.id);
-          message.success('Product deleted successfully');
+          message.success('商品删除成功');
           loadProducts();
         } catch (error: unknown) {
-          const msg = error instanceof Error ? error.message : 'Delete failed';
+          const msg = error instanceof Error ? error.message : '删除失败';
           message.error(msg);
         }
       },
@@ -256,10 +256,10 @@ const PointsManagement: React.FC = () => {
   const handleToggleProductActive = async (record: ProductItem, checked: boolean) => {
     try {
       await updatePointsProduct(record.id, { is_active: checked });
-      message.success(`Product ${checked ? 'activated' : 'deactivated'}`);
+      message.success(`商品${checked ? '已启用' : '已停用'}`);
       loadProducts();
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Update failed';
+      const msg = error instanceof Error ? error.message : '更新失败';
       message.error(msg);
     }
   };
@@ -291,16 +291,16 @@ const PointsManagement: React.FC = () => {
       setCategorySubmitting(true);
 
       if (editingCategory) {
-        message.success('Category updated successfully');
+        message.success('分类更新成功');
       } else {
-        message.success('Category created successfully');
+        message.success('分类创建成功');
       }
 
       setCategoryModalVisible(false);
       loadCategories();
     } catch (error: unknown) {
       if (error instanceof Error && error.message?.includes('Validation')) return;
-      const msg = error instanceof Error ? error.message : 'Operation failed';
+      const msg = error instanceof Error ? error.message : '操作失败';
       message.error(msg);
     } finally {
       setCategorySubmitting(false);
@@ -309,17 +309,17 @@ const PointsManagement: React.FC = () => {
 
   const handleDeleteCategory = (record: CategoryItem) => {
     Modal.confirm({
-      title: 'Delete Category',
-      content: `Are you sure you want to delete "${record.name}"?`,
-      okText: 'Delete',
+      title: '删除分类',
+      content: `确定要删除"${record.name}"吗？`,
+      okText: '删除',
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: '取消',
       onOk: async () => {
         try {
-          message.success('Category deleted successfully');
+          message.success('分类删除成功');
           loadCategories();
         } catch (error: unknown) {
-          const msg = error instanceof Error ? error.message : 'Delete failed';
+          const msg = error instanceof Error ? error.message : '删除失败';
           message.error(msg);
         }
       },
@@ -346,12 +346,12 @@ const PointsManagement: React.FC = () => {
         status: values.status,
         tracking_number: values.tracking_number,
       });
-      message.success('Exchange status updated successfully');
+      message.success('兑换状态更新成功');
       setExchangeStatusVisible(false);
       loadExchanges();
     } catch (error: unknown) {
       if (error instanceof Error && error.message?.includes('Validation')) return;
-      const msg = error instanceof Error ? error.message : 'Update failed';
+      const msg = error instanceof Error ? error.message : '更新失败';
       message.error(msg);
     } finally {
       setExchangeSubmitting(false);
@@ -364,11 +364,11 @@ const PointsManagement: React.FC = () => {
 
   const getStatusTag = (status: string) => {
     const config: Record<string, { color: string; text: string }> = {
-      pending: { color: 'orange', text: 'Pending' },
-      approved: { color: 'blue', text: 'Approved' },
-      rejected: { color: 'red', text: 'Rejected' },
-      completed: { color: 'green', text: 'Completed' },
-      cancelled: { color: 'default', text: 'Cancelled' },
+      pending: { color: 'orange', text: '待处理' },
+      approved: { color: 'blue', text: '已通过' },
+      rejected: { color: 'red', text: '已拒绝' },
+      completed: { color: 'green', text: '已完成' },
+      cancelled: { color: 'default', text: '已取消' },
     };
     const info = config[status] || { color: 'default', text: status };
     return <Tag color={info.color}>{info.text}</Tag>;
@@ -386,13 +386,13 @@ const PointsManagement: React.FC = () => {
       width: 70,
     },
     {
-      title: 'Name',
+      title: '名称',
       dataIndex: 'name',
       key: 'name',
       ellipsis: true,
     },
     {
-      title: 'Points Required',
+      title: '所需积分',
       dataIndex: 'points_required',
       key: 'points_required',
       width: 130,
@@ -402,21 +402,21 @@ const PointsManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Stock',
+      title: '库存',
       dataIndex: 'stock',
       key: 'stock',
       width: 90,
       render: (stock: number) =>
         stock === -1 ? (
-          <Tag color="green">Unlimited</Tag>
+          <Tag color="green">不限</Tag>
         ) : stock === 0 ? (
-          <Tag color="red">Out of Stock</Tag>
+          <Tag color="red">缺货</Tag>
         ) : (
           stock
         ),
     },
     {
-      title: 'Status',
+      title: '状态',
       dataIndex: 'is_active',
       key: 'is_active',
       width: 80,
@@ -429,21 +429,21 @@ const PointsManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Category',
+      title: '分类',
       key: 'category',
       width: 120,
       render: (_: unknown, record: ProductItem) =>
-        record.category?.name || <Tag>{record.category_id || 'N/A'}</Tag>,
+        record.category?.name || <Tag>{record.category_id || '无'}</Tag>,
     },
     {
-      title: 'Created At',
+      title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 170,
-      render: (date: string) => (date ? new Date(date).toLocaleDateString() : 'N/A'),
+      render: (date: string) => (date ? new Date(date).toLocaleDateString() : '无'),
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 160,
       fixed: 'right',
@@ -455,7 +455,7 @@ const PointsManagement: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => handleOpenProductEdit(record)}
           >
-            Edit
+            编辑
           </Button>
           <Button
             type="link"
@@ -464,7 +464,7 @@ const PointsManagement: React.FC = () => {
             icon={<DeleteOutlined />}
             onClick={() => handleDeleteProduct(record)}
           >
-            Delete
+            删除
           </Button>
         </Space>
       ),
@@ -483,33 +483,33 @@ const PointsManagement: React.FC = () => {
       width: 70,
     },
     {
-      title: 'Category Name',
+      title: '分类名称',
       dataIndex: 'name',
       key: 'name',
       ellipsis: true,
     },
     {
-      title: 'Description',
+      title: '描述',
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
     },
     {
-      title: 'Sort Order',
+      title: '排序',
       dataIndex: 'sort_order',
       key: 'sort_order',
       width: 100,
       sorter: (a, b) => a.sort_order - b.sort_order,
     },
     {
-      title: 'Created At',
+      title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 170,
-      render: (date: string) => (date ? new Date(date).toLocaleDateString() : 'N/A'),
+      render: (date: string) => (date ? new Date(date).toLocaleDateString() : '无'),
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 160,
       fixed: 'right',
@@ -521,7 +521,7 @@ const PointsManagement: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => handleOpenCategoryEdit(record)}
           >
-            Edit
+            编辑
           </Button>
           <Button
             type="link"
@@ -530,7 +530,7 @@ const PointsManagement: React.FC = () => {
             icon={<DeleteOutlined />}
             onClick={() => handleDeleteCategory(record)}
           >
-            Delete
+            删除
           </Button>
         </Space>
       ),
@@ -549,22 +549,22 @@ const PointsManagement: React.FC = () => {
       width: 70,
     },
     {
-      title: 'User',
+      title: '用户',
       key: 'user',
       width: 120,
       render: (_: unknown, record: ExchangeRecord) =>
-        record.user?.username ?? `User #${record.user_id}`,
+        record.user?.username ?? `用户 #${record.user_id}`,
     },
     {
-      title: 'Product',
+      title: '商品',
       key: 'product',
       width: 150,
       ellipsis: true,
       render: (_: unknown, record: ExchangeRecord) =>
-        record.product?.name ?? `Product #${record.product_id}`,
+        record.product?.name ?? `商品 #${record.product_id}`,
     },
     {
-      title: 'Points Used',
+      title: '消耗积分',
       dataIndex: 'points_spent',
       key: 'points_spent',
       width: 110,
@@ -573,21 +573,21 @@ const PointsManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Status',
+      title: '状态',
       dataIndex: 'status',
       key: 'status',
       width: 110,
       render: (status: string) => getStatusTag(status),
     },
     {
-      title: 'Created At',
+      title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 170,
-      render: (date: string) => (date ? new Date(date).toLocaleString() : 'N/A'),
+      render: (date: string) => (date ? new Date(date).toLocaleString() : '无'),
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 160,
       fixed: 'right',
@@ -598,7 +598,7 @@ const PointsManagement: React.FC = () => {
           icon={<EditOutlined />}
           onClick={() => handleOpenExchangeStatus(record)}
         >
-          Update Status
+          更新状态
         </Button>
       ),
     },
@@ -613,7 +613,7 @@ const PointsManagement: React.FC = () => {
       key: 'products',
       label: (
         <span>
-          <GiftOutlined /> Products
+          <GiftOutlined /> 商品
         </span>
       ),
       children: (
@@ -621,10 +621,10 @@ const PointsManagement: React.FC = () => {
           <div style={{ marginBottom: 16, textAlign: 'right' }}>
             <Space>
               <Button icon={<ReloadOutlined />} onClick={loadProducts}>
-                Refresh
+                刷新
               </Button>
               <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenProductCreate}>
-                Add Product
+                添加商品
               </Button>
             </Space>
           </div>
@@ -636,11 +636,11 @@ const PointsManagement: React.FC = () => {
             pagination={{
               pageSize: 20,
               showSizeChanger: true,
-              showTotal: (total) => `Total ${total} products`,
+              showTotal: (total) => `共 ${total} 件商品`,
             }}
             scroll={{ x: 1000 }}
             locale={{
-              emptyText: <Empty description="No products found" />,
+              emptyText: <Empty description="暂无商品" />,
             }}
           />
         </>
@@ -650,7 +650,7 @@ const PointsManagement: React.FC = () => {
       key: 'categories',
       label: (
         <span>
-          <FolderOutlined /> Categories
+          <FolderOutlined /> 分类
         </span>
       ),
       children: (
@@ -658,10 +658,10 @@ const PointsManagement: React.FC = () => {
           <div style={{ marginBottom: 16, textAlign: 'right' }}>
             <Space>
               <Button icon={<ReloadOutlined />} onClick={loadCategories}>
-                Refresh
+                刷新
               </Button>
               <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCategoryCreate}>
-                Add Category
+                添加分类
               </Button>
             </Space>
           </div>
@@ -673,10 +673,10 @@ const PointsManagement: React.FC = () => {
             pagination={{
               pageSize: 20,
               showSizeChanger: true,
-              showTotal: (total) => `Total ${total} categories`,
+              showTotal: (total) => `共 ${total} 个分类`,
             }}
             locale={{
-              emptyText: <Empty description="No categories found" />,
+              emptyText: <Empty description="暂无分类" />,
             }}
           />
         </>
@@ -686,14 +686,14 @@ const PointsManagement: React.FC = () => {
       key: 'exchanges',
       label: (
         <span>
-          <SwapOutlined /> Exchange Records
+          <SwapOutlined /> 兑换记录
         </span>
       ),
       children: (
         <>
           <div style={{ marginBottom: 16, textAlign: 'right' }}>
             <Button icon={<ReloadOutlined />} onClick={loadExchanges}>
-              Refresh
+              刷新
             </Button>
           </div>
           <Table
@@ -704,11 +704,11 @@ const PointsManagement: React.FC = () => {
             pagination={{
               pageSize: 20,
               showSizeChanger: true,
-              showTotal: (total) => `Total ${total} records`,
+              showTotal: (total) => `共 ${total} 条记录`,
             }}
             scroll={{ x: 900 }}
             locale={{
-              emptyText: <Empty description="No exchange records found" />,
+              emptyText: <Empty description="暂无兑换记录" />,
             }}
           />
         </>
@@ -723,9 +723,9 @@ const PointsManagement: React.FC = () => {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <Title level={2}>Points Management</Title>
+        <Title level={2}>积分管理</Title>
         <p style={{ color: '#888' }}>
-          Manage points mall products, categories, and exchange records.
+          管理积分商城商品、分类和兑换记录。
         </p>
       </div>
 
@@ -739,7 +739,7 @@ const PointsManagement: React.FC = () => {
 
       {/* Product Create/Edit Modal */}
       <Modal
-        title={editingProduct ? 'Edit Product' : 'Add Product'}
+        title={editingProduct ? '编辑商品' : '添加商品'}
         open={productModalVisible}
         onOk={handleProductSubmit}
         onCancel={() => setProductModalVisible(false)}
@@ -750,20 +750,20 @@ const PointsManagement: React.FC = () => {
         <Form form={productForm} layout="vertical" preserve={false}>
           <Form.Item
             name="name"
-            label="Name"
-            rules={[{ required: true, message: 'Please enter product name' }]}
+            label="名称"
+            rules={[{ required: true, message: '请输入商品名称' }]}
           >
-            <Input placeholder="e.g. VIP Membership" />
+            <Input placeholder="例如：VIP会员" />
           </Form.Item>
-          <Form.Item name="description" label="Description">
-            <TextArea rows={3} placeholder="Product description" />
+          <Form.Item name="description" label="描述">
+            <TextArea rows={3} placeholder="商品描述" />
           </Form.Item>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="points_required"
-                label="Points Required"
-                rules={[{ required: true, message: 'Please enter points' }]}
+                label="所需积分"
+                rules={[{ required: true, message: '请输入积分值' }]}
               >
                 <InputNumber
                   min={0}
@@ -775,28 +775,28 @@ const PointsManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="stock"
-                label="Stock"
-                rules={[{ required: true, message: 'Please enter stock' }]}
-                extra="Use -1 for unlimited"
+                label="库存"
+                rules={[{ required: true, message: '请输入库存' }]}
+                extra="-1 表示不限"
               >
                 <InputNumber min={-1} style={{ width: '100%' }} placeholder="0" />
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item name="image_url" label="Image URL">
+          <Form.Item name="image_url" label="图片地址">
             <Input placeholder="https://example.com/image.png" />
           </Form.Item>
-          <Form.Item name="category_id" label="Category">
+          <Form.Item name="category_id" label="分类">
             <Select
               allowClear
-              placeholder="Select category"
+              placeholder="请选择分类"
               options={categories.map((c) => ({
                 label: c.name,
                 value: c.id,
               }))}
             />
           </Form.Item>
-          <Form.Item name="is_active" label="Active" valuePropName="checked">
+          <Form.Item name="is_active" label="启用" valuePropName="checked">
             <Switch />
           </Form.Item>
         </Form>
@@ -804,7 +804,7 @@ const PointsManagement: React.FC = () => {
 
       {/* Category Create/Edit Modal */}
       <Modal
-        title={editingCategory ? 'Edit Category' : 'Add Category'}
+        title={editingCategory ? '编辑分类' : '添加分类'}
         open={categoryModalVisible}
         onOk={handleCategorySubmit}
         onCancel={() => setCategoryModalVisible(false)}
@@ -814,18 +814,18 @@ const PointsManagement: React.FC = () => {
         <Form form={categoryForm} layout="vertical" preserve={false}>
           <Form.Item
             name="name"
-            label="Category Name"
-            rules={[{ required: true, message: 'Please enter category name' }]}
+            label="分类名称"
+            rules={[{ required: true, message: '请输入分类名称' }]}
           >
-            <Input placeholder="e.g. Digital Goods" />
+            <Input placeholder="例如：数码商品" />
           </Form.Item>
-          <Form.Item name="description" label="Description">
-            <TextArea rows={2} placeholder="Category description" />
+          <Form.Item name="description" label="描述">
+            <TextArea rows={2} placeholder="分类描述" />
           </Form.Item>
           <Form.Item
             name="sort_order"
-            label="Sort Order"
-            rules={[{ required: true, message: 'Please enter sort order' }]}
+            label="排序"
+            rules={[{ required: true, message: '请输入排序' }]}
           >
             <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
           </Form.Item>
@@ -834,7 +834,7 @@ const PointsManagement: React.FC = () => {
 
       {/* Exchange Status Update Modal */}
       <Modal
-        title="Update Exchange Status"
+        title="更新兑换状态"
         open={exchangeStatusVisible}
         onOk={handleExchangeStatusSubmit}
         onCancel={() => setExchangeStatusVisible(false)}
@@ -843,32 +843,32 @@ const PointsManagement: React.FC = () => {
       >
         <div style={{ marginBottom: 16 }}>
           <p>
-            User: <strong>{selectedExchange?.user?.username ?? `#${selectedExchange?.user_id}`}</strong>
+            用户：<strong>{selectedExchange?.user?.username ?? `#${selectedExchange?.user_id}`}</strong>
           </p>
           <p>
-            Product: <strong>{selectedExchange?.product?.name ?? `#${selectedExchange?.product_id}`}</strong>
+            商品：<strong>{selectedExchange?.product?.name ?? `#${selectedExchange?.product_id}`}</strong>
           </p>
           <p>
-            Points Used: <strong>{selectedExchange?.points_spent}</strong>
+            消耗积分：<strong>{selectedExchange?.points_spent}</strong>
           </p>
         </div>
         <Form form={exchangeForm} layout="vertical" preserve={false}>
           <Form.Item
             name="status"
-            label="Status"
-            rules={[{ required: true, message: 'Please select a status' }]}
+            label="状态"
+            rules={[{ required: true, message: '请选择状态' }]}
           >
             <Select
               options={[
-                { label: 'Pending', value: 'pending' },
-                { label: 'Approved', value: 'approved' },
-                { label: 'Rejected', value: 'rejected' },
-                { label: 'Completed', value: 'completed' },
+                { label: '待处理', value: 'pending' },
+                { label: '已通过', value: 'approved' },
+                { label: '已拒绝', value: 'rejected' },
+                { label: '已完成', value: 'completed' },
               ]}
             />
           </Form.Item>
-          <Form.Item name="tracking_number" label="Reason / Tracking Number">
-            <Input placeholder="Optional reason or tracking number" />
+          <Form.Item name="tracking_number" label="原因/快递单号">
+            <Input placeholder="可选的原因或快递单号" />
           </Form.Item>
         </Form>
       </Modal>

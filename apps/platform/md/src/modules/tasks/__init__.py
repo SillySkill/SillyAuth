@@ -33,7 +33,9 @@ from typing import Optional, Dict, Any, List
 from pathlib import Path
 import yaml
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from starlette.responses import HTMLResponse
+from core.template_helpers import render_template
 from pydantic import BaseModel
 
 # Import components
@@ -185,6 +187,42 @@ class SillyMDModule:
         app.include_router(tasks_router)
 
         logger.info(f"Tasks routes registered at {tasks_router.prefix}")
+
+        # Page routes
+        @app.get("/tasks", response_class=HTMLResponse, include_in_schema=False)
+        async def tasks_page(request: Request):
+            try:
+                from core.db_adapter import get_db_cursor
+                daily_tasks = []
+                achievements = []
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("tasks", "daily_tasks"))
+                        row = cur.fetchone()
+                        if row and row.get("data"):
+                            raw = row["data"]
+                            import json as _jt
+                            daily_tasks = _jt.loads(raw) if isinstance(raw, str) else raw
+                except Exception:
+                    daily_tasks = DEFAULT_DAILY_TASKS if "DEFAULT_DAILY_TASKS" in dir() else []
+
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("tasks", "achievements"))
+                        row = cur.fetchone()
+                        if row and row.get("data"):
+                            raw = row["data"]
+                            import json as _ja
+                            achievements = _ja.loads(raw) if isinstance(raw, str) else raw
+                except Exception:
+                    achievements = DEFAULT_ACHIEVEMENTS if "DEFAULT_ACHIEVEMENTS" in dir() else []
+            except Exception:
+                daily_tasks, achievements = [], []
+
+            return render_template(request, "tasks/index.html", {
+                "daily_tasks": daily_tasks,
+                "achievements": achievements,
+            })
 
     def install(self, app: FastAPI) -> None:
         """Alias for register() - for PluginManager compatibility."""

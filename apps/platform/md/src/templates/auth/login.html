@@ -1,0 +1,298 @@
+{% extends "base-auth.html" %}
+
+{% block title %}{{ _("login.title") }} - {{ _("site.name") }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/css/auth.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+{% endblock %}
+
+{% block auth_content %}
+{% if error %}
+<div class="auth-error-message">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>{{ error }}</span>
+    <button type="button" class="error-close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+{% endif %}
+
+<!-- Login tab switcher -->
+<div class="login-tabs">
+    <button type="button" class="login-tab active" data-tab="password">
+        <i class="fas fa-key"></i>
+        <span>{{ _("login.passwordTab") }}</span>
+    </button>
+    <button type="button" class="login-tab" data-tab="qrcode">
+        <i class="fas fa-qrcode"></i>
+        <span>{{ _("login.qrcodeTab") }}</span>
+    </button>
+</div>
+
+<!-- Password login form -->
+<form class="auth-form" id="passwordForm" method="POST" action="/api/v1/auth/login">
+    {{ csrf_input }}
+    <div class="form-group">
+        <label for="email">{{ _("form.email") }}</label>
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" name="email" required
+                   placeholder="name@example.com"
+                   value="{{ form_data.get('email', '') if form_data else '' }}">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="password">{{ _("form.password") }}</label>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" name="password" required
+                   placeholder="{{ _('form.passwordPlaceholder') }}">
+            <button type="button" class="toggle-password" id="togglePassword">
+                <i class="fas fa-eye"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="form-options">
+        <label class="checkbox-label">
+            <input type="checkbox" name="remember" {% if form_data and form_data.get('remember') %}checked{% endif %}>
+            <span>{{ _("form.remember") }}</span>
+        </label>
+        <a href="/forgot-password" class="forgot-link">{{ _("form.forgotPassword") }}</a>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-full" id="passwordSubmit">
+        <span>{{ _("login.submit") }}</span>
+        <i class="fas fa-arrow-right"></i>
+    </button>
+</form>
+
+<!-- QR code login section -->
+<div class="qr-login-section hidden" id="qrcodeSection">
+    <div class="qr-container">
+        <div class="qr-code-box" id="qrCodeBox">
+            <div class="qr-loading" id="qrLoading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>{{ _("login.qrGenerating") }}</span>
+            </div>
+            <div class="qr-code-display hidden" id="qrCodeDisplay">
+                <!-- QR code will be inserted here by JavaScript -->
+            </div>
+        </div>
+        <div class="qr-status" id="qrStatus">
+            <span class="status-dot"></span>
+            <span class="status-text">{{ _("login.qrWaiting") }}</span>
+        </div>
+        <p class="qr-hint">{{ _("login.qrHint") }}</p>
+        <button type="button" class="btn btn-secondary btn-full" id="refreshQR" style="margin-top: 1rem;">
+            <i class="fas fa-redo"></i>
+            <span>{{ _("login.qrRefresh") }}</span>
+        </button>
+    </div>
+</div>
+
+<!-- Social login divider -->
+<div class="auth-divider" id="passwordDivider">
+    <span>{{ _("auth.orContinueWith") }}</span>
+</div>
+
+<!-- Social login buttons -->
+<div class="social-login" id="socialLogin">
+    <button class="social-btn google" onclick="window.location.href='/api/v1/auth/google'">
+        <i class="fab fa-google"></i>
+        <span>Google</span>
+    </button>
+    <button class="social-btn github" onclick="window.location.href='/api/v1/auth/github'">
+        <i class="fab fa-github"></i>
+        <span>GitHub</span>
+    </button>
+</div>
+
+<!-- Auth footer -->
+<div class="auth-footer">
+    <p>{{ _("login.noAccount") }}</p>
+    <a href="/register" class="auth-link">{{ _("login.registerNow") }}</a>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/auth.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password visibility toggle
+    const togglePassword = document.getElementById('togglePassword');
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        });
+    }
+
+    // Login tab switching
+    const tabs = document.querySelectorAll('.login-tab');
+    const passwordForm = document.getElementById('passwordForm');
+    const qrcodeSection = document.getElementById('qrcodeSection');
+    const passwordDivider = document.getElementById('passwordDivider');
+    const socialLogin = document.getElementById('socialLogin');
+    let qrPollingInterval = null;
+    let currentQRCode = null;
+
+    tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var tabName = this.dataset.tab;
+            tabs.forEach(function(t) { t.classList.remove('active'); });
+            tab.classList.add('active');
+
+            if (tabName === 'password') {
+                passwordForm.classList.remove('hidden');
+                qrcodeSection.classList.add('hidden');
+                passwordDivider.style.display = '';
+                socialLogin.style.display = '';
+                stopQRPolling();
+            } else {
+                passwordForm.classList.add('hidden');
+                qrcodeSection.classList.remove('hidden');
+                passwordDivider.style.display = 'none';
+                socialLogin.style.display = 'none';
+                generateQRCode();
+            }
+        });
+    });
+
+    function initQRCodeLogin() {
+        var refreshBtn = document.getElementById('refreshQR');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                stopQRPolling();
+                generateQRCode();
+            });
+        }
+    }
+
+    async function generateQRCode() {
+        var qrLoading = document.getElementById('qrLoading');
+        var qrDisplay = document.getElementById('qrCodeDisplay');
+        var qrStatus = document.getElementById('qrStatus');
+
+        qrLoading.classList.remove('hidden');
+        qrDisplay.classList.add('hidden');
+        qrStatus.className = 'qr-status';
+        qrStatus.querySelector('.status-text').textContent = '{{ _("login.qrWaiting") }}';
+
+        try {
+            var response = await fetch('/api/v1/auth/qrcode/generate', {
+                method: 'POST'
+            });
+            var data = await response.json();
+
+            if (data.success) {
+                currentQRCode = data.data.code;
+
+                qrLoading.classList.add('hidden');
+                qrDisplay.classList.remove('hidden');
+
+                var qrData = JSON.stringify({
+                    code: currentQRCode,
+                    app: 'SillyMD',
+                    version: '1.0'
+                });
+
+                try {
+                    var qr = qrcode(0, 'M');
+                    qr.addData(qrData);
+                    qr.make();
+                    var qrImageUrl = qr.createDataURL(8, 4);
+                    qrDisplay.innerHTML = '<img src="' + qrImageUrl + '" alt="Login QR Code" style="width: 180px; height: 180px;">';
+                } catch (e) {
+                    qrDisplay.innerHTML = '<div class="qr-placeholder-pattern"><i class="fas fa-qrcode"></i></div><div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #94A3B8;">' + currentQRCode.substring(0, 8) + '...</div>';
+                }
+
+                startQRPolling();
+            } else {
+                qrLoading.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--error-color);"></i><span>{{ _("login.qrError") }}</span>';
+            }
+        } catch (error) {
+            qrLoading.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--error-color);"></i><span>{{ _("login.networkError") }}</span>';
+        }
+    }
+
+    function startQRPolling() {
+        if (qrPollingInterval) return;
+
+        qrPollingInterval = setInterval(async function() {
+            if (!currentQRCode) return;
+
+            try {
+                var response = await fetch('/api/v1/auth/qrcode/' + currentQRCode + '/status');
+                var data = await response.json();
+
+                if (data.success) {
+                    updateQRStatus(data.data);
+                }
+            } catch (error) {
+                console.error('QR status check failed');
+            }
+        }, 2000);
+    }
+
+    function stopQRPolling() {
+        if (qrPollingInterval) {
+            clearInterval(qrPollingInterval);
+            qrPollingInterval = null;
+        }
+        currentQRCode = null;
+    }
+
+    function updateQRStatus(status) {
+        var qrStatus = document.getElementById('qrStatus');
+        var statusText = qrStatus.querySelector('.status-text');
+
+        qrStatus.classList.remove('scanned', 'confirmed', 'expired');
+
+        switch (status.status) {
+            case 'SCANNED':
+                qrStatus.classList.add('scanned');
+                statusText.textContent = '{{ _("login.qrScanned") }}';
+                break;
+            case 'CONFIRMED':
+                qrStatus.classList.add('confirmed');
+                statusText.textContent = '{{ _("login.qrConfirmed") }}';
+                stopQRPolling();
+
+                if (status.token) {
+                    localStorage.setItem('token', status.token);
+                    setTimeout(function() {
+                        var params = new URLSearchParams(window.location.search);
+                        var redirect = params.get('redirect') || '/';
+                        window.location.href = redirect;
+                    }, 1000);
+                }
+                break;
+            case 'EXPIRED':
+                qrStatus.classList.add('expired');
+                statusText.textContent = '{{ _("login.qrExpired") }}';
+                stopQRPolling();
+                break;
+            case 'CANCELLED':
+                qrStatus.classList.add('expired');
+                statusText.textContent = '{{ _("login.qrCancelled") }}';
+                stopQRPolling();
+                break;
+            default:
+                statusText.textContent = '{{ _("login.qrWaiting") }}';
+        }
+    }
+
+    initQRCodeLogin();
+});
+</script>
+{% endblock %}

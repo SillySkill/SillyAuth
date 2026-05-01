@@ -52,11 +52,13 @@ router = APIRouter(prefix="/api/v1/admin", tags=["管理后台"])
 security = HTTPBearer()
 
 # JWT configuration (should match auth module)
-SECRET_KEY = os.getenv("JWT_SECRET", "CHANGE-ME-IN-PRODUCTION")
+SECRET_KEY = os.getenv("JWT_SECRET")
+if not SECRET_KEY:
+    raise RuntimeError("JWT_SECRET environment variable is required.")
 ALGORITHM = "HS256"
 
 # Admin roles configuration
-ADMIN_ROLES = ['super_admin', 'content_admin', 'user_admin', 'finance_admin']
+ADMIN_ROLES = ['super_admin', 'content_admin', 'user_admin', 'finance_admin', 'ADMIN']
 
 
 
@@ -109,9 +111,30 @@ async def get_current_admin(
             raise credentials_exception
 
         # Get user from database
-        with get_db_cursor() as cur:
-            cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
-            user = cur.fetchone()
+        user = None
+        try:
+            with get_db_cursor() as cur:
+                cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+                user = cur.fetchone()
+        except Exception as db_err:
+            logger.warning(f"Database unavailable for admin auth, using token payload: {db_err}")
+            # Fallback: use payload data when DB is unavailable (dev mode)
+            payload_role = payload.get("role", "user")
+            if payload_role not in ADMIN_ROLES:
+                logger.warning(f"Non-admin role '{payload_role}' in token attempted admin access")
+                raise not_admin_exception
+            user = {
+                "id": payload.get("user_id"),
+                "username": payload.get("username", "admin"),
+                "email": payload.get("email", "admin@sillymd.com"),
+                "role": payload_role,
+                "is_active": True,
+                "is_verified": True,
+                "first_name": payload.get("first_name", ""),
+                "last_name": payload.get("last_name", ""),
+                "avatar_url": None,
+                "created_at": None,
+            }
 
         if not user:
             raise credentials_exception

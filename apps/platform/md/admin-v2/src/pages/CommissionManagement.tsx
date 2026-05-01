@@ -1,8 +1,8 @@
 /**
- * Commission Management
+ * 佣金管理
  *
- * Admin page displaying commission stats cards and commission records table.
- * Supports filtering by status and date range.
+ * 管理后台页面，展示佣金统计卡片和佣金记录表格。
+ * 支持按状态和日期范围筛选。
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -94,7 +94,7 @@ const CommissionManagement: React.FC = () => {
       setRecords(Array.isArray(data) ? data : []);
       setPagination({ current: page, pageSize, total });
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to load commission records';
+      const msg = error instanceof Error ? error.message : '加载佣金记录失败';
       message.error(msg);
     } finally {
       setLoading(false);
@@ -145,8 +145,8 @@ const CommissionManagement: React.FC = () => {
 
   const getSettlementStatusTag = (status: string) => {
     const config: Record<string, { color: string; text: string }> = {
-      pending: { color: 'orange', text: 'Pending' },
-      settled: { color: 'green', text: 'Settled' },
+      pending: { color: 'orange', text: '待结算' },
+      settled: { color: 'green', text: '已结算' },
     };
     const info = config[status] || { color: 'default', text: status };
     return <Tag color={info.color}>{info.text}</Tag>;
@@ -154,10 +154,10 @@ const CommissionManagement: React.FC = () => {
 
   const getContentTypeTag = (type: string) => {
     const config: Record<string, { color: string; label: string }> = {
-      article: { color: 'blue', label: 'Article' },
-      tutorial: { color: 'purple', label: 'Tutorial' },
-      skill: { color: 'cyan', label: 'Skill' },
-      download: { color: 'geekblue', label: 'Download' },
+      article: { color: 'blue', label: '文章' },
+      tutorial: { color: 'purple', label: '教程' },
+      skill: { color: 'cyan', label: '技能' },
+      download: { color: 'geekblue', label: '下载' },
     };
     const info = config[type] || { color: 'default', label: type };
     return <Tag color={info.color}>{info.label}</Tag>;
@@ -176,33 +176,33 @@ const CommissionManagement: React.FC = () => {
       sorter: true,
     },
     {
-      title: 'Order ID',
+      title: '订单ID',
       dataIndex: 'order_id',
       key: 'order_id',
       width: 100,
     },
     {
-      title: 'Content Type',
+      title: '内容类型',
       dataIndex: 'content_type',
       key: 'content_type',
       width: 130,
       render: (type: string) => getContentTypeTag(type),
       filters: [
-        { text: 'Article', value: 'article' },
-        { text: 'Tutorial', value: 'tutorial' },
-        { text: 'Skill', value: 'skill' },
-        { text: 'Download', value: 'download' },
+        { text: '文章', value: 'article' },
+        { text: '教程', value: 'tutorial' },
+        { text: '技能', value: 'skill' },
+        { text: '下载', value: 'download' },
       ],
       onFilter: (value, record) => record.content_type === value,
     },
     {
-      title: 'Content ID',
+      title: '内容ID',
       dataIndex: 'content_id',
       key: 'content_id',
       width: 100,
     },
     {
-      title: 'Gross Amount',
+      title: '总额',
       dataIndex: 'gross_amount',
       key: 'gross_amount',
       width: 130,
@@ -211,7 +211,7 @@ const CommissionManagement: React.FC = () => {
         `¥${(amount ?? 0).toFixed(2)}`,
     },
     {
-      title: 'Platform Commission',
+      title: '平台佣金',
       dataIndex: 'platform_commission',
       key: 'platform_commission',
       width: 160,
@@ -223,7 +223,7 @@ const CommissionManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Creator Share',
+      title: '创作者分成',
       dataIndex: 'creator_share',
       key: 'creator_share',
       width: 130,
@@ -235,19 +235,19 @@ const CommissionManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Settlement Status',
+      title: '结算状态',
       dataIndex: 'settlement_status',
       key: 'settlement_status',
       width: 140,
       render: (status: string) => getSettlementStatusTag(status),
     },
     {
-      title: 'Created At',
+      title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 180,
       sorter: true,
-      render: (date: string) => (date ? new Date(date).toLocaleString() : 'N/A'),
+      render: (date: string) => (date ? new Date(date).toLocaleString() : '无'),
     },
   ];
 
@@ -258,9 +258,9 @@ const CommissionManagement: React.FC = () => {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <Title level={2}>Commission Management</Title>
+        <Title level={2}>佣金管理</Title>
         <p style={{ color: '#888' }}>
-          View platform commissions, revenue breakdown, and creator payouts.
+          查看平台佣金、收入明细以及创作者支出。
         </p>
       </div>
 
@@ -269,7 +269,7 @@ const CommissionManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="Total Commission"
+              title="总佣金"
               value={stats.total_commission}
               precision={2}
               prefix="¥"
@@ -281,7 +281,7 @@ const CommissionManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="Platform Revenue"
+              title="平台收入"
               value={stats.platform_revenue}
               precision={2}
               prefix="¥"
@@ -293,7 +293,7 @@ const CommissionManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="Creator Payouts"
+              title="创作者支出"
               value={stats.creator_payouts}
               precision={2}
               prefix="¥"
@@ -305,7 +305,7 @@ const CommissionManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="Pending Payouts"
+              title="待支付"
               value={stats.pending_payouts}
               precision={2}
               prefix="¥"
@@ -323,33 +323,33 @@ const CommissionManagement: React.FC = () => {
             icon={<ReloadOutlined />}
             onClick={() => loadRecords(pagination.current, pagination.pageSize)}
           >
-            Refresh
+            刷新
           </Button>
         }
       >
-        {/* Filters Row */}
+        {/* 筛选栏 */}
         <div style={{ marginBottom: 16 }}>
           <Space wrap>
             <span style={{ color: '#888' }}>
-              <FilterOutlined /> Filters:
+              <FilterOutlined /> 筛选：
             </span>
             <Select
               allowClear
-              placeholder="Status"
+              placeholder="状态"
               style={{ width: 150 }}
               value={statusFilter}
               onChange={handleStatusFilterChange}
               options={[
-                { label: 'Pending', value: 'pending' },
-                { label: 'Settled', value: 'settled' },
+                { label: '待结算', value: 'pending' },
+                { label: '已结算', value: 'settled' },
               ]}
             />
             <RangePicker
               onChange={handleDateRangeChange}
-              placeholder={['Start Date', 'End Date']}
+              placeholder={['开始日期', '结束日期']}
             />
             {(statusFilter || dateRange) && (
-              <Button onClick={handleResetFilters}>Reset Filters</Button>
+              <Button onClick={handleResetFilters}>重置筛选</Button>
             )}
           </Space>
         </div>
@@ -366,11 +366,11 @@ const CommissionManagement: React.FC = () => {
             pagination={{
               ...pagination,
               showSizeChanger: true,
-              showTotal: (total) => `Total ${total} records`,
+              showTotal: (total) => `共 ${total} 条记录`,
             }}
             scroll={{ x: 1200 }}
             locale={{
-              emptyText: <Empty description="No commission records found" />,
+              emptyText: <Empty description="暂无佣金记录" />,
             }}
           />
         </Spin>

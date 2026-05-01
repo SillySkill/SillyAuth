@@ -70,9 +70,9 @@ interface ChapterFormValues {
 }
 
 const difficultyOptions = [
-  { label: 'Beginner', value: 'beginner', color: 'green' },
-  { label: 'Intermediate', value: 'intermediate', color: 'orange' },
-  { label: 'Advanced', value: 'advanced', color: 'red' },
+  { label: '初级', value: 'beginner', color: 'green' },
+  { label: '中级', value: 'intermediate', color: 'orange' },
+  { label: '高级', value: 'advanced', color: 'red' },
 ];
 
 const TutorialManagement: React.FC = () => {
@@ -118,7 +118,7 @@ const TutorialManagement: React.FC = () => {
         setPagination((prev) => ({ ...prev, total: response.data.total }));
       }
     } catch (error) {
-      message.error('Failed to load tutorials');
+      message.error('加载教程失败');
     } finally {
       setLoading(false);
     }
@@ -160,18 +160,18 @@ const TutorialManagement: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     Modal.confirm({
-      title: 'Confirm Delete',
-      content: 'Are you sure you want to delete this tutorial? All chapters will also be deleted.',
-      okText: 'Delete',
+      title: '确认删除',
+      content: '确定要删除此教程吗？所有章节也将被删除。',
+      okText: '删除',
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: '取消',
       onOk: async () => {
         try {
           await deleteTutorial(id);
-          message.success('Tutorial deleted successfully');
+          message.success('教程已删除');
           fetchTutorials();
         } catch (error) {
-          message.error('Failed to delete tutorial');
+          message.error('删除教程失败');
         }
       },
     });
@@ -181,10 +181,10 @@ const TutorialManagement: React.FC = () => {
     try {
       const newStatus = status === 'published' ? 'draft' : 'published';
       await updateTutorial(id, { status: newStatus });
-      message.success(`Tutorial ${newStatus === 'published' ? 'published' : 'unpublished'}`);
+      message.success(`教程${newStatus === 'published' ? '已发布' : '已取消发布'}`);
       fetchTutorials();
     } catch (error) {
-      message.error('Failed to update tutorial');
+      message.error('更新教程失败');
     }
   };
 
@@ -194,16 +194,16 @@ const TutorialManagement: React.FC = () => {
       const values = await form.validateFields();
       if (editingTutorial) {
         await updateTutorial(editingTutorial.id, values);
-        message.success('Tutorial updated successfully');
+        message.success('教程更新成功');
       } else {
         await createTutorial(values);
-        message.success('Tutorial created successfully');
+        message.success('教程创建成功');
       }
       setModalVisible(false);
       fetchTutorials();
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'errorFields' in error) return;
-      message.error('Operation failed');
+      message.error('操作失败');
     } finally {
       setSubmitting(false);
     }
@@ -225,7 +225,7 @@ const TutorialManagement: React.FC = () => {
         setChapters(response.data);
       }
     } catch (error) {
-      message.error('Failed to load chapters');
+      message.error('加载章节失败');
     } finally {
       setChaptersLoading(false);
     }
@@ -253,18 +253,18 @@ const TutorialManagement: React.FC = () => {
   const handleDeleteChapter = async (chapterId: number) => {
     if (!selectedTutorialId) return;
     Modal.confirm({
-      title: 'Delete Chapter',
-      content: 'Are you sure you want to delete this chapter?',
-      okText: 'Delete',
+      title: '删除章节',
+      content: '确定要删除此章节吗？',
+      okText: '删除',
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: '取消',
       onOk: async () => {
         try {
           await deleteChapter(selectedTutorialId, chapterId);
-          message.success('Chapter deleted');
+          message.success('章节已删除');
           openChapterManager(selectedTutorialId);
         } catch (error) {
-          message.error('Failed to delete chapter');
+          message.error('删除章节失败');
         }
       },
     });
@@ -277,16 +277,16 @@ const TutorialManagement: React.FC = () => {
       const values = await chapterForm.validateFields();
       if (editingChapter) {
         await updateChapter(selectedTutorialId, editingChapter.id, values);
-        message.success('Chapter updated');
+        message.success('章节更新成功');
       } else {
         await createChapter(selectedTutorialId, values);
-        message.success('Chapter created');
+        message.success('章节创建成功');
       }
       setChapterModalVisible(false);
       openChapterManager(selectedTutorialId);
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'errorFields' in error) return;
-      message.error('Operation failed');
+      message.error('操作失败');
     } finally {
       setChapterSubmitting(false);
     }
@@ -302,7 +302,7 @@ const TutorialManagement: React.FC = () => {
       width: 70,
     },
     {
-      title: 'Title',
+      title: '标题',
       dataIndex: 'title',
       key: 'title',
       width: 260,
@@ -321,7 +321,7 @@ const TutorialManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Difficulty',
+      title: '难度',
       dataIndex: 'difficulty_level',
       key: 'difficulty_level',
       width: 110,
@@ -331,21 +331,21 @@ const TutorialManagement: React.FC = () => {
       },
     },
     {
-      title: 'Featured',
+      title: '精选',
       key: 'featured',
       width: 90,
       render: (_: unknown, record: Tutorial) => (
         <Switch
           checked={record.status === 'published'}
           size="small"
-          checkedChildren="Yes"
-          unCheckedChildren="No"
+          checkedChildren="是"
+          unCheckedChildren="否"
           onChange={() => handleToggleFeatured(record.id, record.status)}
         />
       ),
     },
     {
-      title: 'Views',
+      title: '浏览',
       dataIndex: 'view_count',
       key: 'view_count',
       width: 80,
@@ -357,7 +357,7 @@ const TutorialManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Likes',
+      title: '点赞',
       key: 'likes',
       width: 80,
       render: () => (
@@ -367,29 +367,29 @@ const TutorialManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Status',
+      title: '状态',
       dataIndex: 'status',
       key: 'status',
       width: 100,
       render: (status: string) => {
         const config: Record<string, { color: string; label: string }> = {
-          published: { color: 'green', label: 'Published' },
-          draft: { color: 'orange', label: 'Draft' },
-          archived: { color: 'default', label: 'Archived' },
+          published: { color: 'green', label: '已发布' },
+          draft: { color: 'orange', label: '草稿' },
+          archived: { color: 'default', label: '已归档' },
         };
         const cfg = config[status] || { color: 'default', label: status };
         return <Tag color={cfg.color}>{cfg.label}</Tag>;
       },
     },
     {
-      title: 'Created At',
+      title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 170,
       render: (date: string) => formatDate(date),
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 240,
       fixed: 'right',
@@ -401,7 +401,7 @@ const TutorialManagement: React.FC = () => {
             icon={<BookOutlined />}
             onClick={() => openChapterManager(record.id)}
           >
-            Chapters
+            章节
           </Button>
           <Button
             type="link"
@@ -409,17 +409,17 @@ const TutorialManagement: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           >
-            Edit
+            编辑
           </Button>
           <Popconfirm
-            title="Delete this tutorial?"
+            title="确定删除此教程？"
             onConfirm={() => handleDelete(record.id)}
-            okText="Delete"
-            cancelText="Cancel"
+            okText="删除"
+            cancelText="取消"
             okType="danger"
           >
             <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              Delete
+              删除
             </Button>
           </Popconfirm>
         </Space>
@@ -430,33 +430,33 @@ const TutorialManagement: React.FC = () => {
   return (
     <div>
       <Title level={2} style={{ marginBottom: 24 }}>
-        Tutorial Management
+        教程管理
       </Title>
 
       {/* Search/Filter */}
       <Card style={{ marginBottom: 16 }}>
         <Form layout="inline" onFinish={handleSearch}>
           <Form.Item name="search">
-            <Input placeholder="Search by title..." prefix={<SearchOutlined />} style={{ width: 220 }} allowClear />
+            <Input placeholder="按标题搜索..." prefix={<SearchOutlined />} style={{ width: 220 }} allowClear />
           </Form.Item>
           <Form.Item name="difficulty_level">
-            <Select placeholder="Difficulty" style={{ width: 150 }} allowClear>
+            <Select placeholder="难度" style={{ width: 150 }} allowClear>
               {difficultyOptions.map((opt) => (
                 <Option key={opt.value} value={opt.value}>{opt.label}</Option>
               ))}
             </Select>
           </Form.Item>
           <Form.Item name="status">
-            <Select placeholder="Status" style={{ width: 140 }} allowClear>
-              <Option value="published">Published</Option>
-              <Option value="draft">Draft</Option>
-              <Option value="archived">Archived</Option>
+            <Select placeholder="状态" style={{ width: 140 }} allowClear>
+              <Option value="published">已发布</Option>
+              <Option value="draft">草稿</Option>
+              <Option value="archived">已归档</Option>
             </Select>
           </Form.Item>
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
-                Search
+                搜索
               </Button>
               <Button
                 icon={<ReloadOutlined />}
@@ -465,7 +465,7 @@ const TutorialManagement: React.FC = () => {
                   setPagination({ current: 1, pageSize: 10, total: 0 });
                 }}
               >
-                Reset
+                重置
               </Button>
             </Space>
           </Form.Item>
@@ -476,7 +476,7 @@ const TutorialManagement: React.FC = () => {
       <Card
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            Create Tutorial
+            创建教程
           </Button>
         }
       >
@@ -491,54 +491,54 @@ const TutorialManagement: React.FC = () => {
             pageSize: pagination.pageSize,
             total: pagination.total,
             showSizeChanger: true,
-            showTotal: (total) => `Total ${total} tutorials`,
+            showTotal: (total) => `共 ${total} 个教程`,
             onChange: (page, pageSize) => handleTableChange(page, pageSize),
           }}
-          locale={{ emptyText: 'No tutorials found' }}
+          locale={{ emptyText: '暂无教程' }}
         />
       </Card>
 
       {/* Create/Edit Tutorial Modal */}
       <Modal
-        title={editingTutorial ? 'Edit Tutorial' : 'Create Tutorial'}
+        title={editingTutorial ? '编辑教程' : '创建教程'}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
         width={800}
         confirmLoading={submitting}
-        okText={editingTutorial ? 'Update' : 'Create'}
-        cancelText="Cancel"
+        okText={editingTutorial ? '更新' : '创建'}
+        cancelText="取消"
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item
-            label="Title (zh_CN)"
+            label="标题（中文）"
             name="title"
-            rules={[{ required: true, message: 'Please enter the title' }]}
+            rules={[{ required: true, message: '请输入标题' }]}
           >
-            <Input placeholder="Tutorial title" />
+            <Input placeholder="教程标题" />
           </Form.Item>
 
           <Form.Item
-            label="Description"
+            label="描述"
             name="description"
-            rules={[{ required: true, message: 'Please enter a description' }]}
+            rules={[{ required: true, message: '请输入描述' }]}
           >
-            <TextArea rows={3} placeholder="Brief description" showCount maxLength={500} />
+            <TextArea rows={3} placeholder="简要描述" showCount maxLength={500} />
           </Form.Item>
 
           <Form.Item
-            label="Content"
+            label="内容"
             name="content"
-            rules={[{ required: true, message: 'Please enter tutorial content' }]}
+            rules={[{ required: true, message: '请输入教程内容' }]}
           >
-            <TextArea rows={6} placeholder="Tutorial content in markdown or HTML" showCount maxLength={100000} />
+            <TextArea rows={6} placeholder="教程内容（Markdown 或 HTML）" showCount maxLength={100000} />
           </Form.Item>
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="Difficulty" name="difficulty_level">
-                <Select placeholder="Select difficulty">
+              <Form.Item label="难度" name="difficulty_level">
+                <Select placeholder="选择难度">
                   {difficultyOptions.map((opt) => (
                     <Option key={opt.value} value={opt.value}>{opt.label}</Option>
                   ))}
@@ -546,37 +546,37 @@ const TutorialManagement: React.FC = () => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Status" name="status">
+              <Form.Item label="状态" name="status">
                 <Select>
-                  <Option value="published">Published</Option>
-                  <Option value="draft">Draft</Option>
-                  <Option value="archived">Archived</Option>
+                  <Option value="published">已发布</Option>
+                  <Option value="draft">草稿</Option>
+                  <Option value="archived">已归档</Option>
                 </Select>
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item label="Video URL" name="video_url" rules={[{ type: 'url', message: 'Invalid URL', warningOnly: true }]}>
+          <Form.Item label="视频 URL" name="video_url" rules={[{ type: 'url', message: 'URL 格式无效', warningOnly: true }]}>
             <Input placeholder="https://example.com/video.mp4" />
           </Form.Item>
 
-          <Form.Item label="Cover Image URL" name="cover_image" rules={[{ type: 'url', message: 'Invalid URL', warningOnly: true }]}>
+          <Form.Item label="封面图片 URL" name="cover_image" rules={[{ type: 'url', message: 'URL 格式无效', warningOnly: true }]}>
             <Input placeholder="https://example.com/cover.jpg" />
           </Form.Item>
 
-          <Form.Item label="Sort Order" name="sort_order">
-            <InputNumber min={0} max={9999} style={{ width: '100%' }} placeholder="Display order" />
+          <Form.Item label="排序" name="sort_order">
+            <InputNumber min={0} max={9999} style={{ width: '100%' }} placeholder="显示顺序" />
           </Form.Item>
 
-          <Form.Item label="Skill ID (Optional)" name="skill_id">
-            <InputNumber min={1} style={{ width: '100%' }} placeholder="Link to a skill" />
+          <Form.Item label="技能 ID（可选）" name="skill_id">
+            <InputNumber min={1} style={{ width: '100%' }} placeholder="关联技能" />
           </Form.Item>
         </Form>
       </Modal>
 
       {/* Chapter Management Modal */}
       <Modal
-        title="Chapter Management"
+        title="章节管理"
         open={chaptersModalVisible}
         onCancel={() => {
           setChaptersModalVisible(false);
@@ -587,14 +587,14 @@ const TutorialManagement: React.FC = () => {
       >
         <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAddChapter}>
-            Add Chapter
+            添加章节
           </Button>
         </div>
 
         {chaptersLoading ? (
-          <div style={{ textAlign: 'center', padding: 40 }}>Loading chapters...</div>
+          <div style={{ textAlign: 'center', padding: 40 }}>加载章节中...</div>
         ) : chapters.length === 0 ? (
-          <Empty description="No chapters yet" />
+          <Empty description="暂无章节" />
         ) : (
           <List
             dataSource={chapters.sort((a, b) => a.order - b.order)}
@@ -607,17 +607,17 @@ const TutorialManagement: React.FC = () => {
                     icon={<EditOutlined />}
                     onClick={() => handleEditChapter(chapter)}
                   >
-                    Edit
+                    编辑
                   </Button>,
                   <Popconfirm
-                    title="Delete this chapter?"
+                    title="确定删除此章节？"
                     onConfirm={() => handleDeleteChapter(chapter.id)}
-                    okText="Delete"
-                    cancelText="Cancel"
+                    okText="删除"
+                    cancelText="取消"
                     okType="danger"
                   >
                     <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-                      Delete
+                      删除
                     </Button>
                   </Popconfirm>,
                 ]}
@@ -629,8 +629,8 @@ const TutorialManagement: React.FC = () => {
                   title={chapter.title}
                   description={
                     <span>
-                      {chapter.duration ? `${chapter.duration} min` : ''}
-                      {chapter.video_url ? ' | Has video' : ''}
+                      {chapter.duration ? `${chapter.duration} 分钟` : ''}
+                      {chapter.video_url ? ' | 有视频' : ''}
                     </span>
                   }
                 />
@@ -642,47 +642,47 @@ const TutorialManagement: React.FC = () => {
 
       {/* Chapter Edit Modal */}
       <Modal
-        title={editingChapter ? 'Edit Chapter' : 'Add Chapter'}
+        title={editingChapter ? '编辑章节' : '添加章节'}
         open={chapterModalVisible}
         onOk={handleChapterSubmit}
         onCancel={() => setChapterModalVisible(false)}
         width={640}
         confirmLoading={chapterSubmitting}
-        okText={editingChapter ? 'Update' : 'Create'}
-        cancelText="Cancel"
+        okText={editingChapter ? '更新' : '创建'}
+        cancelText="取消"
         destroyOnClose
       >
         <Form form={chapterForm} layout="vertical" preserve={false}>
           <Form.Item
-            label="Chapter Title"
+            label="章节标题"
             name="title"
-            rules={[{ required: true, message: 'Please enter chapter title' }]}
+            rules={[{ required: true, message: '请输入章节标题' }]}
           >
-            <Input placeholder="e.g. Getting Started" />
+            <Input placeholder="例如：入门指南" />
           </Form.Item>
 
           <Form.Item
-            label="Content"
+            label="内容"
             name="content"
-            rules={[{ required: true, message: 'Please enter chapter content' }]}
+            rules={[{ required: true, message: '请输入章节内容' }]}
           >
-            <TextArea rows={5} placeholder="Chapter content" showCount maxLength={50000} />
+            <TextArea rows={5} placeholder="章节内容" showCount maxLength={50000} />
           </Form.Item>
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="Order" name="order">
+              <Form.Item label="排序" name="order">
                 <InputNumber min={1} max={999} style={{ width: '100%' }} placeholder="1" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Duration (min)" name="duration">
+              <Form.Item label="时长（分钟）" name="duration">
                 <InputNumber min={0} style={{ width: '100%' }} placeholder="30" />
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item label="Video URL" name="video_url">
+          <Form.Item label="视频 URL" name="video_url">
             <Input placeholder="https://example.com/video.mp4" />
           </Form.Item>
         </Form>

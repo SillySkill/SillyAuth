@@ -1,0 +1,151 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}团队协作 - {{ site_name }}{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ site_name }} 团队协作 - 团队管理与项目协作">
+{% endblock %}
+
+{% block dashboard_content %}
+<!-- Teams Page Header -->
+<div class="page-header" style="margin-bottom: 32px;">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h1 style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+        <i class="fas fa-users" style="color: var(--primary); margin-right: 10px;"></i>
+        团队协作
+      </h1>
+      <p style="color: var(--text-light); font-size: 0.9rem;">管理团队、邀请成员、协作开发</p>
+    </div>
+    <button class="btn btn-primary" onclick="createTeam()">
+      <i class="fas fa-plus"></i> 创建团队
+    </button>
+  </div>
+</div>
+
+{% if teams %}
+<!-- Teams List -->
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px;">
+  {% for team in teams %}
+  <div class="team-card" style="background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 28px; transition: all 0.3s; box-shadow: var(--shadow-sm); cursor: pointer;"
+       onmouseenter="this.style.transform='translateY(-4px)';this.style.borderColor='var(--primary-light)';this.style.boxShadow='var(--shadow-card)'"
+       onmouseleave="this.style.transform='translateY(0)';this.style.borderColor='var(--border-light)';this.style.boxShadow='var(--shadow-sm)'"
+       onclick="window.location.href='/teams/{{ team.slug or team.id }}'">
+    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+      <div style="width: 56px; height: 56px; border-radius: var(--radius-md); background: {{ team.color or 'linear-gradient(135deg, var(--primary), var(--primary-light))' }}; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; flex-shrink: 0;">
+        {% if team.icon %}
+        <i class="{{ team.icon }}"></i>
+        {% else %}
+        <i class="fas fa-users"></i>
+        {% endif %}
+      </div>
+      <div style="min-width: 0;">
+        <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          {{ team.name }}
+        </h3>
+        {% if team.role %}
+        <span style="font-size: 0.8rem; padding: 2px 10px; background: rgba(79, 110, 247, 0.08); color: var(--primary); border-radius: 12px; font-weight: 500;">
+          {{ team.role }}
+        </span>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if team.description %}
+    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+      {{ team.description }}
+    </p>
+    {% endif %}
+
+    <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--border-light);">
+      <div style="display: flex; gap: 16px;">
+        <span style="font-size: 0.85rem; color: var(--text-light);">
+          <i class="fas fa-user-friends"></i> {{ team.member_count or 0 }} 成员
+        </span>
+        <span style="font-size: 0.85rem; color: var(--text-light);">
+          <i class="fas fa-cube"></i> {{ team.skills_count or 0 }} Skills
+        </span>
+      </div>
+      <i class="fas fa-chevron-right" style="color: var(--text-light);"></i>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<!-- Empty State -->
+<div style="text-align: center; padding: 80px 20px;">
+  <div style="width: 100px; height: 100px; background: linear-gradient(135deg, rgba(79, 110, 247, 0.06), rgba(132, 94, 247, 0.06)); border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--primary-light);">
+    <i class="fas fa-users" style="font-size: 2.5rem; color: var(--primary);"></i>
+  </div>
+  <h3 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">暂无团队</h3>
+  <p style="color: var(--text-secondary); max-width: 400px; margin: 0 auto 24px; font-size: 0.95rem;">
+    创建团队，邀请成员一起协作开发 Skills 项目
+  </p>
+  <button class="btn btn-primary" onclick="createTeam()">
+    <i class="fas fa-plus"></i> 创建第一个团队
+  </button>
+</div>
+{% endif %}
+
+<!-- Create Team Modal (Hidden by default) -->
+<div id="createTeamModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;" onclick="closeTeamModal(event)">
+  <div style="background: var(--bg-white); border-radius: var(--radius-lg); padding: 40px; max-width: 500px; width: 90%; box-shadow: var(--shadow-lg);" onclick="event.stopPropagation()">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary);">创建团队</h2>
+      <button onclick="closeTeamModal()" style="background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 1.2rem;">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form id="createTeamForm" onsubmit="submitTeam(event)">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div>
+          <label for="teamName" style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px;">团队名称 <span style="color: #ef4444;">*</span></label>
+          <input type="text" id="teamName" name="name" required
+                 style="width: 100%; padding: 12px 16px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9rem; color: var(--text-primary); background: var(--bg-white);"
+                 placeholder="输入团队名称">
+        </div>
+        <div>
+          <label for="teamDescription" style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px;">团队描述</label>
+          <textarea id="teamDescription" name="description" rows="3"
+                    style="width: 100%; padding: 12px 16px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9rem; color: var(--text-primary); background: var(--bg-white); resize: vertical;"
+                    placeholder="简单描述你的团队"></textarea>
+        </div>
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
+          <button type="button" class="btn btn-secondary" onclick="closeTeamModal()">取消</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-check"></i> 创建
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function createTeam() {
+  var modal = document.getElementById('createTeamModal');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+}
+
+function closeTeamModal(event) {
+  if (event && event.target !== document.getElementById('createTeamModal')) return;
+  var modal = document.getElementById('createTeamModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+function submitTeam(event) {
+  event.preventDefault();
+  // Team creation logic would go here
+  var modal = document.getElementById('createTeamModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+</script>
+{% endblock %}

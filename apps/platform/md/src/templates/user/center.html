@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% set profile = profile|default(user if user else {}, True) %}
+
+{% block title %}{{ profile.get('username', '个人中心') }} - {{ _('site.name') }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/css/user-center.css">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- 用户资料 -->
+    <div class="user-profile">
+        <div class="profile-header">
+            <div class="avatar">{{ profile.username[:1] | upper if profile.username else "U" }}</div>
+            <div class="user-info">
+                <h1>{{ profile.username | default("用户名") }}</h1>
+                <div class="email">{{ profile.email | default("user@example.com") }}</div>
+                {% if profile.bio %}
+                <div class="bio">{{ profile.bio }}</div>
+                {% endif %}
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ profile.points | default(0) }}</div>
+                        <div class="stat-label">积分</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ profile.level | default(1) }}</div>
+                        <div class="stat-label">等级</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ profile.experience | default(0) }}</div>
+                        <div class="stat-label">经验</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="editProfile()">编辑资料</button>
+        </div>
+    </div>
+
+    <!-- 快捷菜单 -->
+    <div class="menu-section">
+        <div class="menu-item" onclick="switchTab('orders')">
+            <i class="ri-shopping-bag-3-line"></i>
+            <span class="label">我的订单</span>
+            <span class="arrow">→</span>
+        </div>
+        <div class="menu-item" onclick="switchTab('favorites')">
+            <i class="ri-heart-3-line"></i>
+            <span class="label">我的收藏</span>
+            <span class="arrow">→</span>
+        </div>
+        <div class="menu-item" onclick="switchTab('points')">
+            <i class="ri-coin-line"></i>
+            <span class="label">积分记录</span>
+            <span class="arrow">→</span>
+        </div>
+        <div class="menu-item" onclick="window.location.href='/user/settings'">
+            <i class="ri-settings-3-line"></i>
+            <span class="label">账号设置</span>
+            <span class="arrow">→</span>
+        </div>
+    </div>
+
+    <!-- 活动历史 -->
+    <div class="content-card">
+        <div class="card-title">
+            <span>活动历史</span>
+        </div>
+        {% if activity and activity | length > 0 %}
+        <div class="order-list">
+            {% for item in activity %}
+            <div class="order-item">
+                <div class="order-info">
+                    <div class="order-number">{{ item.description }}</div>
+                    <div class="order-details">{{ item.created_at }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="ri-history-line"></i>
+            <p>暂无活动记录</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 内容区域 -->
+    <div class="content-card">
+        <!-- 订单 Tab -->
+        <div id="ordersTab" class="tab-content active">
+            <div class="card-title">
+                <span>我的订单</span>
+                <div class="actions">
+                    <button class="btn btn-outline" onclick="loadOrders('all')">全部</button>
+                    <button class="btn btn-outline" onclick="loadOrders('pending')">待支付</button>
+                </div>
+            </div>
+            <div class="order-list" id="orderList">
+                <div class="empty-state">
+                    <i class="ri-shopping-bag-3-line"></i>
+                    <p>暂无订单</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 收藏 Tab -->
+        <div id="favoritesTab" class="tab-content">
+            <div class="card-title">
+                <span>我的收藏</span>
+            </div>
+            <div class="favorites-grid" id="favoritesList">
+                <div class="empty-state">
+                    <i class="ri-heart-line"></i>
+                    <p>暂无收藏</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 积分 Tab -->
+        <div id="pointsTab" class="tab-content">
+            <div class="card-title">
+                <span>积分记录</span>
+            </div>
+            <div class="order-list" id="pointsList">
+                <div class="empty-state">
+                    <i class="ri-coin-line"></i>
+                    <p>暂无积分记录</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置 Tab -->
+        <div id="settingsTab" class="tab-content">
+            <div class="card-title">
+                <span>账号设置</span>
+            </div>
+            <form id="profileForm" onsubmit="saveProfile(event)">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="editUsername" value="{{ profile.username | default('') }}" placeholder="输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="editEmail" value="{{ profile.email | default('') }}" placeholder="输入邮箱" required>
+                </div>
+                <div class="form-group">
+                    <label>个人简介</label>
+                    <textarea id="editBio" rows="4" placeholder="介绍一下自己...">{{ profile.bio | default('') }}</textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="btn btn-outline" onclick="cancelEdit()">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/user-center.js"></script>
+{% endblock %}

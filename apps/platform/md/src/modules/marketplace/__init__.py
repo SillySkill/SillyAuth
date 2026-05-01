@@ -27,7 +27,9 @@ from typing import Optional, Dict, Any, List
 from pathlib import Path
 import yaml
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from starlette.responses import HTMLResponse
+from core.template_helpers import render_template
 from pydantic import BaseModel
 
 # Import components
@@ -190,6 +192,100 @@ class SillyMDModule:
         app.include_router(marketplace_router)
 
         logger.info(f"Marketplace routes registered at {marketplace_router.prefix}")
+
+        # Page routes
+        @app.get("/marketplace", response_class=HTMLResponse, include_in_schema=False)
+        async def marketplace_page(request: Request):
+            try:
+                from core.db_adapter import get_db_cursor
+                # Load market stats from config_data
+                stats = []
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("market_stats", "stats"))
+                        row = cur.fetchone()
+                        if row and row.get("data"):
+                            raw = row["data"]
+                            import json as _j
+                            stats = _j.loads(raw) if isinstance(raw, str) else raw
+                except Exception:
+                    pass
+
+                # Load vendor tiers from config_data
+                tiers = []
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("vendor_tiers", "tiers"))
+                        row = cur.fetchone()
+                        if row and row.get("data"):
+                            raw = row["data"]
+                            import json as _j2
+                            tiers = _j2.loads(raw) if isinstance(raw, str) else raw
+                except Exception:
+                    pass
+
+                # Load vendor listings from DB
+                listings = []
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("""
+                            SELECT
+                                v.id, v.tier, v.company_name as display_name,
+                                u.username, u.avatar_url,
+                                COALESCE(skill_counts.cnt, 0) as total_skills,
+                                COALESCE(sales.total, 0) as total_sales,
+                                COALESCE(rating.avg_rating, 0) as rating_avg
+                            FROM vendors v
+                            JOIN users u ON v.user_id = u.id
+                            LEFT JOIN (
+                                SELECT author_id, COUNT(*) as cnt FROM skills WHERE is_deleted = FALSE GROUP BY author_id
+                            ) skill_counts ON skill_counts.author_id = v.user_id
+                            LEFT JOIN (
+                                SELECT sk.author_id, COUNT(*) as total
+                                FROM skills sk
+                                JOIN orders o ON o.product_id = sk.id AND o.status = 'completed'
+                                WHERE sk.is_deleted = FALSE
+                                GROUP BY sk.author_id
+                            ) sales ON sales.author_id = v.user_id
+                            LEFT JOIN (
+                                SELECT sk.author_id, ROUND(AVG(sk.rating_avg)::numeric, 1) as avg_rating
+                                FROM skills sk
+                                WHERE sk.is_deleted = FALSE AND sk.rating_count > 0
+                                GROUP BY sk.author_id
+                            ) rating ON rating.author_id = v.user_id
+                            WHERE v.is_verified = TRUE
+                            ORDER BY rating.avg_rating DESC NULLS LAST, skill_counts.cnt DESC
+                            LIMIT 20
+                        """)
+                        rows = cur.fetchall()
+                        tier_emoji_map = {t.get("name"): t for t in tiers}
+                        for r in rows:
+                            tier_name = r.get("tier", "basic")
+                            tier_info = tier_emoji_map.get(tier_name, {})
+                            listings.append({
+                                "username": r.get("username", ""),
+                                "avatar_url": r.get("avatar_url") or "/static/img/avatar-default.svg",
+                                "display_name": r.get("display_name") or r.get("username", ""),
+                                "tier_name": tier_name,
+                                "tier_emoji": tier_info.get("emoji", ""),
+                                "tier_color": tier_info.get("revenue_color", "#888"),
+                                "total_skills": r.get("total_skills", 0),
+                                "total_sales": r.get("total_sales", 0),
+                                "rating_avg": float(r.get("rating_avg", 0) or 0),
+                            })
+                except Exception:
+                    pass
+            except Exception:
+                stats, tiers, listings = [], [], []
+
+            return render_template(request, "marketplace/list.html", {
+                "market_stats": stats,
+                "tiers": tiers,
+                "listings": listings,
+                "search_query": "",
+                "current_sort": "popular",
+                "total_pages": 1,
+            })
 
     def install(self, app: FastAPI) -> None:
         """Alias for register() - for PluginManager compatibility."""

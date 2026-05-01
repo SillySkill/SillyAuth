@@ -1,0 +1,195 @@
+{% extends "base-auth.html" %}
+
+{% block title %}{{ _("register.title") }} - {{ _("site.name") }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/css/auth.css">
+{% endblock %}
+
+{% block auth_content %}
+{% if error %}
+<div class="auth-error-message">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>{{ error }}</span>
+    <button type="button" class="error-close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+{% endif %}
+
+{% if success %}
+<div class="auth-success-message">
+    <i class="fas fa-check-circle"></i>
+    <span>{{ success }}</span>
+</div>
+{% endif %}
+
+<h1>{{ _("register.heading") }}</h1>
+<p class="auth-subtitle">{{ _("register.subtitle") }}</p>
+
+<form class="auth-form" id="registerForm" method="POST" action="/api/v1/auth/register">
+    {{ csrf_input }}
+    <div class="form-row">
+        <div class="form-group">
+            <label for="firstName">{{ _("form.firstName") }}</label>
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="firstName" name="firstName" required
+                       placeholder="{{ _('form.firstNamePlaceholder') }}"
+                       value="{{ form_data.get('firstName', '') if form_data else '' }}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="lastName">{{ _("form.lastName") }}</label>
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="lastName" name="lastName" required
+                       placeholder="{{ _('form.lastNamePlaceholder') }}"
+                       value="{{ form_data.get('lastName', '') if form_data else '' }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="username">{{ _("form.username") }}</label>
+        <div class="input-group">
+            <i class="fas fa-at"></i>
+            <input type="text" id="username" name="username" required
+                   placeholder="{{ _('form.usernamePlaceholder') }}"
+                   value="{{ form_data.get('username', '') if form_data else '' }}">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="email">{{ _("form.email") }}</label>
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" name="email" required
+                   placeholder="name@example.com"
+                   value="{{ form_data.get('email', '') if form_data else '' }}">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="password">{{ _("form.password") }}</label>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" name="password" required
+                   placeholder="{{ _('form.passwordPlaceholder') }}"
+                   minlength="8">
+            <button type="button" class="toggle-password" id="togglePassword">
+                <i class="fas fa-eye"></i>
+            </button>
+        </div>
+        <div class="password-strength" id="passwordStrength">
+            <div class="strength-bar"></div>
+            <span class="strength-text">{{ _("form.passwordStrength") }}</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="confirmPassword">{{ _("form.confirmPassword") }}</label>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="confirmPassword" name="confirmPassword" required
+                   placeholder="{{ _('form.passwordPlaceholder') }}"
+                   minlength="8">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="checkbox-label terms-label">
+            <input type="checkbox" name="terms" required>
+            <span>{{ _("form.agreeTerms") }}</span>
+            <a href="/terms" target="_blank">{{ _("form.termsOfService") }}</a>
+            <span>{{ _("form.and") }}</span>
+            <a href="/privacy" target="_blank">{{ _("form.privacyPolicy") }}</a>
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-full">
+        <span>{{ _("register.button") }}</span>
+        <i class="fas fa-arrow-right"></i>
+    </button>
+</form>
+
+<div class="auth-divider">
+    <span>{{ _("auth.orContinueWith") }}</span>
+</div>
+
+<div class="social-login">
+    <button class="social-btn google" onclick="window.location.href='/api/v1/auth/google'">
+        <i class="fab fa-google"></i>
+        <span>Google</span>
+    </button>
+    <button class="social-btn github" onclick="window.location.href='/api/v1/auth/github'">
+        <i class="fab fa-github"></i>
+        <span>GitHub</span>
+    </button>
+</div>
+
+<div class="auth-footer">
+    <p>{{ _("register.hasAccount") }}</p>
+    <a href="/login" class="auth-link">{{ _("register.loginNow") }}</a>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/auth.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const togglePassword = document.getElementById('togglePassword');
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        });
+    }
+
+    // Password strength indicator
+    const passwordInput = document.getElementById('password');
+    const strengthBar = document.querySelector('.strength-bar');
+    const strengthText = document.querySelector('.strength-text');
+
+    if (passwordInput && strengthBar) {
+        passwordInput.addEventListener('input', function() {
+            const val = this.value;
+            let strength = 0;
+
+            if (val.length >= 8) strength += 1;
+            if (val.length >= 12) strength += 1;
+            if (/[A-Z]/.test(val)) strength += 1;
+            if (/[0-9]/.test(val)) strength += 1;
+            if (/[^A-Za-z0-9]/.test(val)) strength += 1;
+
+            const levels = ['', 'weak', 'fair', 'good', 'strong', 'very-strong'];
+            strengthBar.className = 'strength-bar ' + levels[strength];
+            strengthBar.style.width = (strength * 20) + '%';
+        });
+    }
+
+    // Form validation - check passwords match
+    const registerForm = document.getElementById('registerForm');
+    const confirmInput = document.getElementById('confirmPassword');
+
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            const pw = passwordInput.value;
+            const confirm = confirmInput.value;
+
+            if (pw !== confirm) {
+                e.preventDefault();
+                alert('{{ _("form.passwordsDoNotMatch") }}');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

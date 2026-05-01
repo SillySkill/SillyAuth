@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}{{ skill.name }} - {{ _('site.name') }}{% endblock %}
+
+{% block extra_head %}
+{% endblock %}
+
+{% block content %}
+<!-- Skill Header -->
+<section class="skill-detail-header">
+  <div class="container">
+    <div style="display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+      {% if skill.industry %}
+      <span class="tag">&#128202; {{ skill.industry }}</span>
+      {% endif %}
+      {% if skill.scenario %}
+      <span class="tag">&#129302; {{ skill.scenario }}</span>
+      {% endif %}
+      {% if skill.level %}
+      <span class="badge badge-success">&#127942; {{ skill.level }}</span>
+      {% endif %}
+    </div>
+
+    <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 16px;">{{ skill.name }}</h1>
+
+    <p style="font-size: 1.1rem; color: var(--text-light); max-width: 800px; line-height: 1.7;">
+      {{ skill.description }}
+    </p>
+
+    <div style="display: flex; align-items: center; gap: 24px; margin-top: 24px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-star" style="color: #FFC107;"></i>
+        <span style="font-weight: 600;">{{ skill.rating }}</span>
+        <span style="color: var(--text-light);">({{ skill.downloads }} {{ _('skills.downloads') }})</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-download" style="color: var(--primary-light);"></i>
+        <span style="color: var(--text-light);">{{ _('skills.version') }} {{ skill.version }}</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-clock" style="color: var(--secondary);"></i>
+        <span style="color: var(--text-light);">{{ _('skills.updated_on') }} {{ skill.updated_at }}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Detail Content -->
+<section class="skill-detail-content">
+  <div class="container">
+    <div class="detail-layout">
+      <!-- Left Content -->
+      <div>
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+          <a href="#" class="active" data-tab="overview">{{ _('skills.tab_overview') }}</a>
+          <a href="#" data-tab="docs">{{ _('skills.tab_docs') }}</a>
+          <a href="#" data-tab="reviews">{{ _('skills.tab_reviews') }} ({{ skill.review_count or 0 }})</a>
+          <a href="#" data-tab="changelog">{{ _('skills.tab_changelog') }}</a>
+        </div>
+
+        <!-- Overview Tab -->
+        <div class="tab-content" id="tab-overview">
+          {% if skill.features %}
+          <div style="margin-bottom: 32px;">
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 16px;">{{ _('skills.features') }}</h2>
+            <div class="grid grid-2">
+              {% for feature in skill.features %}
+              <div class="card" style="padding: 20px;">
+                <i class="{{ feature.icon }}" style="font-size: 2rem; color: var(--primary-light); margin-bottom: 12px;"></i>
+                <h3 style="font-size: 1.1rem; margin-bottom: 8px;">{{ feature.title }}</h3>
+                <p style="color: var(--text-light); font-size: 0.9rem;">{{ feature.description }}</p>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {% if skill.quickstart %}
+          <div style="margin-bottom: 32px;">
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 16px;">{{ _('skills.quickstart') }}</h2>
+            <div class="code-block">
+              <pre><code>{{ skill.quickstart }}</code></pre>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Vendor Info -->
+          <div>
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 16px;">{{ _('skills.vendor_info') }}</h2>
+            <div class="card" style="padding: 24px;">
+              <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                <img src="{{ skill.author_avatar }}" alt="{{ skill.author }}" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--primary);" onerror="this.src='/static/img/avatar-default.svg'">
+                <div>
+                  <h3 style="font-size: 1.2rem; font-weight: 600;">{{ skill.author }}</h3>
+                  {% if skill.author_bio %}
+                  <p style="color: var(--text-light); font-size: 0.9rem;">{{ skill.author_bio }}</p>
+                  {% endif %}
+                </div>
+                {% if skill.vendor_level %}
+                <span class="badge badge-success" style="margin-left: auto;">&#127942; {{ skill.vendor_level }}</span>
+                {% endif %}
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: center;">
+                <div>
+                  <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-light);">{{ skill.vendor_stats.skills_count }}</div>
+                  <div style="font-size: 0.85rem; color: var(--text-light);">{{ _('skills.skills') }}</div>
+                </div>
+                <div>
+                  <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">{{ skill.vendor_stats.sales }}</div>
+                  <div style="font-size: 0.85rem; color: var(--text-light);">{{ _('skills.sales') }}</div>
+                </div>
+                <div>
+                  <div style="font-size: 1.5rem; font-weight: 700; color: var(--secondary);">{{ skill.vendor_stats.rating }}</div>
+                  <div style="font-size: 0.85rem; color: var(--text-light);">{{ _('skills.rating') }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Docs Tab -->
+        <div class="tab-content" id="tab-docs" style="display: none;">
+          <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 16px;">{{ _('skills.docs_title') }}</h2>
+          {% if skill.documentation %}
+          <div class="card" style="padding: 24px;">
+            {{ skill.documentation | safe }}
+          </div>
+          {% else %}
+          <div class="card" style="padding: 24px;">
+            <p style="color: var(--text-light); line-height: 1.7; margin-bottom: 16px;">
+              {{ _('skills.docs_unavailable') }}
+            </p>
+            {% if skill.config_example %}
+            <div class="code-block">
+              <pre><code>{{ skill.config_example }}</code></pre>
+            </div>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Reviews Tab -->
+        <div class="tab-content" id="tab-reviews" style="display: none;">
+          <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 16px;">{{ _('skills.reviews_title') }}</h2>
+          <div id="reviewsList">
+            {% for review in skill.reviews %}
+            <div class="review-card">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <img src="{{ review.avatar }}" style="width: 40px; height: 40px; border-radius: 50%;" onerror="this.src='/static/img/avatar-default.svg'">
+                <div>
+                  <div style="font-weight: 600;">{{ review.author }}</div>
+                  <div style="display: flex; gap: 2px;">
+                    {% for i in range(review.stars) %}
+                    <i class="fas fa-star" style="color: #FFC107; font-size: 0.8rem;"></i>
+                    {% endfor %}
+                    {% if review.has_half_star %}
+                    <i class="fas fa-star-half-alt" style="color: #FFC107; font-size: 0.8rem;"></i>
+                    {% endif %}
+                  </div>
+                </div>
+                <span style="margin-left: auto; color: var(--text-light); font-size: 0.85rem;">{{ review.date }}</span>
+              </div>
+              <p style="color: var(--text-light); line-height: 1.6;">{{ review.content }}</p>
+            </div>
+            {% else %}
+            <p style="color: var(--text-light);">{{ _('skills.no_reviews') }}</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Changelog Tab -->
+        <div class="tab-content" id="tab-changelog" style="display: none;">
+          <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 16px;">{{ _('skills.changelog_title') }}</h2>
+          <div class="card" style="padding: 24px;">
+            {% for changelog in skill.changelog %}
+            <div style="border-left: 2px solid {% if loop.first %}var(--primary){% else %}var(--border-light){% endif %}; padding-left: 20px; margin-bottom: 24px;">
+              <div style="font-weight: 600; color: {% if loop.first %}var(--primary-light){% else %}var(--text-light){% endif %}; margin-bottom: 8px;">{{ changelog.version }} - {{ changelog.date }}</div>
+              <ul style="color: var(--text-light); line-height: 1.8; padding-left: 16px;">
+                {% for item in changelog.get('items', []) %}
+                <li>{{ item }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+            {% else %}
+            <p style="color: var(--text-light);">{{ _('skills.no_changelog') }}</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Sidebar -->
+      <div class="skill-sidebar">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div class="price-tag">{{ skill.price_display }}</div>
+          <div style="color: var(--text-light); font-size: 0.9rem; margin-top: 8px;">{{ _('skills.one_time_purchase') }}</div>
+        </div>
+
+        {% if skill.purchase_url %}
+        <a href="{{ skill.purchase_url }}" class="btn btn-primary btn-lg" style="width: 100%; margin-bottom: 12px; text-align: center; justify-content: center;">
+          <i class="fas fa-shopping-cart"></i> {{ _('skills.buy_now') }}
+        </a>
+        {% else %}
+        <button class="btn btn-primary btn-lg" style="width: 100%; margin-bottom: 12px; text-align: center; justify-content: center;">
+          <i class="fas fa-download"></i> {{ _('skills.download') }}
+        </button>
+        {% endif %}
+        <button class="btn btn-secondary btn-lg" style="width: 100%; margin-bottom: 24px; text-align: center; justify-content: center;">
+          <i class="fas fa-heart"></i> {{ _('skills.favorite') }}
+        </button>
+
+        <ul class="feature-list">
+          {% for benefit in skill.benefits %}
+          <li><i class="fas fa-check-circle"></i> {{ benefit }}</li>
+          {% endfor %}
+        </ul>
+
+        {% if skill.tags %}
+        <div style="border-top: 1px solid var(--border-light); padding-top: 20px; margin-top: 20px;">
+          <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 8px;">{{ _('skills.tags') }}</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            {% for tag in skill.tags %}
+            <span class="tag" style="font-size: 0.75rem; padding: 2px 8px;">{{ tag }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Tab switching
+document.querySelectorAll('.tab-nav a').forEach(function(tab) {
+  tab.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelectorAll('.tab-nav a').forEach(function(a) { a.classList.remove('active'); });
+    this.classList.add('active');
+    var tabName = this.dataset.tab;
+    document.querySelectorAll('.tab-content').forEach(function(content) {
+      content.style.display = 'none';
+    });
+    document.getElementById('tab-' + tabName).style.display = 'block';
+  });
+});
+</script>
+{% endblock %}

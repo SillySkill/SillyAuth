@@ -71,7 +71,7 @@ const VendorManagement: React.FC = () => {
         setPagination((prev) => ({ ...prev, total: response.data.total }));
       }
     } catch (error) {
-      message.error('Failed to load vendors');
+      message.error('加载供应商失败');
     } finally {
       setLoading(false);
     }
@@ -113,27 +113,27 @@ const VendorManagement: React.FC = () => {
   const handleToggleActive = async (id: number, checked: boolean) => {
     try {
       await updateVendor(id, { is_active: checked });
-      message.success(`Vendor ${checked ? 'activated' : 'deactivated'}`);
+      message.success(`供应商${checked ? '已启用' : '已禁用'}`);
       fetchVendors();
     } catch (error) {
-      message.error('Failed to update vendor');
+      message.error('更新供应商失败');
     }
   };
 
   const handleDelete = async (id: number) => {
     Modal.confirm({
-      title: 'Confirm Delete',
-      content: 'Are you sure you want to delete this vendor? All related data will be affected.',
-      okText: 'Delete',
+      title: '确认删除',
+      content: '确定要删除此供应商吗？所有相关数据将受影响。',
+      okText: '删除',
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: '取消',
       onOk: async () => {
         try {
           await deleteVendor(id);
-          message.success('Vendor deleted successfully');
+          message.success('供应商删除成功');
           fetchVendors();
         } catch (error) {
-          message.error('Failed to delete vendor');
+          message.error('删除供应商失败');
         }
       },
     });
@@ -145,16 +145,16 @@ const VendorManagement: React.FC = () => {
       const values = await form.validateFields();
       if (editingVendor) {
         await updateVendor(editingVendor.id, values);
-        message.success('Vendor updated successfully');
+        message.success('供应商更新成功');
       } else {
         await createVendor(values);
-        message.success('Vendor created successfully');
+        message.success('供应商创建成功');
       }
       setModalVisible(false);
       fetchVendors();
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'errorFields' in error) return;
-      message.error('Operation failed');
+      message.error('操作失败');
     } finally {
       setSubmitting(false);
     }
@@ -172,7 +172,7 @@ const VendorManagement: React.FC = () => {
       width: 70,
     },
     {
-      title: 'Name',
+      title: '名称',
       dataIndex: 'name',
       key: 'name',
       width: 200,
@@ -186,7 +186,7 @@ const VendorManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Contact',
+      title: '联系方式',
       key: 'contact',
       width: 200,
       render: (_: unknown, record: Vendor) => (
@@ -207,7 +207,7 @@ const VendorManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Website',
+      title: '网站',
       dataIndex: 'website',
       key: 'website',
       width: 150,
@@ -222,15 +222,15 @@ const VendorManagement: React.FC = () => {
         ),
     },
     {
-      title: 'Status',
+      title: '状态',
       key: 'status',
       width: 140,
       render: (_: unknown, record: Vendor) => (
         <Space size={8}>
           {record.is_verified ? (
-            <Tag color="green">Verified</Tag>
+            <Tag color="green">已验证</Tag>
           ) : (
-            <Tag color="orange">Pending</Tag>
+            <Tag color="orange">待审核</Tag>
           )}
           <Switch
             checked={record.is_active}
@@ -241,7 +241,7 @@ const VendorManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Category',
+      title: '分类',
       dataIndex: 'category',
       key: 'category',
       width: 140,
@@ -249,14 +249,14 @@ const VendorManagement: React.FC = () => {
         category ? <Tag color="cyan">{category}</Tag> : <span style={{ color: '#ccc' }}>-</span>,
     },
     {
-      title: 'Created At',
+      title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 180,
       render: (date: string) => formatDate(date),
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 180,
       fixed: 'right',
@@ -268,17 +268,17 @@ const VendorManagement: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           >
-            Edit
+            编辑
           </Button>
           <Popconfirm
-            title="Delete this vendor?"
+            title="确定删除此供应商？"
             onConfirm={() => handleDelete(record.id)}
-            okText="Delete"
-            cancelText="Cancel"
+            okText="删除"
+            cancelText="取消"
             okType="danger"
           >
             <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              Delete
+              删除
             </Button>
           </Popconfirm>
         </Space>
@@ -289,18 +289,18 @@ const VendorManagement: React.FC = () => {
   return (
     <div>
       <Title level={2} style={{ marginBottom: 24 }}>
-        Vendor Management
+        供应商管理
       </Title>
 
       <Card style={{ marginBottom: 16 }}>
         <Form layout="inline" onFinish={handleSearch}>
           <Form.Item name="search">
-            <Input placeholder="Search by name..." prefix={<SearchOutlined />} style={{ width: 260 }} allowClear />
+            <Input placeholder="按名称搜索..." prefix={<SearchOutlined />} style={{ width: 260 }} allowClear />
           </Form.Item>
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
-                Search
+                搜索
               </Button>
               <Button
                 icon={<ReloadOutlined />}
@@ -309,7 +309,7 @@ const VendorManagement: React.FC = () => {
                   setPagination({ current: 1, pageSize: 10, total: 0 });
                 }}
               >
-                Reset
+                重置
               </Button>
             </Space>
           </Form.Item>
@@ -319,7 +319,7 @@ const VendorManagement: React.FC = () => {
       <Card
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            Create Vendor
+            创建供应商
           </Button>
         }
       >
@@ -334,77 +334,77 @@ const VendorManagement: React.FC = () => {
             pageSize: pagination.pageSize,
             total: pagination.total,
             showSizeChanger: true,
-            showTotal: (total) => `Total ${total} vendors`,
+            showTotal: (total) => `共 ${total} 家供应商`,
             onChange: (page, pageSize) => handleTableChange(page, pageSize),
           }}
-          locale={{ emptyText: 'No vendors found' }}
+          locale={{ emptyText: '暂无供应商' }}
         />
       </Card>
 
       <Modal
-        title={editingVendor ? 'Edit Vendor' : 'Create Vendor'}
+        title={editingVendor ? '编辑供应商' : '创建供应商'}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
         width={700}
         confirmLoading={submitting}
-        okText={editingVendor ? 'Update' : 'Create'}
-        cancelText="Cancel"
+        okText={editingVendor ? '更新' : '创建'}
+        cancelText="取消"
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item
-            label="Name"
+            label="名称"
             name="name"
-            rules={[{ required: true, message: 'Please enter the vendor name' }]}
+            rules={[{ required: true, message: '请输入供应商名称' }]}
           >
-            <Input placeholder="Vendor company name" />
+            <Input placeholder="供应商公司名称" />
           </Form.Item>
 
           <Form.Item
-            label="Description"
+            label="描述"
             name="description"
-            rules={[{ required: true, message: 'Please enter a description' }]}
+            rules={[{ required: true, message: '请输入描述' }]}
           >
-            <TextArea rows={3} placeholder="Brief description" showCount maxLength={500} />
+            <TextArea rows={3} placeholder="简要描述" showCount maxLength={500} />
           </Form.Item>
 
-          <Form.Item label="Contact Email" name="contact_email" rules={[{ type: 'email', message: 'Invalid email' }]}>
+          <Form.Item label="联系邮箱" name="contact_email" rules={[{ type: 'email', message: '邮箱格式无效' }]}>
             <Input placeholder="contact@company.com" />
           </Form.Item>
 
-          <Form.Item label="Contact Phone" name="contact_phone">
+          <Form.Item label="联系电话" name="contact_phone">
             <Input placeholder="+86 138-0000-0000" />
           </Form.Item>
 
-          <Form.Item label="Website" name="website" rules={[{ type: 'url', message: 'Invalid URL', warningOnly: true }]}>
+          <Form.Item label="网站" name="website" rules={[{ type: 'url', message: 'URL格式无效', warningOnly: true }]}>
             <Input placeholder="https://www.example.com" />
           </Form.Item>
 
-          <Form.Item label="Category" name="category">
-            <Select placeholder="Select a category" allowClear>
-              <Option value="Development Tools">Development Tools</Option>
-              <Option value="Cloud Services">Cloud Services</Option>
-              <Option value="AI Services">AI Services</Option>
-              <Option value="Design Tools">Design Tools</Option>
-              <Option value="Education">Education</Option>
-              <Option value="Other">Other</Option>
+          <Form.Item label="分类" name="category">
+            <Select placeholder="请选择分类" allowClear>
+              <Option value="Development Tools">开发工具</Option>
+              <Option value="Cloud Services">云服务</Option>
+              <Option value="AI Services">AI服务</Option>
+              <Option value="Design Tools">设计工具</Option>
+              <Option value="Education">教育</Option>
+              <Option value="Other">其他</Option>
             </Select>
           </Form.Item>
 
-          <Form.Item label="Logo URL" name="logo" rules={[{ type: 'url', message: 'Invalid URL', warningOnly: true }]}>
+          <Form.Item label="Logo地址" name="logo" rules={[{ type: 'url', message: 'URL格式无效', warningOnly: true }]}>
             <Input placeholder="https://example.com/logo.png" />
           </Form.Item>
 
-          <Form.Item label="Sort Order" name="sort_order">
+          <Form.Item label="排序" name="sort_order">
             <Input type="number" placeholder="0" />
           </Form.Item>
 
           <Space size="large">
-            <Form.Item label="Verified" name="is_verified" valuePropName="checked">
+            <Form.Item label="已验证" name="is_verified" valuePropName="checked">
               <Switch />
             </Form.Item>
-            <Form.Item label="Active" name="is_active" valuePropName="checked">
+            <Form.Item label="启用" name="is_active" valuePropName="checked">
               <Switch />
             </Form.Item>
           </Space>

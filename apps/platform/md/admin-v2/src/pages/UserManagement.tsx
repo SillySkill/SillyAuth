@@ -108,7 +108,7 @@ const UserManagement: React.FC = () => {
         setPagination((prev) => ({ ...prev, total: response.data.total }));
       }
     } catch (error) {
-      message.error('Failed to load users');
+      message.error('加载用户列表失败');
     } finally {
       setLoading(false);
     }
@@ -143,7 +143,7 @@ const UserManagement: React.FC = () => {
         setDrawerUser(response.data as unknown as UserDrawerData);
       }
     } catch (error) {
-      message.error('Failed to load user details');
+      message.error('加载用户详情失败');
     } finally {
       setDrawerLoading(false);
     }
@@ -152,10 +152,10 @@ const UserManagement: React.FC = () => {
   const handleToggleActive = async (id: number, checked: boolean) => {
     try {
       await updateUser(id, { is_active: checked });
-      message.success(`User ${checked ? 'activated' : 'deactivated'}`);
+      message.success(`用户${checked ? '已启用' : '已禁用'}`);
       fetchUsers();
     } catch (error) {
-      message.error('Failed to update user status');
+      message.error('更新用户状态失败');
     }
   };
 
@@ -165,13 +165,13 @@ const UserManagement: React.FC = () => {
       const values = await form.validateFields();
       if (editingUser) {
         await updateUser(editingUser.id, values);
-        message.success('User updated successfully');
+        message.success('用户更新成功');
       }
       setModalVisible(false);
       fetchUsers();
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'errorFields' in error) return;
-      message.error('Operation failed');
+      message.error('操作失败');
     } finally {
       setSubmitting(false);
     }
@@ -182,10 +182,10 @@ const UserManagement: React.FC = () => {
   };
 
   const roleLabelMap: Record<string, string> = {
-    admin: 'Admin',
-    creator: 'Creator',
-    user: 'User',
-    editor: 'Editor',
+    admin: '管理员',
+    creator: '创作者',
+    user: '用户',
+    editor: '编辑',
   };
 
   const roleColorMap: Record<string, string> = {
@@ -203,21 +203,21 @@ const UserManagement: React.FC = () => {
       width: 70,
     },
     {
-      title: 'Username',
+      title: '用户名',
       dataIndex: 'username',
       key: 'username',
       width: 150,
       render: (username: string) => <span style={{ fontWeight: 500 }}>{username}</span>,
     },
     {
-      title: 'Email',
+      title: '邮箱',
       dataIndex: 'email',
       key: 'email',
       width: 220,
       ellipsis: true,
     },
     {
-      title: 'Role',
+      title: '角色',
       dataIndex: 'role',
       key: 'role',
       width: 110,
@@ -228,7 +228,7 @@ const UserManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Status',
+      title: '状态',
       dataIndex: 'is_active',
       key: 'is_active',
       width: 80,
@@ -241,14 +241,14 @@ const UserManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Created At',
+      title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 170,
       render: (date: string) => formatDate(date),
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 220,
       fixed: 'right',
@@ -260,7 +260,7 @@ const UserManagement: React.FC = () => {
             icon={<EyeOutlined />}
             onClick={() => handleViewDetail(record)}
           >
-            Detail
+            详情
           </Button>
           <Button
             type="link"
@@ -268,7 +268,7 @@ const UserManagement: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           >
-            Edit
+            编辑
           </Button>
         </Space>
       ),
@@ -286,31 +286,31 @@ const UserManagement: React.FC = () => {
   return (
     <div>
       <Title level={2} style={{ marginBottom: 24 }}>
-        User Management
+        用户管理
       </Title>
 
       <Card style={{ marginBottom: 16 }}>
         <Form layout="inline" onFinish={handleSearch}>
           <Form.Item name="search">
             <Input
-              placeholder="Search by username/email..."
+              placeholder="搜索用户名/邮箱..."
               prefix={<SearchOutlined />}
               style={{ width: 260 }}
               allowClear
             />
           </Form.Item>
           <Form.Item name="role">
-            <Select placeholder="Role" style={{ width: 140 }} allowClear>
-              <Option value="admin">Admin</Option>
-              <Option value="creator">Creator</Option>
-              <Option value="user">User</Option>
-              <Option value="editor">Editor</Option>
+            <Select placeholder="角色" style={{ width: 140 }} allowClear>
+              <Option value="admin">管理员</Option>
+              <Option value="creator">创作者</Option>
+              <Option value="user">用户</Option>
+              <Option value="editor">编辑</Option>
             </Select>
           </Form.Item>
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
-                Search
+                搜索
               </Button>
               <Button
                 icon={<ReloadOutlined />}
@@ -319,7 +319,7 @@ const UserManagement: React.FC = () => {
                   setPagination({ current: 1, pageSize: 10, total: 0 });
                 }}
               >
-                Reset
+                重置
               </Button>
             </Space>
           </Form.Item>
@@ -338,62 +338,62 @@ const UserManagement: React.FC = () => {
             pageSize: pagination.pageSize,
             total: pagination.total,
             showSizeChanger: true,
-            showTotal: (total) => `Total ${total} users`,
+            showTotal: (total) => `共 ${total} 位用户`,
             onChange: (page, pageSize) => handleTableChange(page, pageSize),
           }}
-          locale={{ emptyText: 'No users found' }}
+          locale={{ emptyText: '暂无用户' }}
         />
       </Card>
 
       {/* Edit User Modal */}
       <Modal
-        title="Edit User"
+        title="编辑用户"
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
         width={520}
         confirmLoading={submitting}
-        okText="Update"
-        cancelText="Cancel"
+        okText="更新"
+        cancelText="取消"
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item
-            label="Username"
+            label="用户名"
             name="username"
             rules={[
-              { required: true, message: 'Please enter a username' },
-              { min: 3, message: 'At least 3 characters' },
+              { required: true, message: '请输入用户名' },
+              { min: 3, message: '至少 3 个字符' },
             ]}
           >
-            <Input placeholder="Username" />
+            <Input placeholder="用户名" />
           </Form.Item>
 
           <Form.Item
-            label="Email"
+            label="邮箱"
             name="email"
             rules={[
-              { required: true, message: 'Please enter an email' },
-              { type: 'email', message: 'Invalid email format' },
+              { required: true, message: '请输入邮箱' },
+              { type: 'email', message: '邮箱格式无效' },
             ]}
           >
-            <Input placeholder="user@example.com" />
+            <Input placeholder="请输入邮箱" />
           </Form.Item>
 
           <Form.Item
-            label="Role"
+            label="角色"
             name="role"
-            rules={[{ required: true, message: 'Please select a role' }]}
+            rules={[{ required: true, message: '请选择角色' }]}
           >
-            <Select placeholder="Select role">
-              <Option value="admin">Admin</Option>
-              <Option value="creator">Creator</Option>
-              <Option value="user">User</Option>
-              <Option value="editor">Editor</Option>
+            <Select placeholder="请选择角色">
+              <Option value="admin">管理员</Option>
+              <Option value="creator">创作者</Option>
+              <Option value="user">用户</Option>
+              <Option value="editor">编辑</Option>
             </Select>
           </Form.Item>
 
-          <Form.Item label="Active" name="is_active" valuePropName="checked">
+          <Form.Item label="启用" name="is_active" valuePropName="checked">
             <Switch />
           </Form.Item>
         </Form>
@@ -401,7 +401,7 @@ const UserManagement: React.FC = () => {
 
       {/* User Detail Drawer */}
       <Drawer
-        title={drawerUser ? `User Detail: ${drawerUser.username}` : 'User Detail'}
+        title={drawerUser ? `用户详情: ${drawerUser.username}` : '用户详情'}
         placement="right"
         width={600}
         onClose={() => {
@@ -417,28 +417,28 @@ const UserManagement: React.FC = () => {
         ) : drawerUser ? (
           <>
             {/* Profile Info */}
-            <Descriptions title="Profile Info" column={2} bordered size="small">
-              <Descriptions.Item label="Username">{drawerUser.username}</Descriptions.Item>
-              <Descriptions.Item label="Email">{drawerUser.email}</Descriptions.Item>
-              <Descriptions.Item label="Role">
+            <Descriptions title="基本信息" column={2} bordered size="small">
+              <Descriptions.Item label="用户名">{drawerUser.username}</Descriptions.Item>
+              <Descriptions.Item label="邮箱">{drawerUser.email}</Descriptions.Item>
+              <Descriptions.Item label="角色">
                 <Tag color={roleColorMap[drawerUser.role]}>
                   {roleLabelMap[drawerUser.role] || drawerUser.role}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Status">
+              <Descriptions.Item label="状态">
                 <Tag color={drawerUser.is_active ? 'green' : 'red'}>
-                  {drawerUser.is_active ? 'Active' : 'Inactive'}
+                  {drawerUser.is_active ? '启用' : '禁用'}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Created At">{formatDate(drawerUser.created_at)}</Descriptions.Item>
-              <Descriptions.Item label="Updated At">{formatDate(drawerUser.updated_at)}</Descriptions.Item>
+              <Descriptions.Item label="创建时间">{formatDate(drawerUser.created_at)}</Descriptions.Item>
+              <Descriptions.Item label="更新时间">{formatDate(drawerUser.updated_at)}</Descriptions.Item>
             </Descriptions>
 
             <Divider />
 
             {/* Order History */}
             <Title level={5}>
-              <ShoppingCartOutlined /> Order History
+              <ShoppingCartOutlined /> 订单历史
             </Title>
             {drawerUser.orders && drawerUser.orders.length > 0 ? (
               <List
@@ -459,14 +459,14 @@ const UserManagement: React.FC = () => {
                 )}
               />
             ) : (
-              <Empty description="No orders" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              <Empty description="暂无订单" image={Empty.PRESENTED_IMAGE_SIMPLE} />
             )}
 
             <Divider />
 
             {/* Points History */}
             <Title level={5}>
-              <GiftOutlined /> Points History
+              <GiftOutlined /> 积分记录
             </Title>
             {drawerUser.points && drawerUser.points.length > 0 ? (
               <List
@@ -475,7 +475,7 @@ const UserManagement: React.FC = () => {
                 renderItem={(point) => (
                   <List.Item>
                     <List.Item.Meta
-                      title={`${point.points > 0 ? '+' : ''}${point.points} points`}
+                      title={`${point.points > 0 ? '+' : ''}${point.points} 积分`}
                       description={point.description}
                     />
                     <div style={{ fontSize: 12, color: '#999' }}>{formatDate(point.created_at)}</div>
@@ -483,14 +483,14 @@ const UserManagement: React.FC = () => {
                 )}
               />
             ) : (
-              <Empty description="No points records" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              <Empty description="暂无积分记录" image={Empty.PRESENTED_IMAGE_SIMPLE} />
             )}
 
             <Divider />
 
             {/* Activity Log */}
             <Title level={5}>
-              <HistoryOutlined /> Activity Log
+              <HistoryOutlined /> 操作日志
             </Title>
             {drawerUser.activities && drawerUser.activities.length > 0 ? (
               <List
@@ -507,11 +507,11 @@ const UserManagement: React.FC = () => {
                 )}
               />
             ) : (
-              <Empty description="No activity log" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              <Empty description="暂无操作日志" image={Empty.PRESENTED_IMAGE_SIMPLE} />
             )}
           </>
         ) : (
-          <Empty description="No user data" />
+          <Empty description="暂无用户数据" />
         )}
       </Drawer>
     </div>

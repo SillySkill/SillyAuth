@@ -22,6 +22,9 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  DatabaseOutlined,
+  ShoppingCartOutlined,
+  CheckSquareOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -31,77 +34,92 @@ const menuItems: MenuProps['items'] = [
   {
     key: '/dashboard',
     icon: <DashboardOutlined />,
-    label: 'Dashboard',
+    label: '控制面板',
   },
   {
     key: '/content',
     icon: <FileTextOutlined />,
-    label: 'Content',
+    label: '内容管理',
   },
   {
     key: '/skills',
     icon: <CodeOutlined />,
-    label: 'Skills',
+    label: '技能管理',
   },
   {
     key: '/vendors',
     icon: <ShopOutlined />,
-    label: 'Vendors',
+    label: '供应商',
   },
   {
     key: '/users',
     icon: <TeamOutlined />,
-    label: 'Users',
+    label: '用户管理',
   },
   {
     key: '/tutorials',
     icon: <BookOutlined />,
-    label: 'Tutorials',
+    label: '教程管理',
   },
   {
     key: '/downloads',
     icon: <DownloadOutlined />,
-    label: 'Downloads',
+    label: '下载管理',
   },
   {
     key: '/payment-accounts',
     icon: <CreditCardOutlined />,
-    label: 'Payment Accounts',
+    label: '支付账户',
   },
   {
     key: '/creator-earnings',
     icon: <DollarOutlined />,
-    label: 'Creator Earnings',
+    label: '创作者收益',
   },
   {
     key: '/commission',
     icon: <PercentageOutlined />,
-    label: 'Commission',
+    label: '佣金管理',
   },
   {
     key: '/points',
     icon: <GiftOutlined />,
-    label: 'Points Mall',
+    label: '积分商城',
   },
   {
     key: '/navigation',
     icon: <MenuOutlined />,
-    label: 'Navigation',
+    label: '导航管理',
   },
   {
     key: '/seo',
     icon: <SearchOutlined />,
-    label: 'SEO',
+    label: 'SEO设置',
   },
   {
     key: '/i18n',
     icon: <GlobalOutlined />,
-    label: 'i18n',
+    label: '多语言',
   },
   {
     key: '/modules',
     icon: <AppstoreOutlined />,
-    label: 'Modules',
+    label: '模块管理',
+  },
+  {
+    key: '/config-data',
+    icon: <DatabaseOutlined />,
+    label: '配置数据',
+  },
+  {
+    key: '/store',
+    icon: <ShoppingCartOutlined />,
+    label: '商城管理',
+  },
+  {
+    key: '/tasks',
+    icon: <CheckSquareOutlined />,
+    label: '任务管理',
   },
 ];
 
@@ -127,14 +145,14 @@ const MainLayout: React.FC = () => {
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: user?.username || 'Profile',
+      label: user?.username || '个人资料',
       disabled: true,
     },
     { type: 'divider' },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: 'Logout',
+      label: '退出登录',
       danger: true,
     },
   ];
@@ -178,7 +196,7 @@ const MainLayout: React.FC = () => {
             borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           }}
         >
-          {collapsed ? 'SM' : 'SillyMD Admin'}
+          {collapsed ? 'SM' : 'SillyMD 管理后台'}
         </div>
         <Menu
           theme="dark"

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}社区论坛 - {{ site_name }}{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ site_name }} 社区论坛 - 交流分享，共同成长">
+{% endblock %}
+
+{% block content %}
+<!-- Community Hero -->
+<section style="padding: 120px 0 60px; text-align: center; background: var(--gradient-light);">
+  <div class="container">
+    <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">
+      社区<span class="text-gradient">论坛</span>
+    </h1>
+    <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+      与开发者交流分享，共同探索 AI Skills 的无限可能
+    </p>
+  </div>
+</section>
+
+<!-- Community Content -->
+<section style="padding: 60px 0 80px;">
+  <div class="container" style="max-width: 900px;">
+
+    <!-- Placeholder -->
+    <div style="text-align: center; padding: 80px 40px;">
+      <div style="margin-bottom: 32px;">
+        <div style="width: 120px; height: 120px; background: linear-gradient(135deg, rgba(79, 110, 247, 0.08), rgba(132, 94, 247, 0.08)); border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--primary-light);">
+          <i class="fas fa-comments" style="font-size: 3rem; color: var(--primary);"></i>
+        </div>
+      </div>
+
+      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">
+        社区功能即将上线
+      </h2>
+      <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 32px; font-size: 1.05rem; line-height: 1.7;">
+        我们正在努力构建一个充满活力的开发者社区。在这里，你可以分享 Skills 使用心得、讨论技术问题、参与话题互动。
+      </p>
+
+      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <a href="/help" class="btn btn-secondary">
+          <i class="fas fa-question-circle"></i> 查看帮助中心
+        </a>
+        <a href="/contact" class="btn btn-primary">
+          <i class="fas fa-envelope"></i> 联系我们
+        </a>
+      </div>
+    </div>
+
+    <!-- Feature Previews -->
+    <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px;">
+      <div style="padding: 32px; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); text-align: center; box-shadow: var(--shadow-sm);">
+        <div style="font-size: 2rem; margin-bottom: 12px; color: var(--primary-light);">
+          <i class="fas fa-comment-dots"></i>
+        </div>
+        <h4 style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">话题讨论</h4>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6;">参与各类技术话题讨论，分享你的见解</p>
+      </div>
+
+      <div style="padding: 32px; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); text-align: center; box-shadow: var(--shadow-sm);">
+        <div style="font-size: 2rem; margin-bottom: 12px; color: var(--accent);">
+          <i class="fas fa-code-branch"></i>
+        </div>
+        <h4 style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">作品展示</h4>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6;">展示你的 Skills 作品，获得社区反馈</p>
+      </div>
+
+      <div style="padding: 32px; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); text-align: center; box-shadow: var(--shadow-sm);">
+        <div style="font-size: 2rem; margin-bottom: 12px; color: var(--secondary);">
+          <i class="fas fa-user-friends"></i>
+        </div>
+        <h4 style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">协作互助</h4>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6;">寻找志同道合的开发者，一起创造优秀作品</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

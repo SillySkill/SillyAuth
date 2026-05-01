@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name if product else '傻福虾U盘' }} - SillyClaw 智能存储设备{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ product.description if product else '傻福虾U盘 (SillyClaw) - 双接口高速USB闪存盘' }}">
+<meta property="og:title" content="{{ product.name if product else '傻福虾U盘' }} - SillyClaw">
+<meta property="og:description" content="{{ product.description if product else '双接口高速USB闪存盘' }}">
+
+{% endblock %}
+
+{% block content %}
+<!-- Product Hero -->
+<section class="product-hero">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <i class="fas fa-bolt"></i>
+            全新上市
+        </div>
+        <h1>{{ product.name if product else '傻福虾U盘' }}</h1>
+        <p>{{ product.description if product else '双接口高速USB闪存盘，Type-A + Type-C设计，兼容各类设备。精致金属外壳，携带方便，是您随身携带的智能存储伙伴。' }}</p>
+        <div class="hero-buttons">
+            <a href="#variants" class="btn btn-primary">
+                <i class="fas fa-shopping-cart"></i>
+                查看规格
+            </a>
+            <a href="#purchase" class="btn btn-secondary" style="color:white;border-color:white;">
+                <i class="fas fa-store"></i>
+                购买渠道
+            </a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <div class="stat-value">{{ product.capacity_range if product else '128GB-1TB' }}</div>
+                <div class="stat-label">容量选择</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">USB 3.2</div>
+                <div class="stat-label">高速传输</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">双接口</div>
+                <div class="stat-label">Type-A + Type-C</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ product.production_count if product else '240+' }}</div>
+                <div class="stat-label">已生产数量</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Serial Number Verification -->
+<section class="verify-section">
+    <div class="verify-box">
+        <h3><i class="fas fa-qrcode"></i> 验证产品真伪</h3>
+        <form class="verify-form" id="verifyForm" onsubmit="return verifySerial(event)">
+            <input type="text" class="verify-input" placeholder="输入18位序列号" maxlength="18" id="serialInput">
+            <button type="submit" class="btn btn-primary">验证</button>
+        </form>
+        <div class="verify-result" id="verifyResult"></div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="features">
+    <div class="section-header">
+        <h2>产品特点</h2>
+        <p>精致工艺，卓越性能，随身携带的智能存储</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-plug"></i></div>
+            <h3>双接口设计</h3>
+            <p>同时支持 Type-A 和 Type-C 接口，兼容电脑、手机、平板等多种设备，无需转接头。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+            <h3>高速传输</h3>
+            <p>采用 USB 3.2 技术，读取速度高达 150MB/s，大文件传输轻松快捷。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+            <h3>稳定可靠</h3>
+            <p>采用优质闪存芯片，支持Wear Leveling技术，延长使用寿命，保护数据安全。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-fingerprint"></i></div>
+            <h3>序列号验证</h3>
+            <p>每产品都有唯一18位序列号，可官网验证真伪，享受质保服务。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-gem"></i></div>
+            <h3>金属外壳</h3>
+            <p>优质金属材质，精致打磨，手感舒适，散热效果好，保护内部芯片。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-palette"></i></div>
+            <h3>多色可选</h3>
+            <p>银色和枪灰银两种配色可选，满足不同审美需求。</p>
+        </div>
+    </div>
+</section>
+
+<!-- Product Variants Section -->
+<section class="variants" id="variants">
+    <div class="section-header">
+        <h2>产品规格</h2>
+        <p>多种容量，满足不同存储需求</p>
+    </div>
+    {% if variants %}
+    <div class="variants-grid">
+        {% for variant in variants %}
+        <div class="variant-card" data-variant-id="{{ variant.id }}">
+            <div class="variant-image">
+                {% if variant.icon %}
+                <i class="{{ variant.icon }}"></i>
+                {% else %}
+                <i class="fas fa-hdd"></i>
+                {% endif %}
+                {% if variant.badge %}
+                <span class="variant-badge">{{ variant.badge }}</span>
+                {% endif %}
+            </div>
+            <div class="variant-info">
+                <div class="variant-capacity">{{ variant.capacity }}</div>
+                <div class="variant-color">{{ variant.color }}</div>
+                {% if variant.tags %}
+                <div class="variant-tags">
+                    {% for tag in variant.tags %}
+                    <span class="variant-tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="variant-price">
+                    <span class="variant-price-value">{{ variant.price }}</span>
+                    <span class="variant-price-unit">起</span>
+                </div>
+                <div class="variant-actions">
+                    <button class="btn btn-primary add-to-cart-btn"
+                            data-variant-id="{{ variant.id }}"
+                            onclick="addToCart('{{ variant.id }}')">
+                        <i class="fas fa-cart-plus"></i> 加入购物车
+                    </button>
+                    <button class="btn btn-secondary buy-now-btn"
+                            data-variant-id="{{ variant.id }}"
+                            onclick="buyNow('{{ variant.id }}')">
+                        立即购买
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:2rem;color:var(--text-light);">
+        <p>暂无规格信息</p>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Tech Specs -->
+<section class="specs" id="specs">
+    <div class="section-header">
+        <h2>技术参数</h2>
+        <p>详细规格，了解产品每一处细节</p>
+    </div>
+    <div class="specs-table">
+        <div class="spec-row">
+            <div class="spec-label">产品名称</div>
+            <div class="spec-value">{{ product.name if product else '傻福虾U盘 (SillyClaw USB Drive)' }}</div>
+        </div>
+        <div class="spec-row">
+            <div class="spec-label">容量选项</div>
+            <div class="spec-value">{{ product.capacity_range if product else '128GB / 256GB / 512GB / 1TB' }}</div>
+        </div>
+        <div class="spec-row">
+            <div class="spec-label">接口类型</div>
+            <div class="spec-value">USB 3.2 Gen 1 (Type-A + Type-C)</div>
+        </div>
+        <div class="spec-row">
+            <div class="spec-label">读取速度</div>
+            <div class="spec-value">最高 150MB/s</div>
+        </div>
+        <div class="spec-row">
+            <div class="spec-label">写入速度</div>
+            <div class="spec-value">最高 50MB/s</div>
+        </div>
+        <div class="spec-row">
+            <div class="spec-label">外壳材质</div>
+            <div class="spec-value">金属合金</div>
+        </div>
+        <div class="spec-row">
+            <div class="spec-label">颜色选项</div>
+            <div class="spec-value">银色、枪灰银</div>
+        </div>
+        <div class="spec-row">
+            <div class="spec-label">工作温度</div>
+            <div class="spec-value">0&#176;C - 70&#176;C</div>
+        </div>
+        <div class="spec-row">
+            <div class="spec-label">存储温度</div>
+            <div class="spec-value">-40&#176;C - 85&#176;C</div>
+        </div>
+        <div class="spec-row">
+            <div class="spec-label">质保期限</div>
+            <div class="spec-value">1年有限质保</div>
+        </div>
+        <div class="spec-row">
+            <div class="spec-label">序列号</div>
+            <div class="spec-value">18位唯一序列号，支持官网验证</div>
+        </div>
+    </div>
+</section>
+
+<!-- Purchase Section -->
+<section class="purchase" id="purchase">
+    <div class="purchase-content">
+        <div class="purchase-info">
+            <h2>购买渠道</h2>
+            <p>通过官方渠道购买，确保正品，享受完整质保服务</p>
+            <div class="purchase-links" id="purchaseLinks">
+                <a href="{{ product.purchase_links.taobao if product and product.purchase_links else '#' }}"
+                   target="_blank" class="purchase-link">
+                    <i class="fab fa-taobao"></i>
+                    <div class="purchase-link-text">
+                        <div class="purchase-link-title">淘宝旗舰店</div>
+                        <div class="purchase-link-desc">搜索 "傻福虾U盘"</div>
+                    </div>
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+                <a href="#" class="purchase-link">
+                    <i class="fab fa-alipay"></i>
+                    <div class="purchase-link-text">
+                        <div class="purchase-link-title">支付宝小程序</div>
+                        <div class="purchase-link-desc">SillyClaw 官方商城</div>
+                    </div>
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+                <a href="#" class="purchase-link">
+                    <i class="fas fa-store"></i>
+                    <div class="purchase-link-text">
+                        <div class="purchase-link-title">官方微店</div>
+                        <div class="purchase-link-desc">扫码直达购买页面</div>
+                    </div>
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+                <a href="#" class="purchase-link">
+                    <i class="fab fa-weixin"></i>
+                    <div class="purchase-link-text">
+                        <div class="purchase-link-title">微信客服</div>
+                        <div class="purchase-link-desc">sillymd-com</div>
+                    </div>
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+            <p class="purchase-note">
+                <i class="fas fa-info-circle"></i>
+                如需批量采购或定制，请联系客服
+            </p>
+        </div>
+        <div class="purchase-qr">
+            <div class="qr-codes">
+                <div class="qr-item">
+                    <div class="qr-placeholder">
+                        <i class="fas fa-qrcode"></i>
+                        <span class="qr-label">淘宝</span>
+                    </div>
+                </div>
+                <div class="qr-item">
+                    <div class="qr-placeholder">
+                        <i class="fas fa-qrcode"></i>
+                        <span class="qr-label">微店</span>
+                    </div>
+                </div>
+                <div class="qr-item">
+                    <div class="qr-placeholder">
+                        <i class="fas fa-qrcode"></i>
+                        <span class="qr-label">支付宝</span>
+                    </div>
+                </div>
+            </div>
+            <p style="color:var(--text-light);font-size:0.85rem;">扫码直达购买页面</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/product.js"></script>
+{% endblock %}

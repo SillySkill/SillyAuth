@@ -1,0 +1,43 @@
+<nav class="navbar">
+    <div class="navbar-content">
+        <a href="/" class="logo">
+            <img src="/static/img/logo-full.png" alt="SillyMD" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+            <span class="logo-fallback">SillyMD</span>
+        </a>
+
+        <ul class="nav-links">
+            {% for item in nav_items %}
+            {% if item.is_visible %}
+            <li><a href="{{ item.url }}" class="nav-link {% if current_path.startswith(item.url) %}active{% endif %}">{{ item.label_zh if lang_short == 'zh' else item.label_en }}</a></li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+
+        <div class="nav-actions">
+            {% if user %}
+            <div class="user-menu">
+                <span class="user-greeting"><i class="fas fa-user"></i> {{ user.username }}</span>
+            </div>
+            {% else %}
+            <a href="/login" class="btn btn-ghost btn-sm">{{ _('auth.login') }}</a>
+            <a href="/register" class="btn btn-primary btn-sm">{{ _('auth.register') }}</a>
+            {% endif %}
+            <button class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="nav-links">
+            {% for item in nav_items %}
+            {% if item.is_visible %}
+            <a href="{{ item.url }}" class="nav-link">{{ item.label_zh if lang_short == 'zh' else item.label_en }}</a>
+            {% endif %}
+            {% endfor %}
+            {% if not user %}
+            <a href="/login" class="nav-link">{{ _('auth.login') }}</a>
+            <a href="/register" class="nav-link register-link">{{ _('auth.register') }}</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>

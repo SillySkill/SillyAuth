@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('tutorials.title') }} - {{ _('site.name') }}{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ _('tutorials.meta_description') }}">
+<meta name="keywords" content="{{ _('tutorials.meta_keywords') }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="{{ _('tutorials.title') }} - {{ _('site.name') }}">
+<meta property="og:description" content="{{ _('tutorials.meta_description') }}">
+<meta property="og:image" content="/static/img/og-tutorials.jpg">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="tutorials-hero">
+  <div class="container">
+    <div class="hero-badge">
+      <i class="fas fa-star"></i>
+      <span>{{ _('tutorials.hero_badge') }}</span>
+    </div>
+    <h1>{{ _('tutorials.hero_title') }}</h1>
+    <p>{{ _('tutorials.hero_subtitle') }}</p>
+  </div>
+</section>
+
+<!-- Categories Section -->
+<section class="categories-section">
+  <div class="category-grid">
+    {% for category in categories %}
+    <a href="/tutorials?category={{ category.slug }}" class="category-card {% if loop.first %}active{% endif %}" data-category="{{ category.slug }}">
+      <div class="category-icon">{{ category.icon }}</div>
+      <div class="category-name">{{ category.name }}</div>
+      <div class="category-count">{{ category.count }}+</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Featured Tutorial -->
+{% if featured %}
+<section class="featured-tutorial">
+  <a href="/tutorials/{{ featured.slug }}" class="featured-card">
+    <div class="featured-video">
+      <img src="{{ featured.thumbnail }}" alt="{{ featured.title }}">
+    </div>
+    <div class="featured-content">
+      <div class="featured-badge">
+        <i class="fas fa-star"></i>
+        <span>{{ _('tutorials.featured') }}</span>
+      </div>
+      <h2 class="featured-title">{{ featured.title }}</h2>
+      <p class="featured-description">{{ featured.description }}</p>
+      <span class="btn btn-primary" style="width: fit-content;">
+        <i class="fas fa-play"></i> {{ _('tutorials.watch_now') }}
+      </span>
+    </div>
+  </a>
+</section>
+{% endif %}
+
+<!-- Tutorials Section -->
+<section class="tutorials-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">{{ _('tutorials.latest_title') }}</h2>
+      <p class="section-subtitle">{{ _('tutorials.latest_subtitle') }}</p>
+    </div>
+    <div class="filter-tabs">
+      <a href="/tutorials" class="filter-tab {% if current_filter == 'all' or not current_filter %}active{% endif %}">{{ _('tutorials.filter_all') }}</a>
+      {% for filter in available_filters %}
+      <a href="/tutorials?filter={{ filter.slug }}" class="filter-tab {% if current_filter == filter.slug %}active{% endif %}">{{ filter.name }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="tutorials-grid">
+    {% for tutorial in tutorials %}
+    <div class="tutorial-card" onclick="window.location.href='/tutorials/{{ tutorial.slug }}'">
+      <div class="tutorial-thumbnail">
+        <img src="{{ tutorial.thumbnail }}" alt="{{ tutorial.title }}">
+        <span class="tutorial-badge {{ tutorial.difficulty }}">{{ tutorial.difficulty_label }}</span>
+        <div class="tutorial-play"><i class="fas fa-play"></i></div>
+        <span class="tutorial-duration">{{ tutorial.duration }}</span>
+      </div>
+      <div class="tutorial-content">
+        <div class="tutorial-meta">
+          <span class="tutorial-category">{{ tutorial.category_name }}</span>
+        </div>
+        <h3 class="tutorial-title">{{ tutorial.title }}</h3>
+        <p class="tutorial-description">{{ tutorial.description }}</p>
+        <div class="tutorial-footer">
+          <div class="tutorial-stats">
+            <span><i class="fas fa-eye"></i> {{ tutorial.views }}</span>
+            <span><i class="fas fa-heart"></i> {{ tutorial.likes }}</span>
+          </div>
+          <div class="tutorial-author">
+            <img src="{{ tutorial.author_avatar }}" class="tutorial-avatar" alt="{{ tutorial.author }}" onerror="this.src='/static/img/avatar-default.svg'">
+            <span>{{ tutorial.author }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-light);">
+      <i class="fas fa-video" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+      <p style="font-size: 1.1rem;">{{ _('tutorials.no_results') }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="load-more">
+    {% if total_pages > 1 %}
+    {% include "components/pagination.html" %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

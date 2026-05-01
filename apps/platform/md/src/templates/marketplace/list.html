@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('marketplace.title') }} - {{ _('site.name') }}{% endblock %}
+
+{% block extra_head %}
+{% endblock %}
+
+{% block content %}
+<div class="marketplace-page">
+  <!-- Hero -->
+  <section class="marketplace-hero">
+    <div class="container">
+      <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 16px;">
+        <span class="text-gradient">{{ _('marketplace.hero_title') }}</span>
+      </h1>
+      <p style="font-size: 1.1rem; color: var(--text-light); max-width: 600px; margin: 0 auto 32px;">
+        {{ _('marketplace.hero_subtitle') }}
+      </p>
+      <a href="/vendor-apply" class="btn btn-primary btn-lg">
+        <i class="fas fa-rocket"></i> {{ _('marketplace.apply_now') }}
+      </a>
+    </div>
+  </section>
+
+  <!-- Market Stats -->
+  {% if market_stats %}
+  <section class="tier-section">
+    <div class="container">
+      <div class="stats-row">
+        {% for stat in market_stats %}
+        <div class="stat-box">
+          <div class="stat-number">{{ stat.value }}</div>
+          <div class="stat-desc">{{ stat.label }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Vendor Tiers -->
+  <section class="tier-section">
+    <div class="container">
+      <h2 class="section-title" style="text-align: center;">{{ _('marketplace.tiers_title') }}</h2>
+      <p class="section-subtitle" style="text-align: center; margin-bottom: 40px;">{{ _('marketplace.tiers_subtitle') }}</p>
+
+      <div class="tier-grid">
+        {% for tier in tiers %}
+        <div class="tier-card {% if tier.is_featured %}featured{% endif %} {% if tier.is_premium %}premium{% endif %}">
+          <div class="tier-icon" style="{% if tier.bg %}background: {{ tier.bg }};{% endif %}">
+            {{ tier.emoji }}
+          </div>
+          <h3 class="tier-name">{{ tier.name }}</h3>
+          <p class="tier-desc">{{ tier.description }}</p>
+          <div class="tier-revenue" style="color: {{ tier.revenue_color }};">{{ _('marketplace.revenue', percent=tier.revenue_percent) }}</div>
+          <ul class="tier-features">
+            {% for feature in tier.features %}
+            <li><i class="fas fa-check"></i> {{ feature }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Search & Filter -->
+  <section class="vendors-section">
+    <div class="container">
+      <h2 class="section-title" style="margin-bottom: 8px;">{{ _('marketplace.vendors_title') }}</h2>
+      <p class="section-subtitle" style="margin-bottom: 32px;">{{ _('marketplace.vendors_subtitle') }}</p>
+
+      <form method="GET" action="/marketplace" class="search-filter-bar">
+        <div class="search-field">
+          <input type="text" name="search" placeholder="{{ _('marketplace.search_placeholder') }}" value="{{ search_query or '' }}">
+          <i class="fas fa-search"></i>
+        </div>
+        <select class="sort-select" name="sort" onchange="this.form.submit()">
+          <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>{{ _('marketplace.sort_popular') }}</option>
+          <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>{{ _('marketplace.sort_newest') }}</option>
+          <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>{{ _('marketplace.sort_rating') }}</option>
+          <option value="skills" {% if current_sort == 'skills' %}selected{% endif %}>{{ _('marketplace.sort_skills') }}</option>
+        </select>
+      </form>
+
+      <!-- Vendor Grid -->
+      <div class="vendor-grid">
+        {% for listing in listings %}
+        <a href="/marketplace/vendor?username={{ listing.username }}" class="vendor-card">
+          <img src="{{ listing.avatar_url }}" class="vendor-avatar" alt="{{ listing.username }}" onerror="this.src='/static/img/avatar-default.svg'">
+          <h3 class="vendor-name">{{ listing.display_name or listing.username }}</h3>
+          <p class="vendor-username">@{{ listing.username }}</p>
+          {% if listing.tier_name %}
+          <div class="vendor-tier-badge">
+            <span>{{ listing.tier_emoji }}</span>
+            <span style="color: {{ listing.tier_color }};">{{ listing.tier_name }}</span>
+          </div>
+          {% endif %}
+          <div class="vendor-stats">
+            <div>
+              <div class="vendor-stat-value">{{ listing.total_skills or 0 }}</div>
+              <div class="vendor-stat-label">{{ _('marketplace.works') }}</div>
+            </div>
+            <div>
+              <div class="vendor-stat-value">{{ listing.total_sales or 0 }}</div>
+              <div class="vendor-stat-label">{{ _('marketplace.sales') }}</div>
+            </div>
+            <div>
+              <div class="vendor-stat-value">{{ '%0.1f' | format(listing.rating_avg or 0) }}</div>
+              <div class="vendor-stat-label">{{ _('marketplace.rating') }}</div>
+            </div>
+          </div>
+        </a>
+        {% else %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-light);">
+          <i class="fas fa-store" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+          <p style="font-size: 1.1rem;">{{ _('marketplace.no_results') }}</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if total_pages > 1 %}
+      <div style="margin-top: 40px;">
+        {% include "components/pagination.html" %}
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <h2>{{ _('marketplace.cta_title') }}</h2>
+      <p>{{ _('marketplace.cta_subtitle') }}</p>
+      <div class="cta-actions">
+        <a href="/vendor-apply" class="btn btn-primary btn-lg">{{ _('marketplace.cta_apply') }}</a>
+        <a href="/docs" class="btn btn-secondary btn-lg">{{ _('marketplace.cta_learn') }}</a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConfigProvider } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import App from './App';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Ant Design default import (optional, for less reliance on CSS-in-JS)
 import 'antd/dist/reset.css';
@@ -38,7 +39,9 @@ ReactDOM.createRoot(rootElement).render(
             },
           }}
         >
-          <App />
+          <ErrorBoundary>
+            <App />
+          </ErrorBoundary>
         </ConfigProvider>
       </BrowserRouter>
     </QueryClientProvider>

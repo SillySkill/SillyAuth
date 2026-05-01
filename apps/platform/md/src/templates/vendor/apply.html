@@ -1,0 +1,551 @@
+{% extends "base.html" %}
+
+{% block title %}申请成为供应商 - 挺傻的{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/css/vendor.css">
+{% endblock %}
+
+{% block content %}
+<div style="padding-top: 72px;">
+  <section style="padding: 60px 0;">
+    <div class="container" style="max-width: 860px;">
+
+      {# -- Status messages from server -- #}
+      {% if error %}
+      <div class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{ error }}</span>
+      </div>
+      {% endif %}
+
+      {% if success %}
+      <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span>{{ success }}</span>
+      </div>
+      {% endif %}
+
+      {# -- Hero / Page header -- #}
+      <div class="vendor-hero">
+        <h1>申请成为供应商</h1>
+        <p class="subtitle">
+          将你的专业技能打包成 AI Skills，触达数千用户并创造持续收入。
+          加入挺傻的供应商生态，共享 AI 时代的增长红利。
+        </p>
+
+        <div class="application-flow">
+          <span class="flow-step">
+            <span class="step-num">1</span> 填写资料
+            <span class="step-arrow"><i class="fas fa-chevron-right"></i></span>
+          </span>
+          <span class="flow-step">
+            <span class="step-num">2</span> 资质审核
+            <span class="step-arrow"><i class="fas fa-chevron-right"></i></span>
+          </span>
+          <span class="flow-step">
+            <span class="step-num">3</span> 技能评估
+            <span class="step-arrow"><i class="fas fa-chevron-right"></i></span>
+          </span>
+          <span class="flow-step">
+            <span class="step-num">4</span> 正式入驻
+          </span>
+        </div>
+      </div>
+
+      {# -- Application Status Container (populated by JS) -- #}
+      <div id="applicationStatus"></div>
+
+      {# -- Application Form -- #}
+      <div class="card" style="padding: 40px;" id="formContainer">
+        <form id="vendorForm" method="POST" action="/vendor/apply">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+          {# === Section: Company / Personal Info === #}
+          <div class="form-section-title">
+            <i class="fas fa-building" style="margin-right: 8px; color: var(--primary-light);"></i>
+            基本信息
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="companyName">公司 / 团队名称 <span class="required">*</span></label>
+              <input type="text" id="companyName" name="company_name" class="form-input"
+                     placeholder="你的公司或团队名称" required
+                     value="{{ form_data.company_name or '' }}">
+            </div>
+            <div class="form-group">
+              <label for="contactName">联系人姓名 <span class="required">*</span></label>
+              <input type="text" id="contactName" name="contact_name" class="form-input"
+                     placeholder="真实姓名" required
+                     value="{{ form_data.contact_name or '' }}">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contactEmail">联系邮箱 <span class="required">*</span></label>
+              <input type="email" id="contactEmail" name="contact_email" class="form-input"
+                     placeholder="your@email.com" required
+                     value="{{ form_data.contact_email or '' }}">
+            </div>
+            <div class="form-group">
+              <label for="contactPhone">联系电话 <span class="required">*</span></label>
+              <input type="tel" id="contactPhone" name="contact_phone" class="form-input"
+                     placeholder="手机号码" required
+                     value="{{ form_data.contact_phone or '' }}">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="businessType">业务类型 <span class="required">*</span></label>
+              <select id="businessType" name="business_type" class="form-input" required>
+                <option value="">请选择业务类型</option>
+                <option value="individual" {{ 'selected' if form_data.business_type == 'individual' }}>个人开发者</option>
+                <option value="team" {{ 'selected' if form_data.business_type == 'team' }}>小团队 (2-10 人)</option>
+                <option value="studio" {{ 'selected' if form_data.business_type == 'studio' }}>工作室 /  Agency</option>
+                <option value="enterprise" {{ 'selected' if form_data.business_type == 'enterprise' }}>企业</option>
+                <option value="other" {{ 'selected' if form_data.business_type == 'other' }}>其他</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="website">公司网站 / 作品集</label>
+              <input type="url" id="website" name="website" class="form-input"
+                     placeholder="https://"
+                     value="{{ form_data.website or '' }}">
+              <p class="help-text">选填，用于展示你的过往作品或公司信息</p>
+            </div>
+          </div>
+
+          {# === Section: Professional Background === #}
+          <div class="form-section-title" style="margin-top: 32px;">
+            <i class="fas fa-user-tie" style="margin-right: 8px; color: var(--primary-light);"></i>
+            专业背景
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="professionalField">专业领域 <span class="required">*</span></label>
+              <select id="professionalField" name="professional_field" class="form-input" required>
+                <option value="">请选择专业领域</option>
+                <option value="frontend" {{ 'selected' if form_data.professional_field == 'frontend' }}>前端开发</option>
+                <option value="backend" {{ 'selected' if form_data.professional_field == 'backend' }}>后端开发</option>
+                <option value="ai" {{ 'selected' if form_data.professional_field == 'ai' }}>人工智能 / 机器学习</option>
+                <option value="design" {{ 'selected' if form_data.professional_field == 'design' }}>UI/UX 设计</option>
+                <option value="product" {{ 'selected' if form_data.professional_field == 'product' }}>产品管理</option>
+                <option value="data" {{ 'selected' if form_data.professional_field == 'data' }}>数据分析</option>
+                <option value="marketing" {{ 'selected' if form_data.professional_field == 'marketing' }}>数字营销</option>
+                <option value="writing" {{ 'selected' if form_data.professional_field == 'writing' }}>内容创作</option>
+                <option value="other" {{ 'selected' if form_data.professional_field == 'other' }}>其他</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="yearsExperience">从业年限 <span class="required">*</span></label>
+              <select id="yearsExperience" name="years_experience" class="form-input" required>
+                <option value="">请选择</option>
+                <option value="0-1" {{ 'selected' if form_data.years_experience == '0-1' }}>不到 1 年</option>
+                <option value="1-3" {{ 'selected' if form_data.years_experience == '1-3' }}>1-3 年</option>
+                <option value="3-5" {{ 'selected' if form_data.years_experience == '3-5' }}>3-5 年</option>
+                <option value="5-10" {{ 'selected' if form_data.years_experience == '5-10' }}>5-10 年</option>
+                <option value="10+" {{ 'selected' if form_data.years_experience == '10+' }}>10 年以上</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">个人 / 团队简介</label>
+            <textarea id="description" name="description" class="form-input" rows="4"
+                      placeholder="介绍你的专业背景、核心优势、过往项目经验等">{{ form_data.description or '' }}</textarea>
+            <p class="help-text">这将展示在供应商主页上，请认真填写</p>
+          </div>
+
+          {# === Section: Skills & Samples === #}
+          <div class="form-section-title" style="margin-top: 32px;">
+            <i class="fas fa-cube" style="margin-right: 8px; color: var(--primary-light);"></i>
+            Skills 信息
+          </div>
+
+          <div class="form-group">
+            <label for="skillSamples">计划发布的 Skills 类型 <span class="required">*</span></label>
+            <select id="skillSamples" name="skill_types" class="form-input" required>
+              <option value="">请选择</option>
+              <option value="automation" {{ 'selected' if form_data.skill_types == 'automation' }}>自动化工具</option>
+              <option value="analysis" {{ 'selected' if form_data.skill_types == 'analysis' }}>数据分析</option>
+              <option value="creative" {{ 'selected' if form_data.skill_types == 'creative' }}>创意生成</option>
+              <option value="code" {{ 'selected' if form_data.skill_types == 'code' }}>代码辅助</option>
+              <option value="writing" {{ 'selected' if form_data.skill_types == 'writing' }}>写作辅助</option>
+              <option value="education" {{ 'selected' if form_data.skill_types == 'education' }}>教育培训</option>
+              <option value="mixed" {{ 'selected' if form_data.skill_types == 'mixed' }}>综合 / 多种类型</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="sampleLinks">示例作品链接</label>
+            <input type="text" id="sampleLinks" name="sample_links" class="form-input"
+                   placeholder="GitHub 仓库、产品链接等，多个链接用逗号分隔"
+                   value="{{ form_data.sample_links or '' }}">
+            <p class="help-text">选填，提供示例链接可以帮助我们更快完成评估</p>
+          </div>
+
+          {# === Section: Agreement === #}
+          <div class="form-group" style="margin-top: 28px;">
+            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+              <input type="checkbox" name="agree_terms" required style="margin-top: 3px;"
+                     {{ 'checked' if form_data.agree_terms }}>
+              <span style="font-size: 0.9rem; color: var(--text-light, #8b8fa3); line-height: 1.5;">
+                我已阅读并同意
+                <a href="/vendor/agreement" target="_blank" style="color: var(--primary-light);">供应商服务协议</a>
+                和
+                <a href="/vendor/guidelines" target="_blank" style="color: var(--primary-light);">内容发布规范</a>
+                <span class="required">*</span>
+              </span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 8px;">
+            <i class="fas fa-paper-plane"></i> 提交申请
+          </button>
+        </form>
+      </div>
+
+      {# -- Benefits Section -- #}
+      <div style="margin-top: 48px;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 8px;">
+          为什么加入挺傻的供应商生态？
+        </h3>
+        <p style="text-align: center; color: var(--text-light, #8b8fa3); font-size: 0.9rem; margin-bottom: 8px;">
+          与我们一起构建下一代 AI Skills 市场
+        </p>
+
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <div class="icon"><i class="fas fa-chart-line"></i></div>
+            <h4>持续收入</h4>
+            <p>按用量或订阅计费，你的 Skills 每被调用一次就产生一次收入，真正实现睡后收入。</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="icon"><i class="fas fa-users"></i></div>
+            <h4>海量用户</h4>
+            <p>对接挺傻的现有用户基础，让你的 Skills 第一时间触达目标受众，无需从零推广。</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="icon"><i class="fas fa-robot"></i></div>
+            <h4>AI 赋能</h4>
+            <p>平台提供 AI 审核、智能推荐、自动部署等基础设施，你只需专注于核心价值创造。</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="icon"><i class="fas fa-shield-alt"></i></div>
+            <h4>版权保护</h4>
+            <p>完善的版权保护机制和透明的收益分成体系，保障每一位供应商的合法权益。</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="icon"><i class="fas fa-tachometer-alt"></i></div>
+            <h4>数据分析</h4>
+            <p>实时查看 Skills 使用数据、收入报表和用户反馈，用数据驱动产品迭代。</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="icon"><i class="fas fa-headset"></i></div>
+            <h4>专属支持</h4>
+            <p>供应商专属技术支持团队和客户经理，帮助你解决从入驻到运营的所有问题。</p>
+          </div>
+        </div>
+      </div>
+
+      {# -- Application Notes -- #}
+      <div style="margin-top: 40px; padding: 24px; background: rgba(0, 102, 255, 0.05); border-radius: var(--radius-md, 12px); border: 1px solid rgba(0, 102, 255, 0.2);">
+        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 16px;">
+          <i class="fas fa-info-circle" style="color: var(--primary-light); margin-right: 8px;"></i>
+          申请须知
+        </h3>
+        <ul style="color: var(--text-light, #8b8fa3); font-size: 0.9rem; line-height: 2.2; padding-left: 20px;">
+          <li>申请审核通常需要 3-5 个工作日，请耐心等待</li>
+          <li>需提交至少一个 Skill 样本用于质量评估</li>
+          <li>所有上架 Skills 均需通过 AI 审核 + 人工复核双重把关</li>
+          <li>严禁发布侵权、违规或低质量内容，违者将取消供应商资格</li>
+          <li>供应商需遵守平台运营规范，违规 Skills 将被下架处理</li>
+          <li>收益结算周期为每月一次，最低提现额度为 100 元</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/vendor-api.js"></script>
+<script>
+  (function() {
+    'use strict';
+
+    // --------------------------------------------------
+    //  Utility: show floating alert messages
+    // --------------------------------------------------
+    function showMessage(message, type) {
+      type = type || 'success';
+      var existing = document.querySelector('.alert-message');
+      if (existing) existing.remove();
+
+      var alertDiv = document.createElement('div');
+      alertDiv.className = 'alert-message alert-' + type;
+      alertDiv.style.cssText = [
+        'position: fixed',
+        'top: 20px',
+        'right: 20px',
+        'padding: 16px 24px',
+        'background: ' + (type === 'success' ? '#10b981' : '#ef4444'),
+        'color: white',
+        'border-radius: 8px',
+        'box-shadow: 0 4px 12px rgba(0,0,0,0.15)',
+        'z-index: 10000',
+        'animation: slideIn 0.3s ease-out'
+      ].join(';');
+
+      var icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
+      alertDiv.innerHTML = '<i class="fas fa-' + icon + '"></i> ' + message;
+      document.body.appendChild(alertDiv);
+
+      setTimeout(function() {
+        alertDiv.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(function() { alertDiv.remove(); }, 300);
+      }, 5000);
+    }
+
+    // --------------------------------------------------
+    //  Utility: toggle loading state on submit button
+    // --------------------------------------------------
+    function setLoading(form, loading) {
+      var btn = form.querySelector('button[type="submit"]');
+      if (!btn) return;
+
+      if (loading) {
+        btn.disabled = true;
+        btn.dataset.originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
+      } else {
+        btn.disabled = false;
+        if (btn.dataset.originalText) {
+          btn.innerHTML = btn.dataset.originalText;
+        }
+      }
+    }
+
+    // --------------------------------------------------
+    //  Check logged-in state
+    // --------------------------------------------------
+    function checkLogin() {
+      var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/auth/login?redirect=' + encodeURIComponent(window.location.pathname);
+        return false;
+      }
+      return true;
+    }
+
+    // --------------------------------------------------
+    //  Check existing application status via API
+    // --------------------------------------------------
+    function checkApplicationStatus() {
+      var statusContainer = document.getElementById('applicationStatus');
+      var formContainer = document.getElementById('formContainer');
+      if (!statusContainer || !formContainer) return;
+
+      if (typeof VendorAPI === 'undefined' || !VendorAPI.getApplicationStatus) {
+        // API not loaded; silently let the form show
+        return;
+      }
+
+      VendorAPI.getApplicationStatus()
+        .then(function(response) {
+          if (!response.success || !response.data) return;
+
+          var data = response.data;
+
+          if (data.status === 'pending' || data.status === 'reviewing') {
+            formContainer.style.display = 'none';
+            statusContainer.innerHTML =
+              '<div class="card status-card">' +
+                '<div class="status-icon">&#9203;</div>' +
+                '<h2>申请审核中</h2>' +
+                '<p>您的申请正在审核中，请耐心等待 3-5 个工作日</p>' +
+                '<div class="status-details">' +
+                  '<div><strong>申请时间：</strong>' + new Date(data.created_at).toLocaleString('zh-CN') + '</div>' +
+                  (data.company_name ? '<div><strong>公司名称：</strong>' + escapeHtml(data.company_name) + '</div>' : '') +
+                  (data.professional_field ? '<div><strong>专业领域：</strong>' + escapeHtml(data.professional_field) + '</div>' : '') +
+                '</div>' +
+                '<button onclick="location.reload()" class="btn btn-secondary">' +
+                  '<i class="fas fa-sync"></i> 刷新状态' +
+                '</button>' +
+              '</div>';
+          } else if (data.status === 'approved') {
+            formContainer.style.display = 'none';
+            statusContainer.innerHTML =
+              '<div class="card status-card">' +
+                '<div class="status-icon">&#127881;</div>' +
+                '<h2>恭喜您！</h2>' +
+                '<p>您的供应商申请已通过审核</p>' +
+                '<div class="status-details">' +
+                  '<div><strong>通过时间：</strong>' + new Date(data.reviewed_at).toLocaleString('zh-CN') + '</div>' +
+                '</div>' +
+                '<a href="/vendor/dashboard" class="btn btn-primary">' +
+                  '<i class="fas fa-tachometer-alt"></i> 进入供应商控制台' +
+                '</a>' +
+              '</div>';
+          } else if (data.status === 'rejected') {
+            formContainer.style.display = 'none';
+            var rejectionHtml =
+              '<div class="card status-card">' +
+                '<div class="status-icon">&#10060;</div>' +
+                '<h2>申请未通过</h2>' +
+                '<p>很遗憾，您的申请未通过审核</p>';
+            if (data.rejection_reason) {
+              rejectionHtml +=
+                '<div class="status-details" style="background: rgba(239,68,68,0.1);">' +
+                  '<strong>拒绝原因：</strong><br>' + escapeHtml(data.rejection_reason) +
+                '</div>';
+            }
+            rejectionHtml +=
+                '<button onclick="location.reload()" class="btn btn-secondary">' +
+                  '<i class="fas fa-redo"></i> 重新申请' +
+                '</button>' +
+              '</div>';
+            statusContainer.innerHTML = rejectionHtml;
+          }
+        })
+        .catch(function(err) {
+          console.error('检查申请状态失败:', err);
+        });
+    }
+
+    // --------------------------------------------------
+    //  Simple HTML escape
+    // --------------------------------------------------
+    function escapeHtml(str) {
+      if (!str) return '';
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(str));
+      return div.innerHTML;
+    }
+
+    // --------------------------------------------------
+    //  Form validation & submission
+    // --------------------------------------------------
+    function initForm() {
+      var form = document.getElementById('vendorForm');
+      if (!form) return;
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Collect form data
+        var formData = {
+          company_name: document.getElementById('companyName').value.trim(),
+          contact_name: document.getElementById('contactName').value.trim(),
+          contact_email: document.getElementById('contactEmail').value.trim(),
+          contact_phone: document.getElementById('contactPhone').value.trim(),
+          business_type: document.getElementById('businessType').value,
+          website: document.getElementById('website').value.trim(),
+          professional_field: document.getElementById('professionalField').value,
+          years_experience: document.getElementById('yearsExperience').value,
+          description: document.getElementById('description').value.trim(),
+          skill_types: document.getElementById('skillSamples').value,
+          sample_links: document.getElementById('sampleLinks').value.trim()
+        };
+
+        // -- Validation --
+        var requiredFields = [
+          { key: 'company_name', label: '公司名称' },
+          { key: 'contact_name', label: '联系人姓名' },
+          { key: 'contact_email', label: '联系邮箱' },
+          { key: 'contact_phone', label: '联系电话' },
+          { key: 'business_type', label: '业务类型' },
+          { key: 'professional_field', label: '专业领域' },
+          { key: 'years_experience', label: '从业年限' },
+          { key: 'skill_types', label: 'Skills 类型' }
+        ];
+
+        for (var i = 0; i < requiredFields.length; i++) {
+          if (!formData[requiredFields[i].key]) {
+            showMessage('请填写 ' + requiredFields[i].label, 'error');
+            return;
+          }
+        }
+
+        // Email validation (basic)
+        var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRe.test(formData.contact_email)) {
+          showMessage('请输入有效的邮箱地址', 'error');
+          return;
+        }
+
+        // Phone validation (basic: 11-digit Chinese mobile)
+        var phoneRe = /^1[3-9]\d{9}$/;
+        if (!phoneRe.test(formData.contact_phone)) {
+          showMessage('请输入有效的手机号码', 'error');
+          return;
+        }
+
+        // Agreement checkbox
+        var agreeCheckbox = form.querySelector('input[name="agree_terms"]');
+        if (!agreeCheckbox || !agreeCheckbox.checked) {
+          showMessage('请阅读并同意供应商服务协议', 'error');
+          return;
+        }
+
+        // Submit
+        setLoading(form, true);
+
+        var submitFn;
+        if (typeof VendorAPI !== 'undefined' && VendorAPI.submitApplication) {
+          submitFn = VendorAPI.submitApplication(formData);
+        } else {
+          // Fallback: regular form submit or fetch
+          submitFn = fetch('/vendor/apply', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': form.querySelector('input[name="csrf_token"]').value
+            },
+            body: JSON.stringify(formData)
+          }).then(function(res) { return res.json(); });
+        }
+
+        submitFn
+          .then(function(response) {
+            if (response.success) {
+              showMessage('申请提交成功！我们将在 3-5 个工作日内审核您的申请。', 'success');
+              setTimeout(function() { location.reload(); }, 2000);
+            } else {
+              showMessage(response.message || '提交失败，请稍后重试', 'error');
+            }
+          })
+          .catch(function(error) {
+            console.error('提交申请失败:', error);
+            showMessage(error.message || '网络错误，请稍后重试', 'error');
+          })
+          .finally(function() {
+            setLoading(form, false);
+          });
+      });
+    }
+
+    // --------------------------------------------------
+    //  Boot
+    // --------------------------------------------------
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!checkLogin()) return;
+      checkApplicationStatus();
+      // Only initialize form if it is still visible (no existing application)
+      if (document.getElementById('vendorForm')) {
+        initForm();
+      }
+    });
+  })();
+</script>
+{% endblock %}

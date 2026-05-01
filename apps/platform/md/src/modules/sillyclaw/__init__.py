@@ -9,7 +9,9 @@ import os
 import logging
 from typing import Optional, Dict, Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from starlette.responses import HTMLResponse
+from core.template_helpers import render_template
 
 logger = logging.getLogger(__name__)
 
@@ -122,6 +124,64 @@ class SillyMDModule:
         app.include_router(check_update_router)
 
         logger.info(f"Registered SillyClaw module v{ModuleInfo.version}")
+
+        # Page routes
+        @app.get("/sillyclaw", response_class=HTMLResponse, include_in_schema=False)
+        async def sillyclaw_page(request: Request):
+            try:
+                from core.db_adapter import get_db_cursor
+                product = {}
+                variants = []
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyclaw", "product"))
+                        row = cur.fetchone()
+                        if row and row.get("data"):
+                            raw = row["data"]
+                            import json as _js
+                            product = _js.loads(raw) if isinstance(raw, str) else raw
+                except Exception:
+                    product = {"name": "SillyClaw", "description": "AI Skills 实体化硬件平台"}
+
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyclaw", "variants"))
+                        row = cur.fetchone()
+                        if row and row.get("data"):
+                            raw = row["data"]
+                            import json as _jv
+                            variants = _jv.loads(raw) if isinstance(raw, str) else raw
+                except Exception:
+                    variants = []
+            except Exception:
+                product, variants = {}, []
+
+            return render_template(request, "sillyclaw/product.html", {
+                "product": product,
+                "variants": variants,
+            })
+
+        @app.get("/openclaw", response_class=HTMLResponse, include_in_schema=False)
+        async def openclaw_page(request: Request):
+            try:
+                from core.db_adapter import get_db_cursor
+                openclaw_data = {}
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyclaw", "openclaw"))
+                        row = cur.fetchone()
+                        if row and row.get("data"):
+                            raw = row["data"]
+                            import json as _jo
+                            openclaw_data = _jo.loads(raw) if isinstance(raw, str) else raw
+                except Exception:
+                    openclaw_data = {}
+            except Exception:
+                openclaw_data = {}
+
+            return render_template(request, "sillyclaw/openclaw.html", {
+                "openclaw": openclaw_data,
+            })
 
     def install(self, app: FastAPI) -> None:
         """Alias for register() - for PluginManager compatibility."""

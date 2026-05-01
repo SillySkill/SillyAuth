@@ -17,6 +17,10 @@ from typing import List
 
 from pydantic import BaseModel
 
+from fastapi import FastAPI, Request
+from starlette.responses import HTMLResponse
+from core.template_helpers import render_template
+
 from .routes import router as analytics_router
 from .services import AnalyticsService
 from .schemas import (
@@ -71,6 +75,49 @@ class BaseModule:
     def get_router(self):
         """获取路由"""
         return self.router
+
+    def install(self, app: FastAPI) -> None:
+        """安装模块到应用"""
+        app.include_router(self.router)
+        # Page routes
+        @app.get("/analytics", response_class=HTMLResponse, include_in_schema=False)
+        async def analytics_page(request: Request):
+            try:
+                from core.db_adapter import get_db_cursor
+                analytics = {}
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("SELECT COUNT(*) as cnt FROM users")
+                        analytics["total_users"] = cur.fetchone()["cnt"]
+                        cur.execute("SELECT COUNT(*) as cnt FROM skills WHERE is_deleted = FALSE")
+                        analytics["total_skills"] = cur.fetchone()["cnt"]
+                        cur.execute("SELECT COALESCE(SUM(download_count), 0) as cnt FROM skills")
+                        analytics["total_downloads"] = cur.fetchone()["cnt"]
+                        cur.execute("SELECT COUNT(*) as cnt FROM vendors")
+                        analytics["total_vendors"] = cur.fetchone()["cnt"]
+                except Exception:
+                    analytics = {}
+            except Exception:
+                analytics = {}
+
+            # Map to template-expected field names
+            overview = {
+                "total_visits": analytics.get("total_users", 0),
+                "visits_change": "+0%",
+                "total_pageviews": analytics.get("total_skills", 0),
+                "pageviews_change": "+0%",
+                "avg_duration": "0m 0s",
+                "duration_change": "+0%",
+                "bounce_rate": "0%",
+                "bounce_change": "+0%",
+            }
+            trends = []
+            top_pages = []
+            return render_template(request, "analytics/index.html", {
+                "overview": overview,
+                "trends": trends,
+                "top_pages": top_pages,
+            })
 
     def get_services(self):
         """获取服务实例"""

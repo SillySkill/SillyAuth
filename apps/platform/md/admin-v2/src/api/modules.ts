@@ -2,7 +2,7 @@ import apiClient from './client';
 import type { ApiResponse, ModuleInfo } from '@/types';
 
 export const getModules = async (): Promise<ApiResponse<ModuleInfo[]>> => {
-  const response = await apiClient.get<ApiResponse<ModuleInfo[]>>('/modules');
+  const response = await apiClient.get<ApiResponse<ModuleInfo[]>>('/admin/modules');
   return response.data;
 };
 
@@ -10,7 +10,7 @@ export const enableModule = async (
   id: number
 ): Promise<ApiResponse<ModuleInfo>> => {
   const response = await apiClient.post<ApiResponse<ModuleInfo>>(
-    `/modules/${id}/enable`
+    `/admin/modules/${id}/enable`
   );
   return response.data;
 };
@@ -19,7 +19,7 @@ export const disableModule = async (
   id: number
 ): Promise<ApiResponse<ModuleInfo>> => {
   const response = await apiClient.post<ApiResponse<ModuleInfo>>(
-    `/modules/${id}/disable`
+    `/admin/modules/${id}/disable`
   );
   return response.data;
 };

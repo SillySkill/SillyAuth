@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}{{ collection.name_zh if collection else '商城' }} - 官方商城{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ collection.description if collection else '官方商城' }}">
+<meta property="og:title" content="{{ collection.name_zh if collection else '商城' }} - 官方商城">
+<meta property="og:description" content="{{ collection.description if collection else '官方商城' }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.url if request else '/' }}">
+{% endblock %}
+
+{% block content %}
+<!-- Store Hero -->
+<section class="store-hero">
+    <div class="container">
+        <h1>{{ collection.name_zh if collection else '商城' }}</h1>
+        <p>{{ collection.description if collection else '欢迎来到官方商城' }}</p>
+    </div>
+</section>
+
+<!-- Products Section -->
+<section class="products-section">
+    <div class="products-header">
+        <h2>产品列表</h2>
+        {% if collections %}
+        <div class="collection-switcher">
+            {% for col in collections %}
+            <a href="{{ col.url or '#' }}"
+               class="collection-btn {% if col.collection_key == collection.collection_key %}active{% endif %}"
+               data-key="{{ col.collection_key }}">
+                {{ col.name_zh or col.name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if collection and collection.products %}
+    <div class="products-grid">
+        {% for product in collection.products %}
+        <div class="product-card" data-product-id="{{ product.id }}">
+            <div class="product-image">
+                {% if product.icon %}
+                <i class="{{ product.icon }}"></i>
+                {% else %}
+                <i class="fas fa-hdd"></i>
+                {% endif %}
+                {% if product.badge %}
+                <span class="product-badge">{{ product.badge }}</span>
+                {% endif %}
+            </div>
+            <div class="product-info">
+                <div class="product-name">{{ product.name }}</div>
+                <div class="product-price">
+                    <span class="price-current">{{ product.price }}</span>
+                    {% if product.original_price %}
+                    <span class="price-original">{{ product.original_price }}</span>
+                    {% endif %}
+                </div>
+                <div class="product-actions">
+                    <button class="btn btn-primary add-to-cart-btn"
+                            data-product-id="{{ product.id }}"
+                            onclick="addToCart('{{ product.id }}')">
+                        <i class="fas fa-cart-plus"></i> 加入购物车
+                    </button>
+                    <button class="btn btn-secondary buy-now-btn"
+                            data-product-id="{{ product.id }}"
+                            onclick="buyNow('{{ product.id }}')">
+                        立即购买
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="loading" style="text-align:center;padding:3rem;color:var(--text-light);">
+        <i class="fas fa-spinner fa-spin" style="font-size:2rem;color:var(--store-primary);margin-bottom:1rem;"></i>
+        <p>暂无产品</p>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Cart Panel -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-panel" id="cartPanel">
+    <div class="cart-header">
+        <h3><i class="fas fa-shopping-cart"></i> 购物车</h3>
+        <button class="cart-close" onclick="toggleCart()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="cart-items" id="cartItems">
+        {% if cart and cart.items %}
+            {% for item in cart.items %}
+            <div class="cart-item" data-cart-item-id="{{ item.id }}">
+                <div class="cart-item-image">
+                    {% if item.icon %}
+                    <i class="{{ item.icon }}"></i>
+                    {% else %}
+                    <i class="fas fa-hdd"></i>
+                    {% endif %}
+                </div>
+                <div class="cart-item-info">
+                    <div class="cart-item-name">{{ item.name }}</div>
+                    <div class="cart-item-price">{{ item.price }}</div>
+                    <div class="cart-item-controls">
+                        <button class="qty-btn" onclick="updateCartQty('{{ item.id }}', -1)">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="cart-item-qty">{{ item.quantity }}</span>
+                        <button class="qty-btn" onclick="updateCartQty('{{ item.id }}', 1)">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="cart-item-remove" onclick="removeFromCart('{{ item.id }}')">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="cart-empty">
+            <i class="fas fa-shopping-cart"></i>
+            <p>购物车是空的</p>
+        </div>
+        {% endif %}
+    </div>
+    <div class="cart-footer">
+        <div class="cart-total">
+            <span class="cart-total-label">合计</span>
+            <span class="cart-total-value" id="cartTotal">{{ cart.total if cart and cart.total else '¥0.00' }}</span>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="goToCheckout()" {% if not cart or not cart.items %}disabled{% endif %}>
+            <i class="fas fa-credit-card"></i> 去结算
+        </button>
+    </div>
+</div>
+
+<!-- Product Detail Modal -->
+<div class="modal-overlay" id="productModal" style="display:none;">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="productModalTitle">产品详情</h3>
+            <button class="modal-close" onclick="closeProductModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="productModalBody">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal-overlay" id="checkoutModal" style="display:none;">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>确认订单</h3>
+            <button class="modal-close" onclick="closeCheckoutModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="checkoutBody">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/store.js"></script>
+{% endblock %}

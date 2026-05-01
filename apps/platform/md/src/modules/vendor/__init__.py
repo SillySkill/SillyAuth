@@ -38,6 +38,10 @@ except ImportError:
     from src.core.module import BaseModule, ModuleInfo, ModuleState
     from src.core.config_loader import ConfigLoader
 
+from fastapi import FastAPI, Request
+from starlette.responses import HTMLResponse
+from core.template_helpers import render_template
+
 logger = logging.getLogger(__name__)
 
 
@@ -115,6 +119,79 @@ class VendorModule(BaseModule):
         # 将路由挂载到应用
         if hasattr(app, 'include_router'):
             app.include_router(router)
+
+        # Page routes
+        @app.get("/vendor-apply", response_class=HTMLResponse, include_in_schema=False)
+        async def vendor_apply_page(request: Request):
+            return render_template(request, "vendor/apply.html")
+
+        # --- Vendor Profile Page ---
+        @app.get("/vendors/{vendor_id}", response_class=HTMLResponse, include_in_schema=False)
+        async def vendor_profile_page(request: Request, vendor_id: int):
+            vendor = {}
+            try:
+                from core.db_adapter import get_db_cursor
+                with get_db_cursor() as cur:
+                    cur.execute("""
+                        SELECT v.*, u.username, u.avatar_url
+                        FROM vendors v
+                        JOIN users u ON v.user_id = u.id
+                        WHERE v.id = %s AND v.is_verified = TRUE
+                    """, (vendor_id,))
+                    row = cur.fetchone()
+                    if row:
+                        vendor = {
+                            "username": row.get("username", ""),
+                            "avatar_url": row.get("avatar_url") or "/static/img/avatar-default.svg",
+                            "display_name": row.get("company_name") or row.get("username", ""),
+                            "tier_name": row.get("tier", "basic"),
+                            "tier_emoji": "",
+                            "description": row.get("description", ""),
+                            "total_skills": 0,
+                            "total_sales": 0,
+                            "rating_avg": 0,
+                            "skills": [],
+                        }
+                        # Load tier emoji from config
+                        try:
+                            with get_db_cursor() as cur2:
+                                cur2.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("vendor_tiers", "tiers"))
+                                trow = cur2.fetchone()
+                                if trow and trow.get("data"):
+                                    import json as _jvt
+                                    tiers = _jvt.loads(trow["data"]) if isinstance(trow["data"], str) else trow["data"]
+                                    for t in tiers:
+                                        if t.get("name") == vendor["tier_name"]:
+                                            vendor["tier_emoji"] = t.get("emoji", "")
+                                            break
+                        except Exception:
+                            pass
+
+                        # Get vendor skills
+                        cur.execute("""
+                            SELECT skill_id, name, description, price, type, download_count, rating_avg
+                            FROM skills
+                            WHERE author_id = %s AND is_deleted = FALSE AND status = 'approved'
+                            ORDER BY download_count DESC
+                            LIMIT 20
+                        """, (row["user_id"],))
+                        srows = cur.fetchall()
+                        vendor["total_skills"] = len(srows)
+                        vendor["skills"] = [
+                            {
+                                "name": s.get("name", ""),
+                                "slug": s.get("skill_id", ""),
+                                "description": (s.get("description") or "")[:100],
+                                "price_display": "免费" if s.get("type") == "free" or not s.get("price") else f"¥{s.get('price', 0)}",
+                                "category": "",
+                                "downloads": s.get("download_count", 0),
+                                "rating": float(s.get("rating_avg", 0) or 0),
+                            }
+                            for s in srows
+                        ]
+            except Exception:
+                pass
+            return render_template(request, "vendor/profile.html", {"vendor": vendor})
 
         logger.info(f"Vendor module installed: {self.info.name} v{self.info.version}")
 

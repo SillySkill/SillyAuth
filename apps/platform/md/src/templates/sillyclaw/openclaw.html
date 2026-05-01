@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}OpenClaw - 开源的 AI Skills 平台{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="OpenClaw - 面向未来的开源 AI Skills 平台，支持自定义技能、插件扩展、社区共享，助力 AI 应用开发">
+<meta property="og:title" content="OpenClaw - 开源的 AI Skills 平台">
+<meta property="og:description" content="面向未来的开源 AI Skills 平台">
+
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="oc-hero">
+    <div class="oc-hero-content">
+        <div class="oc-hero-badge">
+            <i class="fas fa-star"></i>
+            开源免费 - 社区驱动
+        </div>
+        <h1>Open<span>Claw</span></h1>
+        <p>面向未来的开源 AI Skills 平台，支持自定义技能、插件扩展、社区共享，让 AI 应用开发更简单、更自由。</p>
+        <div class="oc-hero-buttons">
+            <a href="/register" class="btn btn-primary">
+                <i class="fas fa-rocket"></i>
+                立即开始
+            </a>
+            <a href="https://github.com" target="_blank" class="btn btn-secondary" style="color:white;border-color:rgba(255,255,255,0.2);">
+                <i class="fab fa-github"></i>
+                GitHub
+            </a>
+        </div>
+        <div class="oc-hero-code">
+            <span class="prompt">$</span>
+            <span class="command">npm install -g openclaw</span>
+        </div>
+        <div class="oc-stats">
+            <div class="stat-item">
+                <div class="stat-value">500+</div>
+                <div class="stat-label">开源 Skills</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">10K+</div>
+                <div class="stat-label">社区成员</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">50+</div>
+                <div class="stat-label">活跃群组</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">99.9%</div>
+                <div class="stat-label">可用性</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="oc-features" id="features">
+    <div class="oc-section-header">
+        <h2>为什么选择 OpenClaw</h2>
+        <p>强大的功能，简单的使用，让你的 AI 应用如虎添翼</p>
+    </div>
+    <div class="oc-features-grid">
+        <div class="oc-feature-card">
+            <div class="oc-feature-icon"><i class="fas fa-cubes"></i></div>
+            <h3>模块化 Skills</h3>
+            <p>采用 Skills 架构，每个技能都是独立模块，可复用、可组合、可分享，快速构建复杂 AI 应用。</p>
+        </div>
+        <div class="oc-feature-card">
+            <div class="oc-feature-icon"><i class="fas fa-plug"></i></div>
+            <h3>插件扩展</h3>
+            <p>支持插件系统，可以轻松扩展平台能力，集成第三方服务，构建定制化解决方案。</p>
+        </div>
+        <div class="oc-feature-card">
+            <div class="oc-feature-icon"><i class="fas fa-users"></i></div>
+            <h3>社区共享</h3>
+            <p>开放的技能市场，分享你的 Skills，发现社区优秀作品，与全球开发者一起成长。</p>
+        </div>
+        <div class="oc-feature-card">
+            <div class="oc-feature-icon"><i class="fas fa-bolt"></i></div>
+            <h3>开箱即用</h3>
+            <p>丰富的预置技能，开箱即用，无需从零开始，大幅提升开发效率。</p>
+        </div>
+        <div class="oc-feature-card">
+            <div class="oc-feature-icon"><i class="fas fa-shield-alt"></i></div>
+            <h3>安全可靠</h3>
+            <p>企业级安全标准，数据加密传输，权限精细控制，保障你的 AI 应用安全运行。</p>
+        </div>
+        <div class="oc-feature-card">
+            <div class="oc-feature-icon"><i class="fas fa-code-branch"></i></div>
+            <h3>开源免费</h3>
+            <p>完全开源，免费使用，MIT 许可证，你可以自由使用、修改、分发，无后顾之忧。</p>
+        </div>
+    </div>
+</section>
+
+<!-- Shrimp Farmer Club Section -->
+<section class="oc-club" id="club">
+    <div class="oc-club-content">
+        <div class="oc-club-header">
+            <h2>傻福虾群 (Shrimp Farmer Club)</h2>
+            <p>加入我们的社区，认识志同道合的伙伴，一起探索 AI 的无限可能</p>
+        </div>
+        <div class="oc-club-grid">
+            <div class="oc-club-card">
+                <div class="oc-club-card-icon"><i class="fas fa-comments"></i></div>
+                <h3>交流讨论</h3>
+                <p>与全球开发者交流心得，分享经验，解决问题，共同成长</p>
+            </div>
+            <div class="oc-club-card">
+                <div class="oc-club-card-icon"><i class="fas fa-gift"></i></div>
+                <h3>专属福利</h3>
+                <p>优先体验新功能 exclusive skills 免费使用，限量周边赠送</p>
+            </div>
+            <div class="oc-club-card">
+                <div class="oc-club-card-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                <h3>技术分享</h3>
+                <p>定期技术分享会，大咖直播教学，深入理解 OpenClaw</p>
+            </div>
+            <div class="oc-club-card">
+                <div class="oc-club-card-icon"><i class="fas fa-trophy"></i></div>
+                <h3>挑战活动</h3>
+                <p>参与技能开发挑战赛，展示才华赢取奖励，成为社区明星</p>
+            </div>
+        </div>
+        <div class="oc-club-cta">
+            <a href="/login" class="btn">
+                <i class="fas fa-sign-in-alt"></i>
+                登录后随机加入一个群组
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Architecture Section -->
+<section class="oc-architecture" id="architecture">
+    <div class="oc-section-header">
+        <h2>系统架构</h2>
+        <p>模块化设计，灵活扩展，满足各种场景需求</p>
+    </div>
+    <div class="oc-arch-diagram">
+        <div class="oc-arch-layers">
+            <div class="oc-arch-layer">
+                <div class="oc-arch-layer-label">展示层</div>
+                <div class="oc-arch-layer-content">
+                    <div class="oc-arch-component"><i class="fas fa-desktop"></i> Web 控制台</div>
+                    <div class="oc-arch-component"><i class="fas fa-mobile-alt"></i> 移动端</div>
+                    <div class="oc-arch-component"><i class="fas fa-terminal"></i> CLI</div>
+                </div>
+            </div>
+            <div class="oc-arch-connector"></div>
+            <div class="oc-arch-layer">
+                <div class="oc-arch-layer-label">Gateway</div>
+                <div class="oc-arch-layer-content">
+                    <div class="oc-arch-component"><i class="fas fa-server"></i> OpenClaw Gateway</div>
+                    <div class="oc-arch-component"><i class="fas fa-plug"></i> 插件系统</div>
+                    <div class="oc-arch-component"><i class="fas fa-shield-alt"></i> 认证授权</div>
+                </div>
+            </div>
+            <div class="oc-arch-connector"></div>
+            <div class="oc-arch-layer">
+                <div class="oc-arch-layer-label">Skills</div>
+                <div class="oc-arch-layer-content">
+                    <div class="oc-arch-component"><i class="fas fa-puzzle-piece"></i> 预置技能</div>
+                    <div class="oc-arch-component"><i class="fas fa-store"></i> 技能市场</div>
+                    <div class="oc-arch-component"><i class="fas fa-user-plus"></i> 自定义技能</div>
+                </div>
+            </div>
+            <div class="oc-arch-connector"></div>
+            <div class="oc-arch-layer">
+                <div class="oc-arch-layer-label">AI 模型</div>
+                <div class="oc-arch-layer-content">
+                    <div class="oc-arch-component"><i class="fas fa-brain"></i> Claude</div>
+                    <div class="oc-arch-component"><i class="fas fa-comment-dots"></i> GPT-4</div>
+                    <div class="oc-arch-component"><i class="fas fa-robot"></i> 本地模型</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="oc-cta">
+    <div class="oc-section-header" style="color:white;">
+        <h2>准备好开始了吗？</h2>
+        <p style="color:rgba(255,255,255,0.7);">加入 OpenClaw 社区，开始构建你的 AI 应用之旅</p>
+    </div>
+    <div class="oc-cta-buttons">
+        <a href="/register" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i>
+            立即注册
+        </a>
+        <a href="#" class="btn btn-secondary" style="color:white;border-color:rgba(255,255,255,0.2);">
+            <i class="fas fa-book"></i>
+            阅读文档
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/openclaw.js"></script>
+{% endblock %}

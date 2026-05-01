@@ -46,7 +46,9 @@ import os
 import logging
 from typing import Optional, Dict, Any, List
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from starlette.responses import HTMLResponse
+from core.template_helpers import render_template
 
 from .services import DownloadService, set_download_service, get_download_service
 from .schemas import (
@@ -193,6 +195,97 @@ class DownloadsModule:
 
         # Register router
         app.include_router(router)
+
+        # Page routes
+        @app.get("/downloads", response_class=HTMLResponse, include_in_schema=False)
+        async def downloads_page(request: Request):
+            try:
+                from core.db_adapter import get_db_cursor
+                # Load download items from DB
+                downloads = []
+                categories = []
+                stats = []
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("""
+                            SELECT d.*, COALESCE(dc.name, d.category) as category_name
+                            FROM download_items d
+                            LEFT JOIN download_categories dc ON d.category = dc.slug
+                            WHERE d.is_deleted = FALSE
+                            ORDER BY d.download_count DESC, d.created_at DESC
+                            LIMIT 20
+                        """)
+                        rows = cur.fetchall()
+                        for r in rows:
+                            downloads.append({
+                                "name": r.get("name", ""),
+                                "version": r.get("version", ""),
+                                "is_official": r.get("author") == "official" if r.get("author") else False,
+                                "platform_name": r.get("platform", ""),
+                                "file_type": r.get("file_type", ""),
+                                "description": r.get("description", ""),
+                                "file_url": r.get("file_url", ""),
+                                "file_size": str(r.get("size", "")) if r.get("size") else "",
+                                "mirror_url": r.get("mirror_url", ""),
+                                "mirror_name": r.get("mirror_name", ""),
+                                "github_url": r.get("source_url", ""),
+                                "download_count": r.get("download_count", 0),
+                                "view_count": r.get("view_count", 0),
+                                "category_icon": "",
+                            })
+                except Exception:
+                    downloads = []
+
+                # Load categories from DB
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("""
+                            SELECT dc.slug, dc.icon, dc.name, COUNT(di.id) as count
+                            FROM download_categories dc
+                            LEFT JOIN download_items di ON dc.slug = di.category AND di.is_deleted = FALSE
+                            GROUP BY dc.slug, dc.icon, dc.name
+                            ORDER BY count DESC
+                        """)
+                        cat_rows = cur.fetchall()
+                        for c in cat_rows:
+                            categories.append({
+                                "slug": c.get("slug", ""),
+                                "icon": c.get("icon", "fa-download"),
+                                "name": c.get("name", c.get("slug", "")),
+                                "count": c.get("count", 0),
+                            })
+                except Exception:
+                    categories = []
+
+                # Stats from config_data
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("downloads_stats", "stats"))
+                        row = cur.fetchone()
+                        if row and row.get("data"):
+                            raw = row["data"]
+                            import json as _j
+                            stats = _j.loads(raw) if isinstance(raw, str) else raw
+                except Exception:
+                    stats = [
+                        {"value": str(len(downloads)), "label": "开发工具"},
+                        {"value": "0", "label": "资源文件"},
+                        {"value": "0", "label": "总下载量"},
+                        {"value": "99.9%", "label": "可用性"},
+                    ]
+            except Exception:
+                downloads, categories, stats = [], [], []
+
+            return render_template(request, "downloads/list.html", {
+                "downloads": downloads,
+                "categories": categories,
+                "stats": stats,
+                "search_query": "",
+                "current_category": "",
+                "platforms": [],
+                "current_platform": "",
+                "total_pages": 1,
+            })
 
         logger.info(f"Registered Downloads module v{ModuleInfo.version}")
 

@@ -1,0 +1,137 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}任务中心 - 挺傻的{% endblock %}
+
+{% block dashboard_content %}
+<div class="container">
+    <!-- 头部 -->
+    <div class="header" style="background: white; border-radius: 20px; padding: 30px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+        <h1 style="font-size: 32px; color: #333; margin-bottom: 10px;">任务中心</h1>
+        <p style="color: #666;">完成任务获得积分，解锁成就赢得奖励</p>
+    </div>
+
+    <!-- 统计数据 -->
+    <div class="stats-bar" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+        <div class="stat-card" style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); text-align: center;">
+            <div class="value" style="font-size: 32px; font-weight: bold; color: #667eea; margin-bottom: 5px;">{{ streak.today_points | default(0) }}</div>
+            <div class="label" style="font-size: 14px; color: #999;">今日积分</div>
+        </div>
+        <div class="stat-card" style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); text-align: center;">
+            <div class="value" style="font-size: 32px; font-weight: bold; color: #667eea; margin-bottom: 5px;">
+                {% if daily_tasks %}
+                {% set completed = daily_tasks | selectattr('is_completed', 'equalto', true) | list %}
+                {{ completed | length }}/{{ daily_tasks | length }}
+                {% else %}0/0{% endif %}
+            </div>
+            <div class="label" style="font-size: 14px; color: #999;">今日任务</div>
+        </div>
+        <div class="stat-card" style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); text-align: center;">
+            <div class="value" style="font-size: 32px; font-weight: bold; color: #667eea; margin-bottom: 5px;">{{ streak.current_streak | default(0) }}</div>
+            <div class="label" style="font-size: 14px; color: #999;">连续签到</div>
+        </div>
+        <div class="stat-card" style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); text-align: center;">
+            <div class="value" style="font-size: 32px; font-weight: bold; color: #667eea; margin-bottom: 5px;">{{ achievements | selectattr('is_unlocked', 'equalto', true) | list | length | default(0) }}</div>
+            <div class="label" style="font-size: 14px; color: #999;">已解锁成就</div>
+        </div>
+    </div>
+
+    <!-- 签到区域 -->
+    <div class="section" style="background: white; border-radius: 20px; padding: 30px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+        <div class="sign-in-area" style="text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%); border-radius: 15px; margin-bottom: 30px;">
+            <div style="font-size: 48px; margin-bottom: 15px;">📅</div>
+            {% if streak.signed_in_today %}
+            <div>
+                <button class="sign-in-btn" disabled style="background: #ccc; color: white; border: none; padding: 15px 50px; font-size: 18px; border-radius: 30px; cursor: not-allowed;">已签到</button>
+            </div>
+            <div class="sign-in-info" style="margin-top: 20px; font-size: 16px; color: #8B4513;">
+                <span class="consecutive-badge" style="display: inline-block; background: #fff; padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">🔥 连续签到 {{ streak.current_streak | default(0) }} 天</span>
+                <span>今日已获得 {{ streak.today_points | default(0) }} 积分</span>
+            </div>
+            {% else %}
+            <div>
+                <button class="sign-in-btn" onclick="signIn()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px 50px; font-size: 18px; border-radius: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);">立即签到</button>
+            </div>
+            <div class="sign-in-info" style="margin-top: 20px; font-size: 16px; color: #8B4513;">
+                点击按钮完成签到，获得积分奖励
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 每日任务 -->
+    <div class="section" style="background: white; border-radius: 20px; padding: 30px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+        <div class="tab-buttons" style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="tab-btn active" onclick="switchTab('tasks')" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 10px; cursor: pointer; font-size: 16px; color: white; font-weight: 600;">每日任务</button>
+            <button class="tab-btn" onclick="switchTab('achievements')" style="flex: 1; padding: 12px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; color: #666;">成就系统</button>
+        </div>
+
+        <!-- 每日任务列表 -->
+        <div id="tasksTab">
+            {% if daily_tasks and daily_tasks | length > 0 %}
+            <div class="task-list" style="display: grid; gap: 15px;">
+                {% for task in daily_tasks %}
+                <div class="task-item {% if task.is_completed %}task-completed{% endif %}" style="display: flex; align-items: center; padding: 20px; background: #f8f9fa; border-radius: 12px;">
+                    <div class="task-icon" style="width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 24px; color: white; background: {{ task.color | default('#667eea') }};">
+                        <i class="{{ task.icon | default('ri-task-line') }}"></i>
+                    </div>
+                    <div class="task-content" style="flex: 1;">
+                        <div class="task-title" style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;">{{ task.task_name }}</div>
+                        <div class="task-description" style="font-size: 14px; color: #666; margin-bottom: 8px;">{{ task.task_description }}</div>
+                        <div class="task-progress" style="display: flex; align-items: center; gap: 10px;">
+                            <div class="progress-bar" style="flex: 1; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden;">
+                                <div class="progress-fill" style="height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 4px; width: {{ (task.progress / task.target * 100) | round | default(0) }}%;"></div>
+                            </div>
+                            <span style="font-size: 13px; color: #999;">{{ task.progress | default(0) }}/{{ task.target | default(0) }}</span>
+                        </div>
+                    </div>
+                    <div class="task-reward" style="text-align: right; min-width: 100px;">
+                        <div class="reward-points" style="font-size: 18px; font-weight: bold; color: #faad14; margin-bottom: 3px;">+{{ task.reward_points | default(0) }} 积分</div>
+                        {% if task.is_completed and not task.is_rewarded %}
+                        <button class="claim-btn" onclick="claimReward({{ task.id }})" style="padding: 8px 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer;">领取</button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" style="text-align: center; padding: 60px 20px; color: #999;">
+                <i class="ri-task-line" style="font-size: 64px; margin-bottom: 20px; opacity: 0.5;"></i>
+                <p>暂无任务</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 成就系统 -->
+        <div id="achievementsTab" style="display: none;">
+            {% if achievements and achievements | length > 0 %}
+            <div class="achievement-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                {% for achievement in achievements %}
+                <div class="achievement-card {% if achievement.is_unlocked %}unlocked{% else %}locked{% endif %}" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 15px; padding: 20px; text-align: center; position: relative; overflow: hidden; {% if not achievement.is_unlocked %}filter: grayscale(1); opacity: 0.7;{% endif %}">
+                    <div class="badge" style="width: 60px; height: 60px; border-radius: 50%; {% if achievement.is_unlocked %}background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%){% else %}background: {{ achievement.color | default('#999') }}{% endif %}; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 28px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
+                        <i class="{{ achievement.icon | default('ri-trophy-line') }}"></i>
+                    </div>
+                    <div class="achievement-name" style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 8px;">{{ achievement.achievement_name }}</div>
+                    <div class="achievement-description" style="font-size: 13px; color: #666; margin-bottom: 12px;">{{ achievement.description | default('') }}</div>
+                    <div class="achievement-progress" style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                        进度: {{ achievement.progress | default(0) }}/{{ achievement.target | default(0) }}
+                    </div>
+                    <div class="achievement-reward" style="font-size: 14px; font-weight: 600; color: #faad14;">
+                        +{{ achievement.reward_points | default(0) }} 积分
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" style="text-align: center; padding: 60px 20px; color: #999;">
+                <i class="ri-trophy-line" style="font-size: 64px; margin-bottom: 20px; opacity: 0.5;"></i>
+                <p>暂无成就</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/tasks.js"></script>
+{% endblock %}

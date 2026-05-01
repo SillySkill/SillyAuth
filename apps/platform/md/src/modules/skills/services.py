@@ -266,8 +266,7 @@ class SkillService:
                     ) VALUES (
                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, FALSE
                     )
-                    RETURNING id, skill_id, name, category, type, version, status,
-                              price, created_at, updated_at
+                    RETURNING *
                 """, (
                     skill_id,
                     data['name'],

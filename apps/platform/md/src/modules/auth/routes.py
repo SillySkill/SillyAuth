@@ -155,7 +155,7 @@ async def dev_login(credentials: LoginRequest):
         "user_id": 1,
         "username": "admin",
         "email": credentials.email,
-        "role": "ADMIN"
+        "role": "super_admin"
     }
 
     access_token = auth_service.create_access_token(token_data)
@@ -174,7 +174,7 @@ async def dev_login(credentials: LoginRequest):
             first_name="开发",
             last_name="管理员",
             created_at=datetime.now().isoformat(),
-            role="ADMIN",
+            role="super_admin",
             avatar_url=None,
             is_verified=True,
             is_active=True

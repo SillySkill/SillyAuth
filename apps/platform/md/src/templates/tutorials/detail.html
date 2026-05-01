@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tutorial.title if tutorial else '教程详情' }} - {{ site_name }}{% endblock %}
+
+{% block extra_head %}
+{% if tutorial %}
+<meta name="description" content="{{ tutorial.description or tutorial.title }}">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if tutorial %}
+<!-- Breadcrumb -->
+<div class="container" style="padding-top: 80px;">
+  <nav style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-light); padding: 12px 0;">
+    <a href="/" style="color: var(--text-light);">首页</a>
+    <i class="fas fa-chevron-right" style="font-size: 0.65rem;"></i>
+    <a href="/tutorials" style="color: var(--text-light);">教程中心</a>
+    <i class="fas fa-chevron-right" style="font-size: 0.65rem;"></i>
+    <span style="color: var(--text-primary); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">{{ tutorial.title }}</span>
+  </nav>
+</div>
+
+<!-- Tutorial Header -->
+<section style="padding: 40px 0; background: var(--gradient-light);">
+  <div class="container" style="max-width: 1000px;">
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+      {% if tutorial.difficulty %}
+      <span class="tutorial-level" data-level="{{ tutorial.difficulty }}" style="padding: 4px 14px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;
+        {% if tutorial.difficulty == '初级' %}background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10B981;
+        {% elif tutorial.difficulty == '中级' %}background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #D97706;
+        {% elif tutorial.difficulty == '高级' %}background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); color: #8B5CF6;
+        {% else %}background: rgba(79, 110, 247, 0.08); color: var(--primary);{% endif %}">
+        {{ tutorial.difficulty }}
+      </span>
+      {% endif %}
+      {% if tutorial.duration %}
+      <span style="display: flex; align-items: center; gap: 4px; font-size: 0.85rem; color: var(--text-light);">
+        <i class="fas fa-clock"></i> {{ tutorial.duration }}
+      </span>
+      {% endif %}
+      {% if tutorial.chapters %}
+      <span style="display: flex; align-items: center; gap: 4px; font-size: 0.85rem; color: var(--text-light);">
+        <i class="fas fa-list-ol"></i> {{ tutorial.chapters | length }} 章节
+      </span>
+      {% endif %}
+    </div>
+
+    <h1 style="font-size: 2.2rem; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">
+      {{ tutorial.title }}
+    </h1>
+
+    {% if tutorial.description %}
+    <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 700px; line-height: 1.7;">
+      {{ tutorial.description }}
+    </p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Tutorial Body -->
+<section style="padding: 40px 0 80px;">
+  <div class="container" style="max-width: 1200px;">
+    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 40px;">
+
+      <!-- Chapter Navigation Sidebar -->
+      <aside style="position: sticky; top: 88px; align-self: flex-start;">
+        <div style="background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm);">
+          <div style="padding: 20px 24px; border-bottom: 1px solid var(--border-light);">
+            <h4 style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">
+              <i class="fas fa-list" style="margin-right: 8px; color: var(--primary);"></i>
+              章节列表
+            </h4>
+          </div>
+
+          {% if chapters %}
+          <nav style="padding: 8px 0;">
+            {% for chapter in chapters %}
+            <a href="#chapter-{{ loop.index }}" class="chapter-nav-item"
+               style="display: flex; align-items: center; gap: 12px; padding: 12px 24px; text-decoration: none; color: var(--text-secondary); font-size: 0.85rem; transition: all 0.2s; border-left: 3px solid transparent;"
+               onmouseenter="this.style.background='var(--bg-gray)';this.style.color='var(--text-primary)';this.style.borderLeftColor='var(--primary)'"
+               onmouseleave="this.style.background='transparent';this.style.color='var(--text-secondary)';this.style.borderLeftColor='transparent'">
+              <span style="width: 24px; height: 24px; background: var(--bg-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; flex-shrink: 0; color: var(--text-light);">
+                {{ loop.index }}
+              </span>
+              <div style="min-width: 0;">
+                <div style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ chapter.title }}</div>
+                {% if chapter.duration %}
+                <div style="font-size: 0.75rem; color: var(--text-light);">
+                  <i class="fas fa-clock"></i> {{ chapter.duration }}
+                </div>
+                {% endif %}
+              </div>
+            </a>
+            {% endfor %}
+          </nav>
+          {% else %}
+          <div style="padding: 24px; color: var(--text-light); font-size: 0.85rem; text-align: center;">
+            暂无章节
+          </div>
+          {% endif %}
+        </div>
+
+        <div style="margin-top: 16px; text-align: center;">
+          <a href="/tutorials" class="btn btn-ghost btn-sm" style="width: 100%; justify-content: center;">
+            <i class="fas fa-arrow-left"></i> 返回教程列表
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <article>
+        <!-- Video Section -->
+        {% if tutorial.video_url %}
+        <div style="margin-bottom: 40px; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm);">
+          <div style="position: relative; padding-bottom: 56.25%; background: #000;">
+            <iframe src="{{ tutorial.video_url }}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Tutorial Content -->
+        {% if tutorial.content %}
+        <div style="background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 40px; box-shadow: var(--shadow-sm); margin-bottom: 40px;">
+          <div class="tutorial-content" style="color: var(--text-secondary); line-height: 1.9; font-size: 1rem;">
+            {{ tutorial.content | safe }}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Chapter Details -->
+        {% if chapters %}
+        {% for chapter in chapters %}
+        <div id="chapter-{{ loop.index }}" style="background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 40px; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <span style="width: 36px; height: 36px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem; flex-shrink: 0;">
+              {{ loop.index }}
+            </span>
+            <h3 style="font-size: 1.3rem; font-weight: 600; color: var(--text-primary);">{{ chapter.title }}</h3>
+            {% if chapter.duration %}
+            <span style="margin-left: auto; font-size: 0.85rem; color: var(--text-light);">
+              <i class="fas fa-clock"></i> {{ chapter.duration }}
+            </span>
+            {% endif %}
+          </div>
+
+          {% if chapter.video_url %}
+          <div style="margin-bottom: 20px; background: var(--bg-gray); border: 1px solid var(--border-light); border-radius: var(--radius-md); overflow: hidden;">
+            <div style="position: relative; padding-bottom: 56.25%; background: #000;">
+              <iframe src="{{ chapter.video_url }}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if chapter.content %}
+          <div class="chapter-content" style="color: var(--text-secondary); line-height: 1.9; font-size: 0.95rem;">
+            {{ chapter.content | safe }}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Tutorial Completion -->
+        <div style="background: linear-gradient(135deg, rgba(79, 110, 247, 0.04), rgba(55, 214, 122, 0.04)); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 32px; text-align: center; margin-top: 24px;">
+          <div style="font-size: 1.5rem; margin-bottom: 8px;">&#127881;</div>
+          <h3 style="font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">恭喜完成本教程</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 16px;">学完本教程了吗？去探索更多内容吧</p>
+          <div style="display: flex; gap: 12px; justify-content: center;">
+            <a href="/tutorials" class="btn btn-secondary">
+              <i class="fas fa-graduation-cap"></i> 更多教程
+            </a>
+            <a href="/skills" class="btn btn-primary">
+              <i class="fas fa-cube"></i> 浏览 Skills
+            </a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+{% else %}
+<!-- Empty State -->
+<section style="padding: 120px 0 80px; text-align: center;">
+  <div class="container">
+    <div style="padding: 80px 20px; color: var(--text-light);">
+      <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+      <p style="font-size: 1.1rem;">教程不存在</p>
+      <a href="/tutorials" class="btn btn-ghost" style="margin-top: 16px;">
+        <i class="fas fa-arrow-left"></i> 返回教程列表
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

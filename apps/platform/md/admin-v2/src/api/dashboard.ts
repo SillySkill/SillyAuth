@@ -29,7 +29,7 @@ export const getRecentActivity = async (
   limit: number = 20
 ): Promise<ApiResponse<RecentActivity[]>> => {
   const response = await apiClient.get<ApiResponse<RecentActivity[]>>(
-    '/dashboard/activity',
+    '/dashboard/recent-activity',
     { params: { limit } }
   );
   return response.data;

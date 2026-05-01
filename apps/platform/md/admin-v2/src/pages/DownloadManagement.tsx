@@ -61,18 +61,18 @@ const DownloadManagement: React.FC = () => {
     { label: 'Windows', value: 'windows', icon: <WindowsOutlined /> },
     { label: 'macOS', value: 'macos', icon: <AppleOutlined /> },
     { label: 'Linux', value: 'linux', icon: <LinuxOutlined /> },
-    { label: 'Cross-platform', value: 'all', icon: null },
+    { label: '跨平台', value: 'all', icon: null },
   ];
 
   const categoryOptions = [
-    'IDE & Editors',
-    'Dev Tools',
-    'Runtime',
-    'Database',
-    'Container',
-    'Version Control',
-    'Utility',
-    'Other',
+    'IDE与编辑器',
+    '开发工具',
+    '运行时',
+    '数据库',
+    '容器',
+    '版本控制',
+    '工具',
+    '其他',
   ];
 
   const fetchDownloads = useCallback(async () => {
@@ -91,7 +91,7 @@ const DownloadManagement: React.FC = () => {
         setPagination((prev) => ({ ...prev, total: response.data.total }));
       }
     } catch (error) {
-      message.error('Failed to load downloads');
+      message.error('加载下载列表失败');
     } finally {
       setLoading(false);
     }
@@ -132,27 +132,27 @@ const DownloadManagement: React.FC = () => {
   const handleToggleActive = async (id: number, checked: boolean) => {
     try {
       await updateDownload(id, { is_active: checked });
-      message.success(`Download ${checked ? 'activated' : 'deactivated'}`);
+      message.success(`下载${checked ? '已启用' : '已禁用'}`);
       fetchDownloads();
     } catch (error) {
-      message.error('Failed to update download');
+      message.error('更新下载失败');
     }
   };
 
   const handleDelete = async (id: number) => {
     Modal.confirm({
-      title: 'Confirm Delete',
-      content: 'Are you sure you want to delete this download?',
-      okText: 'Delete',
+      title: '确认删除',
+      content: '确定要删除此下载吗？',
+      okText: '删除',
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: '取消',
       onOk: async () => {
         try {
           await deleteDownload(id);
-          message.success('Download deleted successfully');
+          message.success('下载删除成功');
           fetchDownloads();
         } catch (error) {
-          message.error('Failed to delete download');
+          message.error('删除下载失败');
         }
       },
     });
@@ -164,16 +164,16 @@ const DownloadManagement: React.FC = () => {
       const values = await form.validateFields();
       if (editingDownload) {
         await updateDownload(editingDownload.id, values);
-        message.success('Download updated successfully');
+        message.success('下载更新成功');
       } else {
         await createDownload(values);
-        message.success('Download created successfully');
+        message.success('下载创建成功');
       }
       setModalVisible(false);
       fetchDownloads();
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'errorFields' in error) return;
-      message.error('Operation failed');
+      message.error('操作失败');
     } finally {
       setSubmitting(false);
     }
@@ -206,7 +206,7 @@ const DownloadManagement: React.FC = () => {
       width: 70,
     },
     {
-      title: 'Title',
+      title: '标题',
       dataIndex: 'title',
       key: 'title',
       width: 220,
@@ -214,7 +214,7 @@ const DownloadManagement: React.FC = () => {
       render: (title: string) => <span style={{ fontWeight: 500 }}>{title}</span>,
     },
     {
-      title: 'Version',
+      title: '版本',
       dataIndex: 'version',
       key: 'version',
       width: 100,
@@ -222,7 +222,7 @@ const DownloadManagement: React.FC = () => {
         version ? <Tag color="blue">{version}</Tag> : <Tag color="default">-</Tag>,
     },
     {
-      title: 'Platform',
+      title: '平台',
       dataIndex: 'platform',
       key: 'platform',
       width: 130,
@@ -237,14 +237,14 @@ const DownloadManagement: React.FC = () => {
       },
     },
     {
-      title: 'File Size',
+      title: '文件大小',
       dataIndex: 'file_size',
       key: 'file_size',
       width: 100,
       render: (size: number) => formatFileSize(size),
     },
     {
-      title: 'Downloads',
+      title: '下载次数',
       dataIndex: 'download_count',
       key: 'download_count',
       width: 100,
@@ -256,7 +256,7 @@ const DownloadManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Category',
+      title: '分类',
       dataIndex: 'category',
       key: 'category',
       width: 120,
@@ -264,7 +264,7 @@ const DownloadManagement: React.FC = () => {
         category ? <Tag color="cyan">{category}</Tag> : <span style={{ color: '#ccc' }}>-</span>,
     },
     {
-      title: 'Status',
+      title: '状态',
       dataIndex: 'is_active',
       key: 'is_active',
       width: 80,
@@ -277,14 +277,14 @@ const DownloadManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Created At',
+      title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 170,
       render: (date: string) => formatDate(date),
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 180,
       fixed: 'right',
@@ -296,17 +296,17 @@ const DownloadManagement: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           >
-            Edit
+            编辑
           </Button>
           <Popconfirm
-            title="Delete this download?"
+            title="删除此下载？"
             onConfirm={() => handleDelete(record.id)}
-            okText="Delete"
-            cancelText="Cancel"
+            okText="删除"
+            cancelText="取消"
             okType="danger"
           >
             <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              Delete
+              删除
             </Button>
           </Popconfirm>
         </Space>
@@ -317,17 +317,17 @@ const DownloadManagement: React.FC = () => {
   return (
     <div>
       <Title level={2} style={{ marginBottom: 24 }}>
-        Download Management
+        下载管理
       </Title>
 
       {/* Search/Filter */}
       <Card style={{ marginBottom: 16 }}>
         <Form layout="inline" onFinish={handleSearch}>
           <Form.Item name="search">
-            <Input placeholder="Search by title..." prefix={<SearchOutlined />} style={{ width: 220 }} allowClear />
+            <Input placeholder="按标题搜索..." prefix={<SearchOutlined />} style={{ width: 220 }} allowClear />
           </Form.Item>
           <Form.Item name="platform">
-            <Select placeholder="Platform" style={{ width: 150 }} allowClear>
+            <Select placeholder="平台" style={{ width: 150 }} allowClear>
               {platformOptions.map((opt) => (
                 <Option key={opt.value} value={opt.value}>
                   {opt.icon} {opt.label}
@@ -338,7 +338,7 @@ const DownloadManagement: React.FC = () => {
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
-                Search
+                搜索
               </Button>
               <Button
                 icon={<ReloadOutlined />}
@@ -347,7 +347,7 @@ const DownloadManagement: React.FC = () => {
                   setPagination({ current: 1, pageSize: 10, total: 0 });
                 }}
               >
-                Reset
+                重置
               </Button>
             </Space>
           </Form.Item>
@@ -358,7 +358,7 @@ const DownloadManagement: React.FC = () => {
       <Card
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            Create Download
+            创建下载
           </Button>
         }
       >
@@ -373,59 +373,59 @@ const DownloadManagement: React.FC = () => {
             pageSize: pagination.pageSize,
             total: pagination.total,
             showSizeChanger: true,
-            showTotal: (total) => `Total ${total} downloads`,
+            showTotal: (total) => `共 ${total} 个下载`,
             onChange: (page, pageSize) => handleTableChange(page, pageSize),
           }}
-          locale={{ emptyText: 'No downloads found' }}
+          locale={{ emptyText: '暂无下载' }}
         />
       </Card>
 
       {/* Create/Edit Modal */}
       <Modal
-        title={editingDownload ? 'Edit Download' : 'Create Download'}
+        title={editingDownload ? '编辑下载' : '创建下载'}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
         width={700}
         confirmLoading={submitting}
-        okText={editingDownload ? 'Update' : 'Create'}
-        cancelText="Cancel"
+        okText={editingDownload ? '更新' : '创建'}
+        cancelText="取消"
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item
-            label="Title (zh_CN)"
+            label="标题（中文）"
             name="title"
-            rules={[{ required: true, message: 'Please enter the title' }]}
+            rules={[{ required: true, message: '请输入标题' }]}
           >
-            <Input placeholder="Download title" />
+            <Input placeholder="下载标题" />
           </Form.Item>
 
           <Form.Item
-            label="Description"
+            label="描述"
             name="description"
-            rules={[{ required: true, message: 'Please enter a description' }]}
+            rules={[{ required: true, message: '请输入描述' }]}
           >
-            <TextArea rows={3} placeholder="Brief description" showCount maxLength={500} />
+            <TextArea rows={3} placeholder="简要描述" showCount maxLength={500} />
           </Form.Item>
 
           <Form.Item
-            label="File URL"
+            label="文件URL"
             name="file_url"
             rules={[
-              { required: true, message: 'Please enter the file URL' },
-              { type: 'url', message: 'Invalid URL' },
+              { required: true, message: '请输入文件URL' },
+              { type: 'url', message: '无效的URL' },
             ]}
           >
             <Input placeholder="https://example.com/downloads/file.zip" />
           </Form.Item>
 
-          <Form.Item label="Version" name="version">
-            <Input placeholder="e.g. 3.12.1" />
+          <Form.Item label="版本" name="version">
+            <Input placeholder="例如 3.12.1" />
           </Form.Item>
 
-          <Form.Item label="Platform" name="platform">
-            <Select placeholder="Select platform" allowClear>
+          <Form.Item label="平台" name="platform">
+            <Select placeholder="选择平台" allowClear>
               {platformOptions.map((opt) => (
                 <Option key={opt.value} value={opt.value}>
                   {opt.icon} {opt.label}
@@ -434,12 +434,12 @@ const DownloadManagement: React.FC = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item label="File Size (bytes)" name="file_size">
+          <Form.Item label="文件大小（字节）" name="file_size">
             <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
           </Form.Item>
 
-          <Form.Item label="File Type" name="file_type">
-            <Select placeholder="Select file type" allowClear>
+          <Form.Item label="文件类型" name="file_type">
+            <Select placeholder="选择文件类型" allowClear>
               <Option value="exe">exe</Option>
               <Option value="msi">msi</Option>
               <Option value="dmg">dmg</Option>
@@ -447,19 +447,19 @@ const DownloadManagement: React.FC = () => {
               <Option value="tar.gz">tar.gz</Option>
               <Option value="deb">deb</Option>
               <Option value="rpm">rpm</Option>
-              <Option value="other">Other</Option>
+              <Option value="other">其他</Option>
             </Select>
           </Form.Item>
 
-          <Form.Item label="Category" name="category">
-            <Select placeholder="Select category" allowClear>
+          <Form.Item label="分类" name="category">
+            <Select placeholder="选择分类" allowClear>
               {categoryOptions.map((cat) => (
                 <Option key={cat} value={cat}>{cat}</Option>
               ))}
             </Select>
           </Form.Item>
 
-          <Form.Item label="Active" name="is_active" valuePropName="checked">
+          <Form.Item label="启用" name="is_active" valuePropName="checked">
             <Switch />
           </Form.Item>
         </Form>

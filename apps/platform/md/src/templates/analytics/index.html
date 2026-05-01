@@ -1,0 +1,136 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}分析 - 挺傻的网站{% endblock %}
+
+{% block dashboard_content %}
+<div class="page-content">
+    <div class="page-header">
+        <h1>数据分析</h1>
+        <p>查看您的网站流量和用户行为数据</p>
+    </div>
+
+    <!-- 概览统计 -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <span class="stat-change">{{ overview.visits_change | default('+0%') }}</span>
+            </div>
+            <div class="stat-value">{{ overview.total_visits | default('0') }}</div>
+            <div class="stat-label">总访问量</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #34d399);"><i class="fas fa-eye"></i></div>
+                <span class="stat-change">{{ overview.pageviews_change | default('+0%') }}</span>
+            </div>
+            <div class="stat-value">{{ overview.total_pageviews | default('0') }}</div>
+            <div class="stat-label">页面浏览量</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);"><i class="fas fa-clock"></i></div>
+                <span class="stat-change">{{ overview.duration_change | default('+0%') }}</span>
+            </div>
+            <div class="stat-value">{{ overview.avg_duration | default('0m 0s') }}</div>
+            <div class="stat-label">平均停留时间</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #f87171);"><i class="fas fa-chart-pie"></i></div>
+                <span class="stat-change {% if overview and overview.bounce_change and overview.bounce_change[0] == '-' %}negative{% endif %}">
+                    {{ overview.bounce_change | default('+0%') }}
+                </span>
+            </div>
+            <div class="stat-value">{{ overview.bounce_rate | default('0%') }}</div>
+            <div class="stat-label">跳出率</div>
+        </div>
+    </div>
+
+    <!-- 趋势数据 -->
+    <div class="card" style="margin-top: 24px;">
+        <div class="card-header">
+            <h3 class="card-title">趋势数据</h3>
+            <div>
+                <button class="btn btn-sm btn-outline" onclick="changePeriod('7d')">7天</button>
+                <button class="btn btn-sm btn-outline active" onclick="changePeriod('30d')">30天</button>
+                <button class="btn btn-sm btn-outline" onclick="changePeriod('90d')">90天</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <canvas id="trendChart" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- 趋势数据表 -->
+    {% if trends and trends | length > 0 %}
+    <div class="card" style="margin-top: 24px;">
+        <div class="card-header">
+            <h3 class="card-title">详细数据</h3>
+        </div>
+        <div class="card-body" style="overflow-x: auto;">
+            <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-color);">
+                        <th style="padding: 12px; text-align: left; font-size: 13px; color: var(--text-muted);">日期</th>
+                        <th style="padding: 12px; text-align: right; font-size: 13px; color: var(--text-muted);">访问量</th>
+                        <th style="padding: 12px; text-align: right; font-size: 13px; color: var(--text-muted);">页面浏览</th>
+                        <th style="padding: 12px; text-align: right; font-size: 13px; color: var(--text-muted);">平均停留</th>
+                        <th style="padding: 12px; text-align: right; font-size: 13px; color: var(--text-muted);">跳出率</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trend in trends %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px; font-size: 14px;">{{ trend.date }}</td>
+                        <td style="padding: 12px; text-align: right; font-size: 14px;">{{ trend.visits | default('0') }}</td>
+                        <td style="padding: 12px; text-align: right; font-size: 14px;">{{ trend.pageviews | default('0') }}</td>
+                        <td style="padding: 12px; text-align: right; font-size: 14px;">{{ trend.avg_duration | default('0m 0s') }}</td>
+                        <td style="padding: 12px; text-align: right; font-size: 14px;">{{ trend.bounce_rate | default('0%') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 热门页面 -->
+    {% if top_pages and top_pages | length > 0 %}
+    <div class="card" style="margin-top: 24px;">
+        <div class="card-header">
+            <h3 class="card-title">热门页面</h3>
+        </div>
+        <div class="card-body">
+            <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-color);">
+                        <th style="padding: 12px; text-align: left; font-size: 13px; color: var(--text-muted);">页面</th>
+                        <th style="padding: 12px; text-align: right; font-size: 13px; color: var(--text-muted);">浏览量</th>
+                        <th style="padding: 12px; text-align: right; font-size: 13px; color: var(--text-muted);">访客数</th>
+                        <th style="padding: 12px; text-align: right; font-size: 13px; color: var(--text-muted);">占比</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for page in top_pages %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px; font-size: 14px;">
+                            <a href="{{ page.url }}" style="color: var(--primary);">{{ page.title | default(page.url) }}</a>
+                        </td>
+                        <td style="padding: 12px; text-align: right; font-size: 14px;">{{ page.pageviews | default('0') }}</td>
+                        <td style="padding: 12px; text-align: right; font-size: 14px;">{{ page.visitors | default('0') }}</td>
+                        <td style="padding: 12px; text-align: right; font-size: 14px;">{{ page.percentage | default('0%') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/static/js/analytics.js"></script>
+{% endblock %}

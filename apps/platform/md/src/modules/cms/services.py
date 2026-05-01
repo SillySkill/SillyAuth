@@ -9,6 +9,7 @@ import os
 import logging
 import math
 import re
+import ast
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -45,7 +46,6 @@ MODULE_CONFIG = {
     "featured_articles_limit": 10
 }
 
-
 def generate_slug(title: str) -> str:
     """
     Generate URL-friendly slug from title.
@@ -72,6 +72,42 @@ def generate_slug(title: str) -> str:
 # ============================================================================
 # Article Service
 # ============================================================================
+
+def _parse_metadata(metadata):
+    """Clean metadata, handling surrogate pairs from broken JSON encoding."""
+    if isinstance(metadata, str):
+        if not metadata.strip():
+            return {}
+        # Try json.loads first (standard JSON from json.dumps)
+        try:
+            result = json.loads(metadata)
+            if isinstance(result, dict):
+                return _clean_surrogates(result)
+            return result
+        except Exception:
+            pass
+        # Fall back to ast.literal_eval (for Python literal strings)
+        try:
+            result = ast.literal_eval(metadata)
+            if isinstance(result, dict):
+                return _clean_surrogates(result)
+            return result
+        except Exception:
+            pass
+        return {}
+    return metadata if isinstance(metadata, dict) else {}
+
+
+def _clean_surrogates(obj):
+    """Recursively fix surrogate pairs in strings within dicts/lists."""
+    if isinstance(obj, str):
+        return obj.encode('utf-8', errors='surrogateescape').decode('utf-8', errors='replace')
+    elif isinstance(obj, list):
+        return [_clean_surrogates(i) for i in obj]
+    elif isinstance(obj, dict):
+        return {k: _clean_surrogates(v) for k, v in obj.items()}
+    return obj
+
 
 class ArticleService:
     """Service for managing articles."""
@@ -369,13 +405,7 @@ class ArticleService:
             tags = [t.strip() for t in tags.split(",") if t.strip()]
 
         # Parse metadata
-        metadata = article.get("metadata", {})
-        if isinstance(metadata, str):
-            try:
-                import ast
-                metadata = ast.literal_eval(metadata)
-            except Exception:
-                metadata = {}
+        metadata = _parse_metadata(article.get("metadata", {}))
 
         return ArticleResponse(
             id=article["id"],
@@ -724,6 +754,275 @@ class ArticleService:
             items=articles,
             total=len(articles)
         )
+
+    def get_hero_slides(self, limit: int = 5) -> list:
+        """
+        Get featured articles as hero slides for homepage.
+
+        Args:
+            limit: Maximum number of slides
+
+        Returns:
+            List of slide dicts with type, src, title, title_parts, description, badge, actions
+        """
+        slides = []
+        try:
+            with get_db_cursor() as cur:
+                cur.execute("""
+                    SELECT a.title, a.slug, a.summary, a.cover_image, a.type,
+                           a.metadata,
+                           u.username as author_username, u.avatar_url as author_avatar
+                    FROM articles a
+                    LEFT JOIN users u ON a.author_id = u.id
+                    WHERE a.is_featured = TRUE AND a.status = 'published'
+                    ORDER BY a.view_count DESC, a.created_at DESC
+                    LIMIT %s
+                """, (limit,))
+                rows = cur.fetchall()
+                for row in rows:
+                    metadata = _parse_metadata(row.get("metadata", {}))
+
+                    article_type = row.get("type", "article")
+                    slide_type = "video" if article_type == "video" else "image"
+
+                    title_parts = metadata.get("title_parts", None)
+                    if not title_parts:
+                        title_parts = [{"text": row["title"], "gradient": False, "break": False}]
+
+                    slide = {
+                        "type": slide_type,
+                        "src": row.get("cover_image") or "/static/img/hero-default.svg",
+                        "poster": metadata.get("poster", ""),
+                        "title": row["title"],
+                        "title_parts": title_parts,
+                        "description": row.get("summary") or row["title"],
+                        "badge": metadata.get("badge", "精选"),
+                        "actions": metadata.get("actions", [
+                            {
+                                "url": f"/articles/{row['slug']}",
+                                "style": "btn-primary btn-lg",
+                                "icon": "fas fa-book-open",
+                                "label": "阅读更多"
+                            }
+                        ])
+                    }
+                    slides.append(slide)
+        except Exception as e:
+            logger.debug(f"Failed to get hero slides: {e}")
+        return slides
+
+    def _format_stat(self, count: int, suffix: str = "+") -> str:
+        """Format stat value: e.g., 10000 -> '10K+', 2500 -> '2.5K+'."""
+        if count >= 10000:
+            val = count / 1000
+            if val == int(val):
+                return f"{int(val)}K+"
+            return f"{val:.1f}K+"
+        elif count >= 1000:
+            return f"{count/1000:.1f}K+"
+        return f"{count}{suffix}"
+
+    def get_homepage_stats(self) -> list:
+        """
+        Get aggregate statistics for homepage.
+
+        Queries multiple tables to compute platform-wide stats.
+
+        Returns:
+            List of stat dicts with value and label
+        """
+        stats = []
+        try:
+            with get_db_cursor() as cur:
+                # Skills count
+                try:
+                    cur.execute("SELECT COUNT(*) as count FROM skills WHERE status = 'approved' AND is_deleted = FALSE")
+                    skills_count = cur.fetchone()["count"]
+                except Exception:
+                    skills_count = 0
+
+                # Distinct vendors (authors with approved skills)
+                try:
+                    cur.execute("SELECT COUNT(DISTINCT author_id) as count FROM skills WHERE status = 'approved' AND is_deleted = FALSE")
+                    vendors_count = cur.fetchone()["count"]
+                except Exception:
+                    vendors_count = 0
+
+                # Teams count
+                try:
+                    cur.execute("SELECT COUNT(*) as count FROM teams")
+                    teams_count = cur.fetchone()["count"]
+                except Exception:
+                    teams_count = 0
+
+                # AI accuracy from config/system_settings
+                ai_accuracy = "99.9%"
+                try:
+                    cur.execute("SELECT value FROM system_settings WHERE key = 'ai_accuracy'")
+                    row = cur.fetchone()
+                    if row:
+                        ai_accuracy = row["value"]
+                except Exception:
+                    pass
+
+            if skills_count > 0:
+                stats.append({"value": self._format_stat(skills_count), "label": "Skills 资产"})
+            if vendors_count > 0:
+                stats.append({"value": self._format_stat(vendors_count), "label": "认证供应商"})
+            if teams_count > 0:
+                stats.append({"value": self._format_stat(teams_count), "label": "企业团队"})
+            stats.append({"value": ai_accuracy, "label": "AI 审核准确率"})
+        except Exception as e:
+            logger.debug(f"Failed to get homepage stats: {e}")
+        return stats
+
+    def get_homepage_features(self) -> list:
+        """
+        Get platform features for homepage.
+
+        Queries articles with type='feature' and extracts icon/items from metadata.
+
+        Returns:
+            List of feature dicts with icon, title, description, items
+        """
+        features = []
+        try:
+            with get_db_cursor() as cur:
+                cur.execute("""
+                    SELECT a.title, a.summary, a.metadata
+                    FROM articles a
+                    WHERE a.type = 'feature' AND a.status = 'published'
+                    ORDER BY a.view_count DESC, a.created_at DESC
+                    LIMIT 3
+                """)
+                rows = cur.fetchall()
+                for row in rows:
+                    metadata = _parse_metadata(row.get("metadata", {}))
+                    features.append({
+                        "icon": metadata.get("icon", "🚀"),
+                        "title": row["title"],
+                        "description": row.get("summary", ""),
+                        "items": metadata.get("items", [])
+                    })
+        except Exception as e:
+            logger.debug(f"Failed to get homepage features: {e}")
+        return features
+
+    def get_homepage_vendors(self, limit: int = 8) -> list:
+        """
+        Get vendor/provider list for homepage.
+
+        Queries distinct skill authors from the database.
+
+        Args:
+            limit: Maximum number of vendors to return
+
+        Returns:
+            List of vendor dicts with tiered badge, avatar, name, stats
+        """
+        vendors = []
+        try:
+            with get_db_cursor() as cur:
+                cur.execute("""
+                    SELECT u.id, u.username, u.avatar_url,
+                        COUNT(s.id) as skills_count,
+                        COALESCE(SUM(s.download_count), 0) as total_downloads
+                    FROM skills s
+                    JOIN users u ON s.author_id = u.id
+                    WHERE s.is_deleted = FALSE AND s.status = 'approved'
+                    GROUP BY u.id, u.username, u.avatar_url
+                    ORDER BY total_downloads DESC
+                    LIMIT %s
+                """, (limit,))
+                rows = cur.fetchall()
+                for row in rows:
+                    total_downloads = row["total_downloads"]
+                    # Tiered badge based on download count
+                    if total_downloads >= 50000:
+                        badge_icon = "fas fa-crown"
+                        badge_label = "金牌供应商"
+                        badge_color = "var(--accent)"
+                    elif total_downloads >= 10000:
+                        badge_icon = "fas fa-award"
+                        badge_label = "优质供应商"
+                        badge_color = "var(--primary-light)"
+                    else:
+                        badge_icon = "fas fa-check-circle"
+                        badge_label = "认证供应商"
+                        badge_color = "var(--secondary)"
+
+                    # Compute rating based on downloads
+                    rating = round(min(5.0, 4.0 + (total_downloads / 100000) * 1.0), 1)
+
+                    vendors.append({
+                        "badge_icon": badge_icon,
+                        "badge_label": badge_label,
+                        "badge_color": badge_color,
+                        "avatar": row.get("avatar_url") or "/static/img/avatar-default.svg",
+                        "name": row["username"],
+                        "title": "AI Skills 开发者",
+                        "bio": f"发布了 {row['skills_count']} 个 Skills",
+                        "skills_count": row["skills_count"],
+                        "downloads": total_downloads,
+                        "rating": rating
+                    })
+        except Exception as e:
+            logger.debug(f"Failed to get vendors: {e}")
+        return vendors
+
+    def get_homepage_categories(self, limit: int = 6) -> List[Dict[str, Any]]:
+        """Get learning center doc categories for the homepage."""
+        categories = []
+        try:
+            with get_db_cursor() as cur:
+                cur.execute("""
+                    SELECT id, name, slug, description, icon, doc_count
+                    FROM categories
+                    WHERE category_type = 'doc'
+                    ORDER BY doc_count DESC
+                    LIMIT %s
+                """, (limit,))
+                rows = cur.fetchall()
+                for row in rows:
+                    categories.append({
+                        "icon": row.get("icon") or "📖",
+                        "name": row["name"],
+                        "desc": row.get("description") or "",
+                        "count": row.get("doc_count", 0),
+                        "url": f"/docs/{row['slug']}" if row.get("slug") else "/docs"
+                    })
+        except Exception as e:
+            logger.debug(f"Failed to get homepage categories: {e}")
+        return categories
+
+    def get_homepage_tutorials(self, limit: int = 3) -> List[Dict[str, Any]]:
+        """Get featured tutorials for the homepage learning center."""
+        tutorials = []
+        try:
+            with get_db_cursor() as cur:
+                cur.execute("""
+                    SELECT id, title, description, slug, category, duration, level,
+                           icon, gradient, cover_image, view_count, like_count
+                    FROM tutorials
+                    WHERE status = 'published'
+                    ORDER BY view_count DESC
+                    LIMIT %s
+                """, (limit,))
+                rows = cur.fetchall()
+                for row in rows:
+                    tutorials.append({
+                        "title": row["title"],
+                        "desc": row.get("description") or "",
+                        "category": row.get("category") or "教程",
+                        "duration": row.get("duration") or "",
+                        "level": row.get("level") or "初级",
+                        "icon": row.get("icon") or "📖",
+                        "gradient": row.get("gradient") or "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                        "url": f"/docs/tutorial/{row['id']}"
+                    })
+        except Exception as e:
+            logger.debug(f"Failed to get homepage tutorials: {e}")
+        return tutorials
 
     def _get_article_by_id(self, article_id: int) -> Optional[Dict[str, Any]]:
         """Get article by ID from database or cache."""

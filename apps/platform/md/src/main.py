@@ -18,9 +18,16 @@ _src_dir = os.path.dirname(os.path.abspath(__file__))
 if _src_dir not in sys.path:
     sys.path.insert(0, _src_dir)
 
+# Load .env before any module imports
+import core.config  # noqa: F401
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from core.template_helpers import render_template
+from core.template_middleware import TemplateContextMiddleware
 
 # 配置日志
 logging.basicConfig(
@@ -46,6 +53,14 @@ async def lifespan(app: FastAPI):
         logger.info(
             f"Loaded {len(app.state.manager._modules)} modules successfully"
         )
+
+        # 在模块加载完成后安装开发桩（覆盖需要 DB 但 DB 不可用的真实路由）
+        if os.getenv("APP_ENV", "production") != "production":
+            try:
+                from dev_stubs import install_dev_stubs
+                install_dev_stubs(app)
+            except Exception as e:
+                logger.warning(f"Failed to install dev stubs: {e}")
     except Exception as e:
         logger.error(f"Failed to load modules: {e}", exc_info=True)
 
@@ -76,14 +91,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------------------------------------------------------------------
-# 根路径 - 重定向到 API 文档
-# ---------------------------------------------------------------------------
+# Template context middleware (JWT/theme/lang from cookies)
+app.add_middleware(TemplateContextMiddleware)
 
-@app.get("/", include_in_schema=False)
-async def root():
-    """根路径 - 重定向到 Swagger API 文档"""
-    return RedirectResponse(url="/docs")
+# Mount static files (from examples/)
+_examples_dir = os.path.join(os.path.dirname(__file__), "..", "examples")
+if os.path.isdir(_examples_dir):
+    app.mount("/static", StaticFiles(directory=_examples_dir), name="static")
+    logger.info(f"Static files mounted from {_examples_dir}")
+
+# Mount hero assets (from frontend/web/public/assets/)
+_assets_dir = os.path.join(os.path.dirname(__file__), "frontend", "web", "public", "assets")
+if os.path.isdir(_assets_dir):
+    app.mount("/assets", StaticFiles(directory=_assets_dir), name="assets")
+    logger.info(f"Assets mounted from {_assets_dir}")
+
+# ---------------------------------------------------------------------------
+# 根路径 - 渲染首页（交由 cms 模块的 SillyMDModule.register() 处理）
+# 此处站点级别的路由若与模块路由冲突，模块路由会被忽略。
+# 详见 main.py lifespan → PluginManager → cms/__init__.py 的注册流程。
+# ---------------------------------------------------------------------------
 
 
 @app.get("/api", include_in_schema=False)

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('skills.explore') }} - {{ _('site.name') }}{% endblock %}
+
+{% block extra_head %}
+{% endblock %}
+
+{% block content %}
+<div class="skills-list-page">
+  <!-- Search Header -->
+  <section class="search-header">
+    <div class="container">
+      <h1 style="font-size: 2.5rem; font-weight: 700; text-align: center; margin-bottom: 16px;">
+        {{ _('skills.explore') }} <span class="text-gradient">{{ _('skills.title') }}</span>
+      </h1>
+      <p style="text-align: center; color: var(--text-light); margin-bottom: 40px;">
+        {{ _('skills.subtitle') }}
+      </p>
+
+      <form method="GET" action="/skills">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="search-input" name="search" placeholder="{{ _('skills.search_placeholder') }}" value="{{ search_query or '' }}">
+        </div>
+      </form>
+
+      <div class="tags-row">
+        <span style="color: var(--text-light); font-size: 0.9rem;">{{ _('skills.hot_searches') }}:</span>
+        {% for hot in hot_tags %}
+        <a href="/skills?search=hot" class="tag">{{ hot }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters and List -->
+  <section class="content-layout container">
+    <!-- Sidebar Filters -->
+    <aside class="filter-sidebar">
+      <div class="filter-header">
+        <h3 class="filter-title">{{ _('skills.filters') }}</h3>
+        <a href="/skills" class="filter-reset">{{ _('skills.reset') }}</a>
+      </div>
+
+      <form method="GET" action="/skills" id="filterForm">
+        {% if search_query %}
+        <input type="hidden" name="search" value="{{ search_query }}">
+        {% endif %}
+
+        {% for filter_group in filter_groups %}
+        <div class="filter-group">
+          <div class="filter-group-title">{{ filter_group.label }}</div>
+          {% for option in filter_group.options %}
+          <label class="filter-option">
+            <input type="checkbox" name="{{ filter_group.name }}" value="{{ option.value }}"
+              {% if option.selected %}checked{% endif %}
+              onchange="document.getElementById('filterForm').submit()">
+            <span>{{ option.label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </form>
+    </aside>
+
+    <!-- List Area -->
+    <div>
+      <!-- Sort Toolbar -->
+      <div class="sort-toolbar">
+        <span class="sort-info">{{ _('skills.total_count', count=total_count) }}</span>
+        <div class="sort-controls">
+          <span class="sort-label">{{ _('skills.sort') }}:</span>
+          <select class="sort-select" onchange="window.location.href=this.value">
+            <option value="/skills?sort=default&search={{ search_query }}" {% if current_sort=='default' %}selected{% endif %}>{{ _('skills.sort_default') }}</option>
+            <option value="/skills?sort=newest&search={{ search_query }}" {% if current_sort=='newest' %}selected{% endif %}>{{ _('skills.sort_newest') }}</option>
+            <option value="/skills?sort=downloads&search={{ search_query }}" {% if current_sort=='downloads' %}selected{% endif %}>{{ _('skills.sort_downloads') }}</option>
+            <option value="/skills?sort=price_asc&search={{ search_query }}" {% if current_sort=='price_asc' %}selected{% endif %}>{{ _('skills.sort_price_asc') }}</option>
+            <option value="/skills?sort=price_desc&search={{ search_query }}" {% if current_sort=='price_desc' %}selected{% endif %}>{{ _('skills.sort_price_desc') }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Skills Grid -->
+      <div class="skills-grid">
+        {% for skill in skills %}
+        <div class="skill-card" onclick="window.location.href='/skills/{{ skill.slug }}'">
+          <div class="skill-card-image" style="{% if skill.bg_gradient %}background: {{ skill.bg_gradient }};{% endif %}">
+            {% if skill.emoji %}{{ skill.emoji }}{% endif %}
+          </div>
+          <div class="skill-card-content">
+            <div class="skill-card-meta">
+              <span class="skill-card-category">{{ skill.category_label }}</span>
+              <span class="skill-card-badge {{ 'free' if skill.is_free else 'paid' }}">
+                {{ _('skills.free') if skill.is_free else skill.price }}
+              </span>
+              <div class="skill-card-rating">
+                <i class="fas fa-star"></i>
+                <span>{{ skill.rating }}</span>
+              </div>
+            </div>
+            <h3 class="skill-card-title">{{ skill.name }}</h3>
+            <p class="skill-card-desc">{{ skill.description }}</p>
+            <div class="skill-card-footer">
+              <div class="skill-card-author">
+                <img src="{{ skill.author_avatar }}" class="skill-card-avatar" alt="{{ skill.author }}" onerror="this.src='/static/img/avatar-default.svg'">
+                <span class="skill-card-author-name">{{ skill.author }}</span>
+              </div>
+              <div class="skill-card-stats">
+                <span><i class="fas fa-download"></i> {{ skill.downloads }}</span>
+                <span><i class="fas fa-heart"></i> {{ skill.likes }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-light);">
+          <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+          <p style="font-size: 1.1rem;">{{ _('skills.no_results') }}</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% include "components/pagination.html" %}
+    </div>
+  </section>
+</div>
+{% endblock %}

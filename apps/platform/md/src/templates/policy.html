@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ policy_title or '政策声明' }} - {{ site_name }}{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ policy_title or '政策声明' }} - {{ site_name }}">
+{% endblock %}
+
+{% block content %}
+<!-- Policy Hero -->
+<section style="padding: 120px 0 60px; text-align: center; background: var(--gradient-light);">
+  <div class="container">
+    <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">
+      {{ policy_title or '政策声明' }}
+    </h1>
+    <p style="font-size: 0.9rem; color: var(--text-light);">
+      最后更新：{{ policy_updated_at or '' }}
+    </p>
+  </div>
+</section>
+
+<!-- Policy Content -->
+<section style="padding: 40px 0 80px;">
+  <div class="container" style="max-width: 860px;">
+    {% if policy_content %}
+    <div style="background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 48px 48px 40px; box-shadow: var(--shadow-sm);">
+      <div class="policy-content" style="color: var(--text-secondary); line-height: 1.9; font-size: 0.95rem;">
+        {{ policy_content | safe }}
+      </div>
+
+      {% if policy_sections %}
+      <div style="margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border-light);">
+        <h3 style="font-weight: 600; margin-bottom: 24px; color: var(--text-primary); font-size: 1.1rem;">内容目录</h3>
+        <ol style="list-style: decimal; padding-left: 20px; display: flex; flex-direction: column; gap: 12px;">
+          {% for section in policy_sections %}
+          <li>
+            <a href="#{{ section.anchor or 'section-' ~ loop.index }}" style="color: var(--primary); font-size: 0.9rem; transition: color 0.3s;">
+              {{ section.title }}
+            </a>
+          </li>
+          {% endfor %}
+        </ol>
+      </div>
+      {% endif %}
+    </div>
+    {% else %}
+    <div style="padding: 80px 20px; text-align: center; color: var(--text-light);">
+      <i class="fas fa-file-contract" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+      <p style="font-size: 1.1rem;">暂无内容</p>
+    </div>
+    {% endif %}
+
+    <!-- Back Link -->
+    <div style="text-align: center; margin-top: 32px;">
+      <a href="/" class="btn btn-ghost">
+        <i class="fas fa-arrow-left"></i> 返回首页
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

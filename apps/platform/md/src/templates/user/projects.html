@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}项目 - 挺傻的{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/css/projects.css">
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="page-header">
+        <h1>我的项目</h1>
+        <p>管理和跟踪您的所有项目</p>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <a href="/user/projects/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> 新建项目
+        </a>
+    </div>
+
+    {% if projects and projects | length > 0 %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+        {% for project in projects %}
+        <div class="card project-card">
+            <div class="card-header">
+                <h3 class="card-title">{{ project.name }}</h3>
+                <span class="status-badge status-{{ project.status | default('pending') }}">
+                    {% if project.status == 'active' %}进行中
+                    {% elif project.status == 'completed' %}已完成
+                    {% elif project.status == 'pending' %}待开始
+                    {% else %}{{ project.status }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="card-body">
+                {% if project.description %}
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">{{ project.description }}</p>
+                {% endif %}
+                {% if project.progress is defined %}
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-size: 13px; color: var(--text-secondary);">进度</span>
+                        <span style="font-size: 13px; color: var(--text-secondary);">{{ project.progress }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ project.progress }}%;"></div>
+                    </div>
+                </div>
+                {% endif %}
+                <div style="margin-top: 16px; display: flex; gap: 8px;">
+                    <a href="/user/projects/{{ project.id }}" class="btn btn-sm btn-outline">查看详情</a>
+                    <a href="/user/projects/{{ project.id }}/edit" class="btn btn-sm btn-outline">编辑</a>
+                </div>
+            </div>
+            <div class="card-footer" style="padding: 12px 20px; border-top: 1px solid var(--border-color); font-size: 13px; color: var(--text-muted);">
+                创建于 {{ project.created_at | default('') }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 80px 20px;">
+        <i class="fas fa-folder-open" style="font-size: 64px; color: var(--text-muted); margin-bottom: 16px;"></i>
+        <h3 style="color: var(--text-secondary); margin-bottom: 8px;">暂无项目</h3>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">创建一个新项目开始您的旅程</p>
+        <a href="/user/projects/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> 创建第一个项目
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/projects.js"></script>
+{% endblock %}

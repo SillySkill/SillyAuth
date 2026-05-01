@@ -88,7 +88,7 @@ const CreatorEarnings: React.FC = () => {
       const data = response?.data?.items ?? response?.data ?? [];
       setSettlements(Array.isArray(data) ? data : []);
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to load pending settlements';
+      const msg = error instanceof Error ? error.message : '加载待结算列表失败';
       message.error(msg);
     } finally {
       setLoading(false);
@@ -104,7 +104,7 @@ const CreatorEarnings: React.FC = () => {
         : response?.data?.items ?? [];
       setRevenueStats(Array.isArray(data) ? data : []);
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to load revenue stats';
+      const msg = error instanceof Error ? error.message : '加载收入统计失败';
       message.error(msg);
     } finally {
       setLoading(false);
@@ -138,13 +138,13 @@ const CreatorEarnings: React.FC = () => {
         payment_account_id: values.payment_account_id,
         notes: values.notes,
       });
-      message.success(`Successfully settled creator "${selectedCreator.username}"`);
+      message.success(`已成功结算创作者 "${selectedCreator.username}"`);
       setSettleModalVisible(false);
       setSelectedCreator(null);
       loadPendingSettlements();
     } catch (error: unknown) {
       if (error instanceof Error && error.message?.includes('Validation')) return;
-      const msg = error instanceof Error ? error.message : 'Settlement failed';
+      const msg = error instanceof Error ? error.message : '结算失败';
       message.error(msg);
     } finally {
       setSubmitting(false);
@@ -173,25 +173,25 @@ const CreatorEarnings: React.FC = () => {
 
   const settlementColumns: ColumnsType<CreatorPendingSettlement> = [
     {
-      title: 'User ID',
+      title: '用户ID',
       dataIndex: 'user_id',
       key: 'user_id',
       width: 80,
     },
     {
-      title: 'Username',
+      title: '用户名',
       dataIndex: 'username',
       key: 'username',
       ellipsis: true,
     },
     {
-      title: 'Email',
+      title: '邮箱',
       dataIndex: 'email',
       key: 'email',
       ellipsis: true,
     },
     {
-      title: 'Settlement Method',
+      title: '结算方式',
       dataIndex: 'settlement_method',
       key: 'settlement_method',
       width: 150,
@@ -200,14 +200,14 @@ const CreatorEarnings: React.FC = () => {
       ),
     },
     {
-      title: 'Pending Count',
+      title: '待结笔数',
       dataIndex: 'pending_count',
       key: 'pending_count',
       width: 130,
       sorter: (a, b) => a.pending_count - b.pending_count,
     },
     {
-      title: 'Total Pending Amount',
+      title: '待结算金额',
       dataIndex: 'total_pending_amount',
       key: 'total_pending_amount',
       width: 180,
@@ -219,14 +219,14 @@ const CreatorEarnings: React.FC = () => {
       ),
     },
     {
-      title: 'Oldest Earning Date',
+      title: '最早收入日期',
       dataIndex: 'oldest_earning_date',
       key: 'oldest_earning_date',
       width: 170,
-      render: (date: string) => (date ? new Date(date).toLocaleDateString() : 'N/A'),
+      render: (date: string) => (date ? new Date(date).toLocaleDateString() : '无'),
     },
     {
-      title: 'Action',
+      title: '操作',
       key: 'action',
       width: 100,
       fixed: 'right',
@@ -237,7 +237,7 @@ const CreatorEarnings: React.FC = () => {
           icon={<PayCircleOutlined />}
           onClick={() => handleSettleClick(record)}
         >
-          Settle
+          结算
         </Button>
       ),
     },
@@ -249,18 +249,18 @@ const CreatorEarnings: React.FC = () => {
 
   const revenueColumns: ColumnsType<RevenueStat> = [
     {
-      title: 'Date',
+      title: '日期',
       dataIndex: 'date',
       key: 'date',
     },
     {
-      title: 'Paid Orders',
+      title: '已支付订单',
       dataIndex: 'paid_orders',
       key: 'paid_orders',
       sorter: (a, b) => a.paid_orders - b.paid_orders,
     },
     {
-      title: 'Total Revenue',
+      title: '总收入',
       dataIndex: 'total_revenue',
       key: 'total_revenue',
       sorter: (a, b) => a.total_revenue - b.total_revenue,
@@ -302,7 +302,7 @@ const CreatorEarnings: React.FC = () => {
       key: 'pending',
       label: (
         <span>
-          <DollarOutlined /> Pending Settlements
+          <DollarOutlined /> 待结算
         </span>
       ),
       children: (
@@ -311,7 +311,7 @@ const CreatorEarnings: React.FC = () => {
             <Col span={8}>
               <Card>
                 <Statistic
-                  title="Creators Pending"
+                  title="待结算创作者"
                   value={settlements.length}
                 />
               </Card>
@@ -319,7 +319,7 @@ const CreatorEarnings: React.FC = () => {
             <Col span={8}>
               <Card>
                 <Statistic
-                  title="Total Pending Amount"
+                  title="待结算总额"
                   value={totalPending}
                   precision={2}
                   prefix="¥"
@@ -330,7 +330,7 @@ const CreatorEarnings: React.FC = () => {
             <Col span={8}>
               <Card>
                 <Statistic
-                  title="Pending Settlements Count"
+                  title="待结算笔数"
                   value={totalPendingCount}
                 />
               </Card>
@@ -344,11 +344,11 @@ const CreatorEarnings: React.FC = () => {
             pagination={{
               pageSize: 20,
               showSizeChanger: true,
-              showTotal: (total) => `Total ${total} creators`,
+              showTotal: (total) => `共 ${total} 位创作者`,
             }}
             scroll={{ x: 1100 }}
             locale={{
-              emptyText: <Empty description="No pending settlements" />,
+              emptyText: <Empty description="暂无待结算记录" />,
             }}
           />
         </>
@@ -358,7 +358,7 @@ const CreatorEarnings: React.FC = () => {
       key: 'stats',
       label: (
         <span>
-          <BarChartOutlined /> Revenue Stats
+          <BarChartOutlined /> 收入统计
         </span>
       ),
       children: (
@@ -367,7 +367,7 @@ const CreatorEarnings: React.FC = () => {
             <Col span={6}>
               <Card>
                 <Statistic
-                  title="Total Paid Orders"
+                  title="总支付订单"
                   value={totalPaidOrders}
                 />
               </Card>
@@ -375,7 +375,7 @@ const CreatorEarnings: React.FC = () => {
             <Col span={6}>
               <Card>
                 <Statistic
-                  title="Total Revenue"
+                  title="总收入"
                   value={totalRevenue}
                   precision={2}
                   prefix="¥"
@@ -386,7 +386,7 @@ const CreatorEarnings: React.FC = () => {
             <Col span={6}>
               <Card>
                 <Statistic
-                  title="Avg. Daily Revenue"
+                  title="日均收入"
                   value={revenueStats.length > 0 ? totalRevenue / revenueStats.length : 0}
                   precision={2}
                   prefix="¥"
@@ -396,16 +396,16 @@ const CreatorEarnings: React.FC = () => {
             </Col>
             <Col span={6}>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ marginBottom: 4, fontSize: 13, color: '#888' }}>Period</span>
+                <span style={{ marginBottom: 4, fontSize: 13, color: '#888' }}>时间范围</span>
                 <Select
                   value={revenueDays}
                   onChange={handleRevenueDaysChange}
                   style={{ width: '100%' }}
                   options={[
-                    { label: 'Last 7 Days', value: 7 },
-                    { label: 'Last 14 Days', value: 14 },
-                    { label: 'Last 30 Days', value: 30 },
-                    { label: 'Last 90 Days', value: 90 },
+                    { label: '最近7天', value: 7 },
+                    { label: '最近14天', value: 14 },
+                    { label: '最近30天', value: 30 },
+                    { label: '最近90天', value: 90 },
                   ]}
                 />
               </div>
@@ -419,10 +419,10 @@ const CreatorEarnings: React.FC = () => {
             pagination={{
               pageSize: 20,
               showSizeChanger: true,
-              showTotal: (total) => `Total ${total} records`,
+              showTotal: (total) => `共 ${total} 条记录`,
             }}
             locale={{
-              emptyText: <Empty description="No revenue data available" />,
+              emptyText: <Empty description="暂无收入数据" />,
             }}
           />
         </>
@@ -433,9 +433,9 @@ const CreatorEarnings: React.FC = () => {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <Title level={2}>Creator Earnings</Title>
+        <Title level={2}>创作者收益</Title>
         <p style={{ color: '#888' }}>
-          Manage creator settlements and view revenue statistics.
+          管理创作者结算并查看收入统计数据。
         </p>
       </div>
 
@@ -448,7 +448,7 @@ const CreatorEarnings: React.FC = () => {
               else loadRevenueStats(revenueDays);
             }}
           >
-            Refresh
+            刷新
           </Button>
         }
       >
@@ -461,7 +461,7 @@ const CreatorEarnings: React.FC = () => {
 
       {/* Settle Modal */}
       <Modal
-        title="Settle Creator Earnings"
+        title="结算创作者收益"
         open={settleModalVisible}
         onOk={handleSettleConfirm}
         onCancel={() => {
@@ -473,10 +473,10 @@ const CreatorEarnings: React.FC = () => {
       >
         <div style={{ marginBottom: 16 }}>
           <p>
-            Creator: <strong>{selectedCreator?.username}</strong>
+            创作者：<strong>{selectedCreator?.username}</strong>
           </p>
           <p>
-            Pending Amount:{' '}
+            待结金额：{' '}
             <strong style={{ color: '#faad14' }}>
               ¥
               {selectedCreator?.total_pending_amount != null
@@ -485,26 +485,26 @@ const CreatorEarnings: React.FC = () => {
             </strong>
           </p>
           <p>
-            Pending Count: <strong>{selectedCreator?.pending_count}</strong>
+            待结笔数：<strong>{selectedCreator?.pending_count}</strong>
           </p>
         </div>
         <Form form={settleForm} layout="vertical">
           <Form.Item
             name="payment_account_id"
-            label="Payment Account"
-            rules={[{ required: true, message: 'Please select a payment account' }]}
+            label="支付账户"
+            rules={[{ required: true, message: '请选择支付账户' }]}
           >
             <Select
-              placeholder="Select payment account"
+              placeholder="选择支付账户"
               options={[
-                { label: 'WeChat Main Account', value: 1 },
-                { label: 'Alipay Main Account', value: 2 },
-                { label: 'PayPal Account', value: 3 },
+                { label: '微信主账户', value: 1 },
+                { label: '支付宝主账户', value: 2 },
+                { label: 'PayPal 账户', value: 3 },
               ]}
             />
           </Form.Item>
-          <Form.Item name="notes" label="Notes">
-            <Input placeholder="Settlement notes (optional)" />
+          <Form.Item name="notes" label="备注">
+            <Input placeholder="结算备注（选填）" />
           </Form.Item>
         </Form>
       </Modal>

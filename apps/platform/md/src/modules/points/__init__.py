@@ -20,6 +20,10 @@ from __future__ import annotations
 from typing import List
 from pydantic import BaseModel
 
+from fastapi import FastAPI, Request
+from starlette.responses import HTMLResponse
+from core.template_helpers import render_template
+
 from .routes import router as points_router
 from .services import PointsService, MallService, CategoryService, CartService
 from .schemas import (
@@ -99,6 +103,61 @@ class BaseModule:
     def get_router(self):
         """获取路由"""
         return self.router
+
+    def install(self, app: FastAPI) -> None:
+        """安装模块到应用"""
+        app.include_router(self.router)
+        # Page routes
+        @app.get("/points-mall", response_class=HTMLResponse, include_in_schema=False)
+        async def points_mall_page(request: Request):
+            try:
+                from core.db_adapter import get_db_cursor
+                items = []
+                categories = []
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("""
+                            SELECT mi.*, COALESCE(pc.name, '未分类') as category_name
+                            FROM mall_items mi
+                            LEFT JOIN points_categories pc ON mi.category_id = pc.id
+                            WHERE mi.is_active = TRUE
+                            ORDER BY mi.sort_order, mi.created_at DESC
+                            LIMIT 30
+                        """)
+                        rows = cur.fetchall()
+                        for r in rows:
+                            items.append({
+                                "id": r.get("id"),
+                                "name": r.get("name", ""),
+                                "description": r.get("description", ""),
+                                "image_url": r.get("image_url", ""),
+                                "points": r.get("points", 0),
+                                "stock": r.get("stock", 0),
+                                "exchange_count": r.get("exchange_count", 0),
+                                "category_name": r.get("category_name", "未分类"),
+                            })
+                except Exception:
+                    items = []
+
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("SELECT id, name, icon FROM points_categories ORDER BY sort_order")
+                        cat_rows = cur.fetchall()
+                        for c in cat_rows:
+                            categories.append({
+                                "id": c.get("id"),
+                                "name": c.get("name", ""),
+                                "icon": c.get("icon", "fa-gift"),
+                            })
+                except Exception:
+                    categories = []
+            except Exception:
+                items, categories = [], []
+
+            return render_template(request, "points/mall.html", {
+                "items": items,
+                "categories": categories,
+            })
 
     def get_services(self):
         """获取服务实例"""

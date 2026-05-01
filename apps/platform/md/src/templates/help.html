@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}帮助中心 - {{ site_name }}{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ site_name }} 帮助中心 - 查找使用指南与常见问题">
+{% endblock %}
+
+{% block content %}
+<!-- Help Hero -->
+<section style="padding: 120px 0 60px; text-align: center; background: var(--gradient-light);">
+  <div class="container">
+    <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">
+      帮助<span class="text-gradient">中心</span>
+    </h1>
+    <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 32px;">
+      查找使用指南、常见问题与平台文档
+    </p>
+
+    <!-- Search Box -->
+    <div style="max-width: 500px; margin: 0 auto 40px;">
+      <div style="position: relative;">
+        <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-light);"></i>
+        <input type="text" id="helpSearch" placeholder="搜索帮助内容..."
+               style="width: 100%; padding: 14px 16px 14px 44px; border: 1px solid var(--border-medium); border-radius: var(--radius-lg); font-family: inherit; font-size: 0.95rem; color: var(--text-primary); background: var(--bg-white); transition: border-color 0.3s;"
+               oninput="filterArticles()">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Help Articles -->
+<section style="padding: 40px 0 80px;">
+  <div class="container" style="max-width: 1000px;">
+
+    {% if help_articles %}
+    <!-- Group articles by category -->
+    {% set groups = {} %}
+    {% for article in help_articles %}
+      {% set category = article.category or '未分类' %}
+      {% if category not in groups %}
+        {% set _ = groups.update({category: []}) %}
+      {% endif %}
+      {% set _ = groups[category].append(article) %}
+    {% endfor %}
+
+    {% for category_name, articles in groups.items() %}
+    <div class="help-category-section" style="margin-bottom: 48px;">
+      <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--primary-light); color: var(--text-primary);">
+        <i class="fas fa-folder" style="color: var(--primary); margin-right: 10px;"></i>
+        {{ category_name }}
+      </h2>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        {% for article in articles %}
+        <a href="/help/{{ article.slug }}" class="help-article-link"
+           style="display: flex; align-items: center; gap: 16px; padding: 18px 24px; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-md); text-decoration: none; color: inherit; transition: all 0.3s;"
+           onmouseenter="this.style.borderColor='var(--primary-light)';this.style.boxShadow='var(--shadow-sm)';this.style.transform='translateX(4px)'"
+           onmouseleave="this.style.borderColor='var(--border-light)';this.style.boxShadow='none';this.style.transform='translateX(0)'">
+          <i class="fas fa-file-alt" style="color: var(--primary); font-size: 1.1rem; flex-shrink: 0;"></i>
+          <div style="flex: 1; min-width: 0;">
+            <h4 style="font-weight: 600; margin-bottom: 4px; color: var(--text-primary); font-size: 0.95rem;">{{ article.title }}</h4>
+            {% if article.summary %}
+            <p style="color: var(--text-light); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ article.summary }}</p>
+            {% endif %}
+          </div>
+          <i class="fas fa-chevron-right" style="color: var(--text-light); flex-shrink: 0;"></i>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <!-- Empty State -->
+    <div style="padding: 80px 20px; text-align: center; color: var(--text-light);">
+      <i class="fas fa-question-circle" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+      <p style="font-size: 1.1rem;">暂无帮助文章</p>
+      <p style="font-size: 0.85rem; margin-top: 8px;">如需帮助，请<a href="/contact" style="color: var(--primary);">联系我们</a></p>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function filterArticles() {
+  var searchTerm = document.getElementById('helpSearch').value.toLowerCase();
+  var sections = document.querySelectorAll('.help-category-section');
+  var hasVisible = false;
+
+  sections.forEach(function(section) {
+    var links = section.querySelectorAll('.help-article-link');
+    var sectionVisible = false;
+
+    links.forEach(function(link) {
+      var text = link.textContent.toLowerCase();
+      if (searchTerm === '' || text.indexOf(searchTerm) !== -1) {
+        link.style.display = 'flex';
+        sectionVisible = true;
+      } else {
+        link.style.display = 'none';
+      }
+    });
+
+    section.style.display = sectionVisible ? 'block' : 'none';
+    if (sectionVisible) hasVisible = true;
+  });
+}
+</script>
+{% endblock %}

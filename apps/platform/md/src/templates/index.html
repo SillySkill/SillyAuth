@@ -1,0 +1,576 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('home.title') }} - {{ _('site.name') }}{% endblock %}
+
+{% block content %}
+<!-- ============================================
+     Hero Carousel
+     ============================================ -->
+<section class="hero-carousel" id="heroCarousel">
+  {% for slide in hero_slides %}
+  <div class="carousel-slide {% if loop.first %}active{% endif %}" data-type="{{ slide.type }}">
+    {% if slide.type == 'video' %}
+    <video class="hero-video" autoplay muted playsinline preload="auto" crossorigin="anonymous" poster="{{ slide.poster }}" onerror="this.style.display='none'">
+      <source src="{{ slide.src }}" type="video/mp4">
+    </video>
+    {% elif slide.type == 'image' %}
+    <img src="{{ slide.src }}" alt="{{ slide.title }}" style="width:100%;height:100%;object-fit:cover;">
+    {% endif %}
+    <div class="hero-fallback-bg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+    <div class="carousel-overlay"></div>
+    <div class="carousel-content">
+      <h1 class="carousel-title">
+        {% if slide.title_parts %}
+          {% for part in slide.title_parts %}
+            {% if part.get("gradient") %}<span class="text-gradient">{{ part.text }}</span>{% else %}{{ part.text }}{% endif %}
+            {% if part.get("break") %}<br>{% endif %}
+          {% endfor %}
+        {% else %}
+          <span class="text-gradient">{{ slide.title }}</span>
+        {% endif %}
+      </h1>
+      <p class="carousel-desc">{{ slide.description }}</p>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Navigation Arrows -->
+  <button class="carousel-arrow prev" id="carouselPrev"><span>❮</span></button>
+  <button class="carousel-arrow next" id="carouselNext"><span>❯</span></button>
+
+  <!-- Global Mute Button -->
+  <button class="global-mute-btn muted" id="globalMuteBtn" title="静音/取消静音" aria-label="静音/取消静音" style="opacity:0.7;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+      <line x1="23" y1="9" x2="17" y2="15"></line>
+      <line x1="17" y1="9" x2="23" y2="15"></line>
+    </svg>
+  </button>
+
+  <!-- Dot Navigation -->
+  <div class="carousel-nav" id="carouselNav">
+    {% for slide in hero_slides %}
+    <button class="carousel-dot {% if loop.first %}active{% endif %}" data-slide="{{ loop.index0 }}" aria-label="Slide {{ loop.index }}"></button>
+    {% endfor %}
+  </div>
+
+  <!-- Video Progress Indicators -->
+  <div class="video-indicators" style="display:none">
+    {% for slide in hero_slides %}
+    <div class="video-indicator {% if loop.first %}active{% endif %}" data-slide="{{ loop.index0 }}" title="{{ slide.title }}"></div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ============================================
+     Stats Section
+     ============================================ -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      {% for stat in stats %}
+      <div class="stat-card">
+        <div class="stat-value">{{ stat.value }}</div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     Free Skills Carousel
+     ============================================ -->
+<section class="skills-section">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">{{ _('home.free_skills_title', '🎉 免费热门 Skills') }}</h2>
+        <p class="section-subtitle">{{ _('home.free_skills_subtitle', '开源共享，社区贡献，完全免费使用') }}</p>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <a href="/skills?type=free" class="btn btn-ghost btn-sm">{{ _('home.view_all') }} <i class="fas fa-arrow-right"></i></a>
+        <div class="section-nav">
+          <button class="nav-arrow" id="freeSkillsPrev">❮</button>
+          <button class="nav-arrow" id="freeSkillsNext">❯</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="skills-carousel-wrapper">
+      <div class="skills-carousel" id="freeSkillsCarousel">
+        {% for skill in featured_skills %}
+        {% if skill.is_free %}
+        <a href="/skills/{{ skill.slug or skill.id }}" style="text-decoration:none;color:inherit;">
+          <div class="skill-card">
+            <div class="skill-image" style="{% if skill.bg_gradient %}background:{{ skill.bg_gradient }}{% else %}background:linear-gradient(135deg,#667eea,#764ba2){% endif %}">
+              {{ skill.emoji or '📦' }}
+            </div>
+            <div class="skill-content">
+              <div class="skill-meta">
+                <span class="skill-category">{{ skill.category or '技术' }}</span>
+                <span class="skill-type free">{{ _('skills.free', '免费') }}</span>
+                <div class="skill-rating">⭐ {{ skill.rating or '4.5' }}</div>
+              </div>
+              <h3 class="skill-title">{{ skill.name }}</h3>
+              <p class="skill-description">{{ skill.description }}</p>
+              <div class="skill-footer">
+                <div class="skill-author">
+                  <div class="skill-avatar" style="background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-size:0.8rem;font-weight:600;">
+                    {{ (skill.author or 'U')[0] | upper }}
+                  </div>
+                  <span class="skill-author-name">{{ skill.author or 'ClawHub' }}</span>
+                </div>
+                <div class="skill-stats">
+                  <span><i class="fas fa-download"></i> {{ skill.downloads or '0' }}</span>
+                  <span><i class="fas fa-star"></i> {{ skill.likes or skill.stars or '0' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     Commercial Skills Carousel
+     ============================================ -->
+<section class="skills-section" style="background: var(--bg-dark-secondary);">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">{{ _('home.commercial_skills_title', '💎 商用精选 Skills') }}</h2>
+        <p class="section-subtitle">{{ _('home.commercial_skills_subtitle', '专业打造，企业级品质，授权即可使用') }}</p>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <a href="/skills?type=commercial" class="btn btn-ghost btn-sm">{{ _('home.view_all') }} <i class="fas fa-arrow-right"></i></a>
+        <div class="section-nav">
+          <button class="nav-arrow" id="commercialSkillsPrev">❮</button>
+          <button class="nav-arrow" id="commercialSkillsNext">❯</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="skills-carousel-wrapper">
+      <div class="skills-carousel" id="commercialSkillsCarousel">
+        {% for skill in featured_skills %}
+        {% if not skill.is_free %}
+        <a href="/skills/{{ skill.slug or skill.id }}" style="text-decoration:none;color:inherit;">
+          <div class="skill-card">
+            <div class="skill-image" style="{% if skill.bg_gradient %}background:{{ skill.bg_gradient }}{% else %}background:linear-gradient(135deg,#f093fb,#f5576c){% endif %}">
+              {{ skill.emoji or '💎' }}
+            </div>
+            <div class="skill-content">
+              <div class="skill-meta">
+                <span class="skill-category">{{ skill.category or '技术' }}</span>
+                <span class="skill-type commercial">{{ skill.price or '¥99' }}</span>
+                <div class="skill-rating">⭐ {{ skill.rating or '4.8' }}</div>
+              </div>
+              <h3 class="skill-title">{{ skill.name }}</h3>
+              <p class="skill-description">{{ skill.description }}</p>
+              <div class="skill-footer">
+                <div class="skill-author">
+                  <div class="skill-avatar" style="background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-size:0.8rem;font-weight:600;">
+                    {{ (skill.author or 'U')[0] | upper }}
+                  </div>
+                  <span class="skill-author-name">{{ skill.author or 'ClawHub' }}</span>
+                </div>
+                <div class="skill-stats">
+                  <span><i class="fas fa-download"></i> {{ skill.downloads or '0' }}</span>
+                  <span><i class="fas fa-heart"></i> {{ skill.likes or skill.stars or '0' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     Vendor Section
+     ============================================ -->
+<section class="vendor-section">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">{{ _('home.vendors_title', '优质供应商') }}</h2>
+        <p class="section-subtitle">{{ _('home.vendors_subtitle', '来自全球的顶级 Skills 创作者') }}</p>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <a href="/marketplace" class="btn btn-ghost btn-sm">{{ _('home.view_all') }} <i class="fas fa-arrow-right"></i></a>
+        <div class="section-nav">
+          <button class="nav-arrow" id="vendorPrev">❮</button>
+          <button class="nav-arrow" id="vendorNext">❯</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="skills-carousel-wrapper">
+      <div class="skills-carousel" id="vendorCarousel">
+        {% for vendor in vendors %}
+        <a href="/vendor-profile?username={{ vendor.name }}" style="text-decoration:none;color:inherit;">
+          <div class="vendor-card">
+            <div class="vendor-badge"><i class="{{ vendor.badge_icon }}"></i> {{ vendor.badge_label }}</div>
+            <img src="{{ vendor.avatar }}" class="vendor-avatar" alt="{{ vendor.name }}" onerror="this.src='/static/img/avatar-default.svg'">
+            <h3 class="vendor-name">{{ vendor.name }}</h3>
+            <p class="vendor-title">{{ vendor.title or '认证供应商' }}</p>
+            <p class="vendor-bio">{{ vendor.bio or 'Skills 创作者' }}</p>
+            <div class="vendor-stats">
+              <div class="vendor-stat">
+                <div class="vendor-stat-value">{{ vendor.skills_count or 0 }}</div>
+                <div class="vendor-stat-label">{{ _('home.skills', 'Skills') }}</div>
+              </div>
+              <div class="vendor-stat">
+                <div class="vendor-stat-value">{{ vendor.downloads or '0' }}</div>
+                <div class="vendor-stat-label">{{ _('home.downloads', '下载') }}</div>
+              </div>
+              <div class="vendor-stat">
+                <div class="vendor-stat-value">{{ vendor.rating or '4.5' }}</div>
+                <div class="vendor-stat-label">{{ _('home.rating', '评分') }}</div>
+              </div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     Team Collaboration Section
+     ============================================ -->
+<section class="team-section" style="display: none">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 60px;">
+      <h2 class="section-title">{{ _('home.team_title', '团队协作') }}</h2>
+      <p class="section-subtitle">{{ _('home.team_subtitle', '打破部门壁垒，用统一标准管理所有项目') }}</p>
+    </div>
+
+    <div class="team-grid">
+      {% for feature in features %}
+      <div class="team-feature">
+        <div class="team-icon" style="font-size: 1.8rem;">{{ feature.icon }}</div>
+        <h3 class="team-feature-title">{{ feature.title }}</h3>
+        <p class="team-feature-desc">{{ feature.description }}</p>
+        <ul class="team-feature-list">
+          {% for item in feature.get("items", []) %}
+          <li><i class="fas fa-check" style="color:var(--accent);"></i> {{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     Docs / Learning Center Section
+     ============================================ -->
+<section class="skills-section" style="background: var(--bg-dark-secondary);">
+  <div class="container">
+    <!-- Section Header -->
+    <div style="text-align: center; margin-bottom: 60px;">
+      <h2 class="section-title">{{ _('home.learning_title', '📚 学习中心') }}</h2>
+      <p class="section-subtitle">{{ _('home.learning_subtitle', '从入门到精通，全面掌握 SillyMD 平台') }}</p>
+    </div>
+
+    <!-- Categories Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 60px;">
+      {% for cat in categories %}
+      <a href="{{ cat.url }}" class="doc-category-card" onmouseenter="this.style.transform='translateY(-4px)';this.style.borderColor='var(--primary)'" onmouseleave="this.style.transform='translateY(0)';this.style.borderColor='var(--border-light)'">
+        <div style="font-size: 2.5rem; margin-bottom: 12px;">{{ cat.icon }}</div>
+        <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">{{ cat.name }}</div>
+        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">{{ cat.desc }}</div>
+        <div style="font-size: 0.8rem; color: var(--primary);">{{ cat.count }} {{ _('home.documents', '篇文档') }}</div>
+      </a>
+      {% endfor %}
+    </div>
+
+    <!-- Featured Tutorials -->
+    <div style="margin-bottom: 40px;">
+      <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 24px; color: var(--text-primary);">
+        ⭐ {{ _('home.featured_tutorials', '精选教程') }}
+      </h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+        {% for t in tutorials %}
+        <a href="{{ t.url }}" class="tutorial-card" onmouseenter="this.style.transform='translateY(-8px)';this.style.boxShadow='var(--shadow-lg)'" onmouseleave="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+          <div style="height: 120px; background: {{ t.gradient }}; display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+            {{ t.icon }}
+          </div>
+          <div style="padding: 20px;">
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <span class="tutorial-tag">{{ t.category }}</span>
+              <span class="tutorial-level" data-level="{{ t.level }}">{{ t.level }}</span>
+            </div>
+            <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">{{ t.title }}</h4>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">{{ t.desc }}</p>
+            <div style="display: flex; align-items: center; gap: 16px; font-size: 0.85rem; color: var(--text-light);">
+              <span>⏱️ {{ t.duration }}</span>
+              <span style="color: var(--primary);">{{ _('home.read_more', '阅读全文') }} →</span>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- View All Button -->
+    <div style="text-align: center; margin-top: 40px;">
+      <a href="/docs" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px;">
+        {{ _('home.view_all_docs', '查看全部文档') }} <span>→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+/* Doc category cards */
+.doc-category-card {
+  display: block;
+  padding: 24px;
+  background: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  transition: all 0.3s;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+.doc-category-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-card);
+}
+
+/* Tutorial cards */
+.tutorial-card {
+  display: block;
+  background: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.3s;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Tutorial tags */
+.tutorial-tag {
+  padding: 4px 10px;
+  background: rgba(79, 110, 247, 0.08);
+  border: 1px solid rgba(79, 110, 247, 0.15);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: var(--primary);
+}
+
+.tutorial-level {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.tutorial-level[data-level="初级"] {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10B981;
+}
+.tutorial-level[data-level="中级"] {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #D97706;
+}
+.tutorial-level[data-level="高级"] {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #8B5CF6;
+}
+</style>
+
+<script>
+// ============================================
+// Hero Carousel
+// ============================================
+const carousel = {
+  slides: document.querySelectorAll('.carousel-slide'),
+  dots: document.querySelectorAll('.carousel-dot'),
+  indicators: document.querySelectorAll('.video-indicator'),
+  prevBtn: document.getElementById('carouselPrev'),
+  nextBtn: document.getElementById('carouselNext'),
+  muteBtn: document.getElementById('globalMuteBtn'),
+  currentSlide: 0,
+  interval: null,
+  videos: {},
+  globalMuted: true,
+
+  init() {
+    this.slides.forEach((slide, index) => {
+      const video = slide.querySelector('video');
+      if (video) {
+        this.videos[index] = video;
+        video.addEventListener('ended', () => this.next());
+      }
+    });
+
+    this.prevBtn.addEventListener('click', () => this.prev());
+    this.nextBtn.addEventListener('click', () => this.next());
+    this.dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => this.goTo(index));
+    });
+    this.indicators.forEach((ind, index) => {
+      ind.addEventListener('click', () => this.goTo(index));
+    });
+
+    if (this.muteBtn) {
+      this.muteBtn.addEventListener('click', () => this.toggleMute());
+    }
+
+    // Keyboard nav
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') this.prev();
+      if (e.key === 'ArrowRight') this.next();
+    });
+
+    this.start();
+  },
+
+  toggleMute() {
+    this.globalMuted = !this.globalMuted;
+    Object.values(this.videos).forEach(v => { if (v) v.muted = this.globalMuted; });
+    if (this.muteBtn) {
+      this.muteBtn.classList.toggle('muted', this.globalMuted);
+      const mutedSvg = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
+      const unmutedSvg = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
+      this.muteBtn.innerHTML = this.globalMuted ? mutedSvg : unmutedSvg;
+      this.muteBtn.style.opacity = this.globalMuted ? '0.7' : '1';
+    }
+  },
+
+  goTo(index) {
+    const currentVideo = this.videos[this.currentSlide];
+    if (currentVideo) { currentVideo.pause(); currentVideo.currentTime = 0; }
+    this.slides[this.currentSlide].classList.remove('active');
+    this.dots[this.currentSlide].classList.remove('active');
+    this.indicators[this.currentSlide].classList.remove('active');
+    this.currentSlide = index;
+    this.slides[this.currentSlide].classList.add('active');
+    this.dots[this.currentSlide].classList.add('active');
+    this.indicators[this.currentSlide].classList.add('active');
+    const newVideo = this.videos[this.currentSlide];
+    if (newVideo) {
+      newVideo.muted = this.globalMuted;
+      newVideo.play().catch(() => {});
+    }
+    this.reset();
+  },
+
+  next() { this.goTo((this.currentSlide + 1) % this.slides.length); },
+  prev() { this.goTo((this.currentSlide - 1 + this.slides.length) % this.slides.length); },
+
+  start() {
+    if (this.slides[this.currentSlide]?.dataset?.type === 'video') return;
+    this.interval = setTimeout(() => this.next(), 5000);
+  },
+
+  reset() {
+    if (this.interval) clearTimeout(this.interval);
+    this.start();
+  }
+};
+
+// ============================================
+// Horizontal Carousel (Skills & Vendors)
+// ============================================
+class HorizontalCarousel {
+  constructor(containerId, prevBtnId, nextBtnId, itemWidth = 374) {
+    this.container = document.getElementById(containerId);
+    this.prevBtn = document.getElementById(prevBtnId);
+    this.nextBtn = document.getElementById(nextBtnId);
+    this.itemWidth = itemWidth;
+    this.currentPosition = 0;
+    this.init();
+  }
+  init() {
+    this.prevBtn.addEventListener('click', () => this.scroll('prev'));
+    this.nextBtn.addEventListener('click', () => this.scroll('next'));
+    this.updateButtons();
+  }
+  scroll(direction) {
+    const containerWidth = this.container.parentElement.offsetWidth;
+    const visibleItems = Math.max(1, Math.floor(containerWidth / this.itemWidth));
+    const scrollAmount = visibleItems * this.itemWidth;
+    if (direction === 'next') this.currentPosition -= scrollAmount;
+    else this.currentPosition += scrollAmount;
+    const maxScroll = Math.max(0, this.container.scrollWidth - containerWidth);
+    this.currentPosition = Math.max(-maxScroll, Math.min(0, this.currentPosition));
+    this.container.style.transform = `translateX(${this.currentPosition}px)`;
+    this.updateButtons();
+  }
+  updateButtons() {
+    const containerWidth = this.container.parentElement.offsetWidth;
+    const maxScroll = Math.max(0, this.container.scrollWidth - containerWidth);
+    if (this.prevBtn) this.prevBtn.style.opacity = this.currentPosition >= 0 ? '0.4' : '1';
+    if (this.nextBtn) this.nextBtn.style.opacity = this.currentPosition <= -maxScroll ? '0.4' : '1';
+  }
+}
+
+// ============================================
+// Mobile Menu
+// ============================================
+const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+const mobileNav = document.getElementById('mobileNav');
+if (mobileMenuBtn && mobileNav) {
+  mobileMenuBtn.addEventListener('click', () => {
+    mobileNav.classList.toggle('active');
+    const icon = mobileMenuBtn.querySelector('i');
+    if (icon) { icon.classList.toggle('fa-bars'); icon.classList.toggle('fa-times'); }
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.navbar') && mobileNav.classList.contains('active')) {
+      mobileNav.classList.remove('active');
+      const icon = mobileMenuBtn.querySelector('i');
+      if (icon) { icon.classList.add('fa-bars'); icon.classList.remove('fa-times'); }
+    }
+  });
+}
+
+// ============================================
+// Init
+// ============================================
+try { carousel.init(); } catch (error) { console.error('Carousel init failed:', error); }
+try { new HorizontalCarousel('freeSkillsCarousel', 'freeSkillsPrev', 'freeSkillsNext'); } catch(e) {}
+try { new HorizontalCarousel('commercialSkillsCarousel', 'commercialSkillsPrev', 'commercialSkillsNext'); } catch(e) {}
+try { new HorizontalCarousel('vendorCarousel', 'vendorPrev', 'vendorNext', 324); } catch(e) {}
+
+// Language Selector
+const langOptions = document.querySelectorAll('.lang-option');
+langOptions.forEach(option => {
+  option.addEventListener('click', () => {
+    const lang = option.dataset.lang;
+    localStorage.setItem('lang', lang);
+    langOptions.forEach(o => o.classList.remove('active'));
+    option.classList.add('active');
+    window.location.href = '/?lang=' + lang;
+  });
+});
+
+// Smooth Scroll
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    const href = this.getAttribute('href');
+    if (href !== '#') { e.preventDefault(); const target = document.querySelector(href); if (target) target.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+</script>
+{% endblock %}

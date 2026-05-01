@@ -17,7 +17,7 @@ export const getPointsProducts = async (
   params: PaginationParams = {}
 ): Promise<PaginatedResponse<PointsProduct>> => {
   const response = await apiClient.get<PaginatedResponse<PointsProduct>>(
-    '/points/products',
+    '/points/mall/items',
     { params }
   );
   return response.data;
@@ -27,7 +27,7 @@ export const createPointsProduct = async (
   data: PointsProductCreateRequest
 ): Promise<ApiResponse<PointsProduct>> => {
   const response = await apiClient.post<ApiResponse<PointsProduct>>(
-    '/points/products',
+    '/points/mall/items',
     data
   );
   return response.data;
@@ -38,7 +38,7 @@ export const updatePointsProduct = async (
   data: PointsProductUpdateRequest
 ): Promise<ApiResponse<PointsProduct>> => {
   const response = await apiClient.put<ApiResponse<PointsProduct>>(
-    `/points/products/${id}`,
+    `/points/mall/items/${id}`,
     data
   );
   return response.data;
@@ -70,7 +70,7 @@ export const getAllExchanges = async (
   params: ExchangeListParams = {}
 ): Promise<PaginatedResponse<PointsExchange>> => {
   const response = await apiClient.get<PaginatedResponse<PointsExchange>>(
-    '/points/exchanges',
+    '/points/mall/all-exchanges',
     { params }
   );
   return response.data;
@@ -81,7 +81,7 @@ export const updateExchangeStatus = async (
   data: { status: string; tracking_number?: string }
 ): Promise<ApiResponse<PointsExchange>> => {
   const response = await apiClient.put<ApiResponse<PointsExchange>>(
-    `/points/exchanges/${id}/status`,
+    `/points/mall/exchanges/${id}/status`,
     data
   );
   return response.data;

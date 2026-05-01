@@ -1,0 +1,50 @@
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="logo">
+                    <img src="/static/img/logo-full.png" alt="挺傻的" style="height: 40px;">
+                </div>
+                <p>
+                    {{ tagline }}
+                </p>
+            </div>
+            {% for section in footer_sections %}
+            <div>
+                <h4 class="footer-title">{{ section.title }}</h4>
+                <div class="footer-links">
+                    {% for link in section['items'] %}
+                    <a href="{{ link.url }}">{{ link.label }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="social-qr">
+            {% for social in social_links %}
+            <div class="qr-item">
+                <div class="qr-code">
+                    {% if social.qr_image %}
+                    <img src="{{ social.qr_image }}" alt="{{ social.platform }}二维码">
+                    {% else %}
+                    <div class="qr-placeholder">{{ social.platform }}</div>
+                    {% endif %}
+                </div>
+                <div class="qr-label">{{ social.platform }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-copy">
+                &copy; {{ current_year }} {{ copyright_text }}
+            </div>
+            {% if icp %}
+            <div class="footer-icp">
+                <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">{{ icp }}</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</footer>

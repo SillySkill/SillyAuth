@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block header %}{% endblock %}
+
+{% block content %}
+<div class="auth-bg">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="grid-pattern"></div>
+</div>
+
+<div class="auth-lang-selector">
+    <button class="lang-btn" id="langBtn">
+        <i class="fas fa-globe"></i>
+        <span>{{ lang }}</span>
+    </button>
+    <div class="lang-dropdown">
+        <a href="#" data-lang="zh-CN">中文</a>
+        <a href="#" data-lang="en">English</a>
+        <a href="#" data-lang="ja">日本語</a>
+        <a href="#" data-lang="ko">한국어</a>
+    </div>
+</div>
+
+<div class="auth-container">
+    <div class="auth-box">
+        <div class="auth-header">
+            <a href="/" class="logo">
+                <i class="fas fa-cube"></i>
+                <span>挺傻的网站</span>
+            </a>
+            {% block auth_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

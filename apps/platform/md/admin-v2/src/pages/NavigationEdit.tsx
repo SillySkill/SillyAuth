@@ -87,7 +87,7 @@ const NavigationEdit: React.FC = () => {
       const data = response?.data?.items ?? response?.items ?? response ?? [];
       setItems(Array.isArray(data) ? data : []);
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to load navigation';
+      const msg = error instanceof Error ? error.message : '加载导航失败';
       message.error(msg);
     } finally {
       setLoading(false);
@@ -106,9 +106,9 @@ const NavigationEdit: React.FC = () => {
     setSaving(true);
     try {
       await api.put('/cms/navigation', { items });
-      message.success('Navigation saved successfully');
+      message.success('导航保存成功');
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to save navigation';
+      const msg = error instanceof Error ? error.message : '保存导航失败';
       message.error(msg);
     } finally {
       setSaving(false);
@@ -155,7 +155,7 @@ const NavigationEdit: React.FC = () => {
               : item
           )
         );
-        message.success('Item updated');
+        message.success('项目已更新');
       } else {
         // Add new item
         const newItem: NavItem = {
@@ -170,7 +170,7 @@ const NavigationEdit: React.FC = () => {
           __isNew: true,
         };
         setItems((prev) => [...prev, newItem]);
-        message.success('Item added');
+        message.success('项目已添加');
       }
 
       setModalVisible(false);
@@ -181,7 +181,7 @@ const NavigationEdit: React.FC = () => {
 
   const handleDelete = (record: NavItem) => {
     setItems((prev) => prev.filter((item) => item.id !== record.id));
-    message.success('Item deleted');
+    message.success('项目已删除');
   };
 
   const handleMoveUp = (index: number) => {
@@ -216,7 +216,7 @@ const NavigationEdit: React.FC = () => {
 
   const columns: ColumnsType<NavItem> = [
     {
-      title: 'Sort',
+      title: '排序',
       key: 'sort_actions',
       width: 80,
       render: (_: unknown, _record: NavItem, index: number) => (
@@ -239,13 +239,13 @@ const NavigationEdit: React.FC = () => {
       ),
     },
     {
-      title: 'Label (ZH)',
+      title: '中文标签',
       dataIndex: 'label_zh',
       key: 'label_zh',
       width: 150,
     },
     {
-      title: 'Label (EN)',
+      title: '英文标签',
       dataIndex: 'label_en',
       key: 'label_en',
       width: 150,
@@ -258,14 +258,14 @@ const NavigationEdit: React.FC = () => {
       ellipsis: true,
     },
     {
-      title: 'Icon',
+      title: '图标',
       dataIndex: 'icon',
       key: 'icon',
       width: 120,
-      render: (icon: string) => icon || <Tag>none</Tag>,
+      render: (icon: string) => icon || <Tag>无</Tag>,
     },
     {
-      title: 'Visible',
+      title: '可见',
       dataIndex: 'is_visible',
       key: 'is_visible',
       width: 80,
@@ -278,13 +278,13 @@ const NavigationEdit: React.FC = () => {
       ),
     },
     {
-      title: 'Sort Order',
+      title: '排序值',
       dataIndex: 'sort_order',
       key: 'sort_order',
       width: 100,
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 160,
       fixed: 'right',
@@ -296,13 +296,13 @@ const NavigationEdit: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           >
-            Edit
+            编辑
           </Button>
           <Popconfirm
-            title="Delete this navigation item?"
+            title="确定删除此导航项？"
             onConfirm={() => handleDelete(record)}
-            okText="Yes"
-            cancelText="No"
+            okText="是"
+            cancelText="否"
           >
             <Button
               type="link"
@@ -310,7 +310,7 @@ const NavigationEdit: React.FC = () => {
               danger
               icon={<DeleteOutlined />}
             >
-              Delete
+              删除
             </Button>
           </Popconfirm>
         </Space>
@@ -325,9 +325,9 @@ const NavigationEdit: React.FC = () => {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <Title level={2}>Navigation Editor</Title>
+        <Title level={2}>导航编辑</Title>
         <p style={{ color: '#888' }}>
-          Manage the site navigation menu using drag-and-drop or move buttons. Click Save to persist changes.
+          通过拖拽或移动按钮管理站点导航菜单，点击保存以持久化更改。
         </p>
       </div>
 
@@ -335,10 +335,10 @@ const NavigationEdit: React.FC = () => {
         extra={
           <Space>
             <Button icon={<ReloadOutlined />} onClick={loadNavigation}>
-              Reload
+              重新加载
             </Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              Add Item
+              添加项
             </Button>
             <Button
               type="primary"
@@ -346,7 +346,7 @@ const NavigationEdit: React.FC = () => {
               onClick={handleSaveAll}
               loading={saving}
             >
-              Save Changes
+              保存修改
             </Button>
           </Space>
         }
@@ -360,7 +360,7 @@ const NavigationEdit: React.FC = () => {
             pagination={false}
             scroll={{ x: 1000 }}
             locale={{
-              emptyText: <Empty description="No navigation items. Add one to get started." />,
+              emptyText: <Empty description="暂无导航项，点击添加开始使用。" />,
             }}
           />
         </Spin>
@@ -368,7 +368,7 @@ const NavigationEdit: React.FC = () => {
 
       {/* Add/Edit Modal */}
       <Modal
-        title={editingItem ? 'Edit Navigation Item' : 'Add Navigation Item'}
+        title={editingItem ? '编辑导航项' : '添加导航项'}
         open={modalVisible}
         onOk={handleModalSubmit}
         onCancel={() => setModalVisible(false)}
@@ -378,36 +378,36 @@ const NavigationEdit: React.FC = () => {
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item
             name="label_zh"
-            label="Label (Chinese)"
-            rules={[{ required: true, message: 'Please enter the Chinese label' }]}
+            label="中文标签"
+            rules={[{ required: true, message: '请输入中文标签' }]}
           >
             <Input placeholder="e.g. 首页" />
           </Form.Item>
           <Form.Item
             name="label_en"
-            label="Label (English)"
-            rules={[{ required: true, message: 'Please enter the English label' }]}
+            label="英文标签"
+            rules={[{ required: true, message: '请输入英文标签' }]}
           >
             <Input placeholder="e.g. Home" />
           </Form.Item>
           <Form.Item
             name="url"
             label="URL"
-            rules={[{ required: true, message: 'Please enter the URL' }]}
+            rules={[{ required: true, message: '请输入 URL' }]}
           >
             <Input placeholder="e.g. /home or https://..." />
           </Form.Item>
-          <Form.Item name="icon" label="Icon (text/class name)">
+          <Form.Item name="icon" label="图标（文本/类名）">
             <Input placeholder="e.g. HomeOutlined" />
           </Form.Item>
           <Form.Item
             name="sort_order"
-            label="Sort Order"
-            rules={[{ required: true, message: 'Please enter sort order' }]}
+            label="排序值"
+            rules={[{ required: true, message: '请输入排序值' }]}
           >
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="is_visible" label="Visible" valuePropName="checked">
+          <Form.Item name="is_visible" label="可见" valuePropName="checked">
             <Switch />
           </Form.Item>
         </Form>

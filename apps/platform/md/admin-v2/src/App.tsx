@@ -20,6 +20,9 @@ import NavigationEdit from '@/pages/NavigationEdit';
 import SEOSettings from '@/pages/SEOSettings';
 import I18nManagement from '@/pages/I18nManagement';
 import ModuleManagement from '@/pages/ModuleManagement';
+import ConfigDataManagement from '@/pages/ConfigDataManagement';
+import StoreManagement from '@/pages/StoreManagement';
+import TasksManagement from '@/pages/TasksManagement';
 
 // Protected route wrapper – redirects to /login if not authenticated
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -92,6 +95,9 @@ const App: React.FC = () => {
         <Route path="seo" element={<SEOSettings />} />
         <Route path="i18n" element={<I18nManagement />} />
         <Route path="modules" element={<ModuleManagement />} />
+        <Route path="config-data" element={<ConfigDataManagement />} />
+        <Route path="store" element={<StoreManagement />} />
+        <Route path="tasks" element={<TasksManagement />} />
       </Route>
 
       {/* Catch-all: redirect unknown paths to dashboard */}

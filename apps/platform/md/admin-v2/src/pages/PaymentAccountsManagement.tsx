@@ -98,7 +98,7 @@ const PaymentAccountsManagement: React.FC = () => {
       setAccounts(Array.isArray(data) ? data : []);
       setPagination({ current: page, pageSize, total: data.length });
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to load payment accounts';
+      const msg = error instanceof Error ? error.message : '加载支付账户失败';
       message.error(msg);
     } finally {
       setLoading(false);
@@ -151,7 +151,7 @@ const PaymentAccountsManagement: React.FC = () => {
         try {
           parsedCredentials = JSON.parse(values.credentials);
         } catch {
-          message.error('Credentials must be valid JSON');
+          message.error('凭证必须是有效的JSON格式');
           setSubmitting(false);
           return;
         }
@@ -168,10 +168,10 @@ const PaymentAccountsManagement: React.FC = () => {
 
       if (editingAccount) {
         await updatePaymentAccount(editingAccount.id, payload);
-        message.success('Payment account updated successfully');
+        message.success('支付账户更新成功');
       } else {
         await createPaymentAccount(payload);
-        message.success('Payment account created successfully');
+        message.success('支付账户创建成功');
       }
 
       handleCloseModal();
@@ -180,7 +180,7 @@ const PaymentAccountsManagement: React.FC = () => {
       if (error instanceof Error && error.message?.includes('Validation')) {
         return; // Form validation error
       }
-      const msg = error instanceof Error ? error.message : 'Operation failed';
+      const msg = error instanceof Error ? error.message : '操作失败';
       message.error(msg);
     } finally {
       setSubmitting(false);
@@ -189,18 +189,18 @@ const PaymentAccountsManagement: React.FC = () => {
 
   const handleDelete = (record: PaymentAccount) => {
     Modal.confirm({
-      title: 'Delete Payment Account',
-      content: `Are you sure you want to delete "${record.account_name}"? This action cannot be undone.`,
-      okText: 'Delete',
+      title: '删除支付账户',
+      content: `确定要删除 "${record.account_name}" 吗？此操作不可撤销。`,
+      okText: '删除',
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: '取消',
       onOk: async () => {
         try {
           await deletePaymentAccount(record.id);
-          message.success('Payment account deleted successfully');
+          message.success('支付账户删除成功');
           loadAccounts(pagination.current, pagination.pageSize);
         } catch (error: unknown) {
-          const msg = error instanceof Error ? error.message : 'Delete failed';
+          const msg = error instanceof Error ? error.message : '删除失败';
           message.error(msg);
         }
       },
@@ -210,10 +210,10 @@ const PaymentAccountsManagement: React.FC = () => {
   const handleSwitchChange = async (record: PaymentAccount, checked: boolean) => {
     try {
       await updatePaymentAccount(record.id, { is_active: checked });
-      message.success(`Account ${checked ? 'activated' : 'deactivated'}`);
+      message.success(`账户${checked ? '已启用' : '已停用'}`);
       loadAccounts(pagination.current, pagination.pageSize);
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Update failed';
+      const msg = error instanceof Error ? error.message : '更新失败';
       message.error(msg);
     }
   };
@@ -232,10 +232,10 @@ const PaymentAccountsManagement: React.FC = () => {
 
   const getAccountTypeTag = (type: string) => {
     const config: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
-      wechat: { color: 'green', icon: <WechatOutlined />, label: 'WeChat' },
-      alipay: { color: 'blue', icon: <AlipayOutlined />, label: 'Alipay' },
+      wechat: { color: 'green', icon: <WechatOutlined />, label: '微信' },
+      alipay: { color: 'blue', icon: <AlipayOutlined />, label: '支付宝' },
       paypal: { color: 'geekblue', icon: <PayCircleOutlined />, label: 'PayPal' },
-      bank: { color: 'purple', icon: <CreditCardOutlined />, label: 'Bank' },
+      bank: { color: 'purple', icon: <CreditCardOutlined />, label: '银行' },
     };
     const info = config[type] || { color: 'default', icon: null, label: type };
     return (
@@ -258,33 +258,33 @@ const PaymentAccountsManagement: React.FC = () => {
       sorter: true,
     },
     {
-      title: 'Account Type',
+      title: '账户类型',
       dataIndex: 'account_type',
       key: 'account_type',
       width: 130,
       render: (type: string) => getAccountTypeTag(type),
       filters: [
-        { text: 'WeChat', value: 'wechat' },
-        { text: 'Alipay', value: 'alipay' },
+        { text: '微信', value: 'wechat' },
+        { text: '支付宝', value: 'alipay' },
         { text: 'PayPal', value: 'paypal' },
-        { text: 'Bank', value: 'bank' },
+        { text: '银行', value: 'bank' },
       ],
       onFilter: (value, record) => record.account_type === value,
     },
     {
-      title: 'Account Name',
+      title: '账户名称',
       dataIndex: 'account_name',
       key: 'account_name',
       ellipsis: true,
     },
     {
-      title: 'Account ID',
+      title: '账户ID',
       dataIndex: 'account_id',
       key: 'account_id',
       ellipsis: true,
     },
     {
-      title: 'Is Active',
+      title: '是否激活',
       dataIndex: 'is_active',
       key: 'is_active',
       width: 100,
@@ -297,29 +297,29 @@ const PaymentAccountsManagement: React.FC = () => {
       ),
     },
     {
-      title: 'Is Primary',
+      title: '是否主要',
       dataIndex: 'is_primary',
       key: 'is_primary',
       width: 110,
       render: (isPrimary: boolean) =>
-        isPrimary ? <Tag color="gold">Primary</Tag> : <Tag>Secondary</Tag>,
+        isPrimary ? <Tag color="gold">主要</Tag> : <Tag>次要</Tag>,
     },
     {
-      title: 'Priority',
+      title: '优先级',
       dataIndex: 'priority',
       key: 'priority',
       width: 90,
       sorter: true,
     },
     {
-      title: 'Currency',
+      title: '货币',
       dataIndex: 'currency',
       key: 'currency',
       width: 90,
       render: (currency: string) => <Tag>{currency}</Tag>,
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       width: 160,
       fixed: 'right',
@@ -331,7 +331,7 @@ const PaymentAccountsManagement: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => handleOpenEdit(record)}
           >
-            Edit
+            编辑
           </Button>
           <Button
             type="link"
@@ -340,7 +340,7 @@ const PaymentAccountsManagement: React.FC = () => {
             icon={<DeleteOutlined />}
             onClick={() => handleDelete(record)}
           >
-            Delete
+            删除
           </Button>
         </Space>
       ),
@@ -354,9 +354,9 @@ const PaymentAccountsManagement: React.FC = () => {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <Title level={2}>Payment Accounts Management</Title>
+        <Title level={2}>支付账户管理</Title>
         <p style={{ color: '#888' }}>
-          Manage platform payment accounts for WeChat, Alipay, PayPal, and bank transfers.
+          管理平台的微信、支付宝、PayPal 和银行转账支付账户。
         </p>
       </div>
 
@@ -367,10 +367,10 @@ const PaymentAccountsManagement: React.FC = () => {
               icon={<ReloadOutlined />}
               onClick={() => loadAccounts(pagination.current, pagination.pageSize)}
             >
-              Refresh
+              刷新
             </Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
-              Add Account
+              添加账户
             </Button>
           </Space>
         }
@@ -385,11 +385,11 @@ const PaymentAccountsManagement: React.FC = () => {
             pagination={{
               ...pagination,
               showSizeChanger: true,
-              showTotal: (total) => `Total ${total} accounts`,
+              showTotal: (total) => `共 ${total} 个账户`,
             }}
             scroll={{ x: 1100 }}
             locale={{
-              emptyText: <Empty description="No payment accounts found" />,
+              emptyText: <Empty description="暂无支付账户" />,
             }}
           />
         </Spin>
@@ -397,7 +397,7 @@ const PaymentAccountsManagement: React.FC = () => {
 
       {/* Create / Edit Modal */}
       <Modal
-        title={editingAccount ? 'Edit Payment Account' : 'Add Payment Account'}
+        title={editingAccount ? '编辑支付账户' : '添加支付账户'}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={handleCloseModal}
@@ -408,40 +408,40 @@ const PaymentAccountsManagement: React.FC = () => {
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item
             name="account_type"
-            label="Account Type"
-            rules={[{ required: true, message: 'Please select an account type' }]}
+            label="账户类型"
+            rules={[{ required: true, message: '请选择账户类型' }]}
           >
             <Select
-              placeholder="Select account type"
+              placeholder="请选择账户类型"
               options={[
-                { label: 'WeChat Pay', value: 'wechat' },
-                { label: 'Alipay', value: 'alipay' },
+                { label: '微信支付', value: 'wechat' },
+                { label: '支付宝', value: 'alipay' },
                 { label: 'PayPal', value: 'paypal' },
-                { label: 'Bank Transfer', value: 'bank' },
+                { label: '银行转账', value: 'bank' },
               ]}
             />
           </Form.Item>
 
           <Form.Item
             name="account_name"
-            label="Account Name"
-            rules={[{ required: true, message: 'Please enter account name' }]}
+            label="账户名称"
+            rules={[{ required: true, message: '请输入账户名称' }]}
           >
-            <Input placeholder="e.g. WeChat Main Account" />
+            <Input placeholder="例如：微信主账户" />
           </Form.Item>
 
           <Form.Item
             name="account_id"
-            label="Account ID"
-            rules={[{ required: true, message: 'Please enter account ID' }]}
+            label="账户ID"
+            rules={[{ required: true, message: '请输入账户ID' }]}
           >
-            <Input placeholder="Unique account identifier" />
+            <Input placeholder="唯一账户标识符" />
           </Form.Item>
 
           <Form.Item
             name="credentials"
-            label="Credentials (JSON)"
-            rules={[{ required: true, message: 'Please enter credentials' }]}
+            label="凭证 (JSON)"
+            rules={[{ required: true, message: '请输入凭证' }]}
           >
             <TextArea
               rows={6}
@@ -451,20 +451,20 @@ const PaymentAccountsManagement: React.FC = () => {
 
           <Form.Item
             name="currency"
-            label="Currency"
-            rules={[{ required: true, message: 'Please select a currency' }]}
+            label="货币"
+            rules={[{ required: true, message: '请选择货币' }]}
           >
             <Select
               options={[
-                { label: 'CNY (Chinese Yuan)', value: 'CNY' },
-                { label: 'USD (US Dollar)', value: 'USD' },
-                { label: 'EUR (Euro)', value: 'EUR' },
+                { label: 'CNY（人民币）', value: 'CNY' },
+                { label: 'USD（美元）', value: 'USD' },
+                { label: 'EUR（欧元）', value: 'EUR' },
               ]}
             />
           </Form.Item>
 
-          <Form.Item name="description" label="Description">
-            <TextArea rows={3} placeholder="Optional description" />
+          <Form.Item name="description" label="描述">
+            <TextArea rows={3} placeholder="可选描述" />
           </Form.Item>
         </Form>
       </Modal>

@@ -17,6 +17,10 @@ from __future__ import annotations
 from typing import List
 from pydantic import BaseModel
 
+from fastapi import FastAPI, Request
+from starlette.responses import HTMLResponse
+from core.template_helpers import render_template
+
 from .routes import router as store_router
 from .routes import admin_router as admin_store_router
 from .services import StoreService, AdminStoreService
@@ -91,6 +95,92 @@ class BaseModule:
     def get_router(self):
         """获取公共路由"""
         return self.router
+
+    def install(self, app: FastAPI) -> None:
+        """安装模块到应用"""
+        app.include_router(self.router)
+        # Page routes
+        @app.get("/store", response_class=HTMLResponse, include_in_schema=False)
+        async def store_page(request: Request):
+            try:
+                from core.db_adapter import get_db_cursor
+                collections = []
+                products = []
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("""
+                            SELECT sc.*, COUNT(sp.id) as product_count
+                            FROM store_collections sc
+                            LEFT JOIN store_products sp ON sp.collection_id = sc.id AND sp.is_active = TRUE
+                            WHERE sc.is_active = TRUE
+                            GROUP BY sc.id
+                            ORDER BY sc.sort_order, sc.id
+                        """)
+                        rows = cur.fetchall()
+                        for r in rows:
+                            collections.append({
+                                "id": r.get("id"),
+                                "name": r.get("name", ""),
+                                "collection_key": r.get("collection_key", ""),
+                                "description": r.get("description", ""),
+                                "image_url": r.get("image_url", ""),
+                                "product_count": r.get("product_count", 0),
+                            })
+
+                        cur.execute("""
+                            SELECT sp.*, sc.name as collection_name, sc.collection_key
+                            FROM store_products sp
+                            LEFT JOIN store_collections sc ON sp.collection_id = sc.id
+                            WHERE sp.is_active = TRUE
+                            ORDER BY sp.sort_order, sp.id
+                            LIMIT 30
+                        """)
+                        p_rows = cur.fetchall()
+                        for p in p_rows:
+                            products.append({
+                                "id": p.get("id"),
+                                "name": p.get("name", ""),
+                                "description": p.get("description", ""),
+                                "price": float(p.get("price", 0) or 0),
+                                "original_price": float(p.get("original_price", 0) or 0),
+                                "image_url": p.get("image_url", ""),
+                                "collection_name": p.get("collection_name", ""),
+                                "collection_key": p.get("collection_key", ""),
+                                "stock": p.get("stock", 0),
+                                "sales_count": p.get("sales_count", 0),
+                            })
+                except Exception:
+                    products, collections = [], []
+
+            except Exception:
+                products, collections = [], []
+
+            # Merge: set collection = first collection with its products
+            collection = None
+            if collections:
+                first = collections[0]
+                ckey = first.get("collection_key", "")
+                coll_products = [p for p in products if p.get("collection_key") == ckey]
+                collection = {
+                    "id": first.get("id"),
+                    "name": first.get("name", ""),
+                    "name_zh": first.get("name", ""),
+                    "collection_key": ckey,
+                    "description": first.get("description", ""),
+                    "image_url": first.get("image_url", ""),
+                    "product_count": first.get("product_count", 0),
+                    "products": coll_products,
+                }
+                # Add name_zh, url to all collections for the switcher
+                for c in collections:
+                    c["name_zh"] = c.get("name", "")
+                    c["url"] = f"/store?collection={c.get('collection_key', '')}"
+
+            # No server-side cart; client JS manages it
+            return render_template(request, "store/index.html", {
+                "collection": collection,
+                "collections": collections,
+            })
 
     def get_admin_router(self):
         """获取管理路由"""

@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}{{ vendor.display_name if vendor and vendor.display_name else '供应商' }} - {{ site_name }}{% endblock %}
+
+{% block extra_head %}
+{% if vendor %}
+<meta name="description" content="{{ vendor.description or (vendor.display_name + ' 的供应商主页') }}">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if vendor %}
+<!-- Vendor Hero Banner -->
+<section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 120px 0 60px; color: white; position: relative; overflow: hidden;">
+  <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.1; background-image: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.2) 0%, transparent 50%);"></div>
+  <div class="container" style="position: relative;">
+    <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+      <!-- Avatar -->
+      <div style="flex-shrink: 0;">
+        {% if vendor.avatar_url %}
+        <img src="{{ vendor.avatar_url }}" alt="{{ vendor.display_name }}" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover;" onerror="this.src='/static/img/avatar-default.svg'">
+        {% else %}
+        <div style="width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 4px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 700; color: white;">
+          {{ (vendor.display_name or vendor.username or '?')[0] | upper }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Info -->
+      <div style="flex: 1; min-width: 200px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap;">
+          <h1 style="font-size: 2rem; font-weight: 700; margin: 0; color: white;">{{ vendor.display_name }}</h1>
+          {% if vendor.tier_name %}
+          <span style="padding: 4px 14px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 16px; font-size: 0.8rem; font-weight: 500; color: white; backdrop-filter: blur(4px);">
+            {% if vendor.tier_emoji %}{{ vendor.tier_emoji }} {% endif %}{{ vendor.tier_name }}
+          </span>
+          {% endif %}
+        </div>
+        {% if vendor.username %}
+        <p style="color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-bottom: 4px;">@{{ vendor.username }}</p>
+        {% endif %}
+        {% if vendor.description %}
+        <p style="color: rgba(255,255,255,0.85); font-size: 0.95rem; max-width: 600px; line-height: 1.6; margin-top: 8px;">{{ vendor.description }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Vendor Stats Bar -->
+<section style="background: var(--bg-white); border-bottom: 1px solid var(--border-light); box-shadow: var(--shadow-sm);">
+  <div class="container">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 48px; padding: 24px 0; flex-wrap: wrap;">
+      <div style="text-align: center;">
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">{{ vendor.total_skills or 0 }}</div>
+        <div style="font-size: 0.85rem; color: var(--text-light);">Skills</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">{{ vendor.total_sales or 0 }}</div>
+        <div style="font-size: 0.85rem; color: var(--text-light);">销量</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--secondary);">
+          {{ vendor.rating_avg or '0.0' }} <i class="fas fa-star" style="font-size: 0.9rem; color: #FFC107;"></i>
+        </div>
+        <div style="font-size: 0.85rem; color: var(--text-light);">平均评分</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Skills Grid Section -->
+<section style="padding: 48px 0 80px;">
+  <div class="container" style="max-width: 1200px;">
+
+    <!-- Section Header -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+      <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">
+        <i class="fas fa-cubes" style="color: var(--primary); margin-right: 8px;"></i>
+        Skills 作品
+        <span style="font-size: 0.9rem; font-weight: 400; color: var(--text-light); margin-left: 8px;">
+          ({{ vendor.skills | length if vendor.skills else 0 }})
+        </span>
+      </h2>
+    </div>
+
+    {% if vendor.skills %}
+    <!-- Skills Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+      {% for skill in vendor.skills %}
+      <a href="/skills/{{ skill.slug or skill.name }}" style="text-decoration: none; color: inherit;">
+        <div class="skill-card" style="height: 100%;"
+             onmouseenter="this.style.transform='translateY(-4px)';this.style.borderColor='var(--primary-light)';this.style.boxShadow='var(--shadow-card)'"
+             onmouseleave="this.style.transform='translateY(0)';this.style.borderColor='var(--border-light)';this.style.boxShadow='var(--shadow-sm)'">
+          <div style="width: 100%; height: 140px; background: {{ skill.bg_gradient or 'linear-gradient(135deg, #667eea, #764ba2)' }}; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: white;">
+            {{ skill.emoji or '📦' }}
+          </div>
+          <div style="padding: 20px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+              {% if skill.category %}
+              <span style="padding: 3px 10px; background: rgba(79, 110, 247, 0.08); border: 1px solid rgba(79, 110, 247, 0.15); border-radius: 12px; font-size: 0.75rem; color: var(--primary);">{{ skill.category }}</span>
+              {% endif %}
+              {% if skill.price_display %}
+              <span style="margin-left: auto; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+                {% if skill.price_display == '免费' %}
+                background: rgba(55, 214, 122, 0.1); border: 1px solid rgba(55, 214, 122, 0.3); color: #2da44e;
+                {% else %}
+                background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #d97706;
+                {% endif %}">
+                {{ skill.price_display }}
+              </span>
+              {% endif %}
+            </div>
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">{{ skill.name }}</h3>
+            {% if skill.description %}
+            <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 16px;">
+              {{ skill.description }}
+            </p>
+            {% endif %}
+            <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border-light);">
+              {% if skill.downloads is not none %}
+              <span style="font-size: 0.8rem; color: var(--text-light);">
+                <i class="fas fa-download"></i> {{ skill.downloads }}
+              </span>
+              {% endif %}
+              {% if skill.rating %}
+              <span style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: #f59e0b;">
+                <i class="fas fa-star"></i> {{ skill.rating }}
+              </span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div style="padding: 80px 20px; text-align: center; color: var(--text-light);">
+      <i class="fas fa-cube" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+      <p style="font-size: 1.1rem;">暂无 Skills 作品</p>
+      <p style="font-size: 0.85rem; margin-top: 4px;">该供应商尚未发布任何作品</p>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+
+{% elif vendor_error %}
+<!-- Error State -->
+<section style="padding: 120px 0 80px; text-align: center;">
+  <div class="container">
+    <div style="padding: 80px 20px; color: var(--text-light);">
+      <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 16px; display: block; color: #ef4444;"></i>
+      <p style="font-size: 1.1rem;">{{ vendor_error }}</p>
+      <a href="/marketplace" class="btn btn-ghost" style="margin-top: 16px;">
+        <i class="fas fa-arrow-left"></i> 返回市场
+      </a>
+    </div>
+  </div>
+</section>
+
+{% else %}
+<!-- Empty State -->
+<section style="padding: 120px 0 80px; text-align: center;">
+  <div class="container">
+    <div style="padding: 80px 20px; color: var(--text-light);">
+      <i class="fas fa-user" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+      <p style="font-size: 1.1rem;">供应商不存在</p>
+      <a href="/marketplace" class="btn btn-ghost" style="margin-top: 16px;">
+        <i class="fas fa-arrow-left"></i> 返回市场
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

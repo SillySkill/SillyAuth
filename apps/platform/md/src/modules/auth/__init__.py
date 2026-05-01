@@ -25,7 +25,9 @@ from typing import Optional, Dict, Any
 from pathlib import Path
 import yaml
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from starlette.responses import HTMLResponse
+from core.template_helpers import render_template
 from pydantic import BaseModel
 
 # Import components
@@ -145,6 +147,23 @@ class SillyMDModule:
         app.include_router(auth_router)
 
         logger.info(f"Auth routes registered at {auth_router.prefix}")
+
+        # Page routes
+        @app.get("/login", response_class=HTMLResponse, include_in_schema=False)
+        async def login_page(request: Request):
+            return render_template(request, "auth/login.html")
+
+        @app.get("/register", response_class=HTMLResponse, include_in_schema=False)
+        async def register_page(request: Request):
+            return render_template(request, "auth/register.html")
+
+        @app.get("/forgot-password", response_class=HTMLResponse, include_in_schema=False)
+        async def forgot_password_page(request: Request):
+            return render_template(request, "auth/forgot-password.html")
+
+        @app.get("/reset-password", response_class=HTMLResponse, include_in_schema=False)
+        async def reset_password_page(request: Request):
+            return render_template(request, "auth/reset-password.html")
 
     def install(self, app: FastAPI) -> None:
         """Alias for register() - for PluginManager compatibility."""

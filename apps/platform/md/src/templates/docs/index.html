@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}文档中心 - {{ site_name }}{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ site_name }} 文档中心 - 全面的使用指南与开发文档">
+{% endblock %}
+
+{% block content %}
+<!-- Docs Hero -->
+<section style="padding: 120px 0 60px; text-align: center; background: var(--gradient-light);">
+  <div class="container">
+    <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">
+      文档<span class="text-gradient">中心</span>
+    </h1>
+    <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 32px;">
+      从入门到精通，全面掌握 {{ site_name }} 平台的使用与开发
+    </p>
+
+    <!-- Search Box -->
+    <div style="max-width: 500px; margin: 0 auto;">
+      <div style="position: relative;">
+        <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-light);"></i>
+        <input type="text" id="docsSearch" placeholder="搜索文档..."
+               style="width: 100%; padding: 14px 16px 14px 44px; border: 1px solid var(--border-medium); border-radius: var(--radius-lg); font-family: inherit; font-size: 0.95rem; color: var(--text-primary); background: var(--bg-white); transition: border-color 0.3s;">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories Grid -->
+<section style="padding: 60px 0 80px;">
+  <div class="container" style="max-width: 1200px;">
+
+    {% if doc_categories %}
+    <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 32px; color: var(--text-primary); text-align: center;">
+      选择文档分类
+    </h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+      {% for cat in doc_categories %}
+      <a href="/docs/category/{{ cat.slug or cat.id }}" class="doc-category-card"
+         style="display: block; padding: 32px; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); text-decoration: none; color: inherit; transition: all 0.3s; box-shadow: var(--shadow-sm);"
+         onmouseenter="this.style.transform='translateY(-4px)';this.style.borderColor='var(--primary-light)';this.style.boxShadow='var(--shadow-card)'"
+         onmouseleave="this.style.transform='translateY(0)';this.style.borderColor='var(--border-light)';this.style.boxShadow='var(--shadow-sm)'">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+          <div style="width: 48px; height: 48px; background: linear-gradient(135deg, rgba(79, 110, 247, 0.08), rgba(132, 94, 247, 0.08)); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+            {% if cat.icon %}
+            <i class="{{ cat.icon }}" style="color: var(--primary);"></i>
+            {% else %}
+            <i class="fas fa-book" style="color: var(--primary);"></i>
+            {% endif %}
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-light); padding: 4px 12px; background: var(--bg-gray); border-radius: 12px; font-weight: 500;">
+            {{ cat.article_count or 0 }} 篇
+          </span>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">{{ cat.name }}</h3>
+        {% if cat.description %}
+        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">{{ cat.description }}</p>
+        {% endif %}
+        <div style="margin-top: 16px; font-size: 0.85rem; color: var(--primary); font-weight: 500;">
+          浏览文档 <i class="fas fa-arrow-right" style="margin-left: 4px;"></i>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div style="padding: 80px 20px; text-align: center; color: var(--text-light);">
+      <i class="fas fa-book" style="font-size: 3rem; margin-bottom: 16px; display: block;"></i>
+      <p style="font-size: 1.1rem;">暂无文档分类</p>
+      <p style="font-size: 0.85rem; margin-top: 8px;">文档正在建设中，敬请期待</p>
+    </div>
+    {% endif %}
+
+    <!-- Quick Start Section -->
+    {% if quick_start_articles %}
+    <div style="margin-top: 80px;">
+      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 32px; color: var(--text-primary); text-align: center;">
+        快速入门
+      </h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto;">
+        {% for article in quick_start_articles %}
+        <a href="/articles/{{ article.slug }}" style="display: flex; align-items: center; gap: 16px; padding: 24px; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-md); text-decoration: none; color: inherit; transition: all 0.3s; box-shadow: var(--shadow-sm);"
+           onmouseenter="this.style.transform='translateX(4px)';this.style.borderColor='var(--primary-light)';this.style.boxShadow='var(--shadow-card)'"
+           onmouseleave="this.style.transform='translateX(0)';this.style.borderColor='var(--border-light)';this.style.boxShadow='var(--shadow-sm)'">
+          <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; flex-shrink: 0;">
+            {{ loop.index }}
+          </div>
+          <div style="min-width: 0;">
+            <h4 style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem; margin-bottom: 4px;">{{ article.title }}</h4>
+            {% if article.summary %}
+            <p style="color: var(--text-light); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ article.summary }}</p>
+            {% endif %}
+          </div>
+          <i class="fas fa-chevron-right" style="color: var(--text-light); flex-shrink: 0;"></i>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.getElementById('docsSearch').addEventListener('input', function() {
+  var query = this.value.toLowerCase();
+  var cards = document.querySelectorAll('.doc-category-card');
+  cards.forEach(function(card) {
+    var text = card.textContent.toLowerCase();
+    card.style.display = text.indexOf(query) !== -1 ? 'block' : 'none';
+  });
+});
+</script>
+{% endblock %}

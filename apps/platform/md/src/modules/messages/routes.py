@@ -38,7 +38,9 @@ router = APIRouter(prefix="/api/v1/messages", tags=["消息"])
 security = HTTPBearer()
 
 # JWT configuration
-SECRET_KEY = os.getenv("JWT_SECRET", "CHANGE-ME-IN-PRODUCTION")
+SECRET_KEY = os.getenv("JWT_SECRET")
+if not SECRET_KEY:
+    raise RuntimeError("JWT_SECRET environment variable is required.")
 ALGORITHM = "HS256"
 
 
