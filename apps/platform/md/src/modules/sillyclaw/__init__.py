@@ -141,7 +141,7 @@ class SillyMDModule:
                             import json as _js
                             product = _js.loads(raw) if isinstance(raw, str) else raw
                 except Exception:
-                    product = {"name": "SillyClaw", "description": "AI Skills 实体化硬件平台"}
+                    product = {}
 
                 try:
                     with get_db_cursor() as cur:
@@ -165,7 +165,35 @@ class SillyMDModule:
         async def openclaw_page(request: Request):
             try:
                 from core.db_adapter import get_db_cursor
+                product = {}
+                variants = []
                 openclaw_data = {}
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyclaw", "product"))
+                        row = cur.fetchone()
+                        if row and row.get("data"):
+                            raw = row["data"]
+                            import json as _js
+                            product = _js.loads(raw) if isinstance(raw, str) else raw
+                except Exception:
+                    product = {}
+
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyclaw", "variants"))
+                        row = cur.fetchone()
+                        if row and row.get("data"):
+                            raw = row["data"]
+                            import json as _jv
+                            variants = _jv.loads(raw) if isinstance(raw, str) else raw
+                except Exception:
+                    variants = []
+
+                # Fallback: if no independent variants record exists, read from product.data.variants
+                if not variants and product.get("variants"):
+                    variants = product["variants"]
+
                 try:
                     with get_db_cursor() as cur:
                         cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyclaw", "openclaw"))
@@ -177,9 +205,11 @@ class SillyMDModule:
                 except Exception:
                     openclaw_data = {}
             except Exception:
-                openclaw_data = {}
+                product, variants, openclaw_data = {}, [], {}
 
             return render_template(request, "sillyclaw/openclaw.html", {
+                "product": product,
+                "variants": variants,
                 "openclaw": openclaw_data,
             })
 

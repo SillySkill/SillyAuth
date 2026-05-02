@@ -1,0 +1,617 @@
+/* ============================================
+   OpenClaw Product Page Styles
+   SillyMD — 傻福虾盘 Product Detail Page
+   ============================================ */
+
+/* ========== Design Tokens ========== */
+:root {
+  --oc-primary: #4F6EF7;
+  --oc-primary-dark: #3B55D9;
+  --oc-text: #1A1A2E;
+  --oc-text-secondary: #4A4A68;
+  --oc-text-light: #8A8AA8;
+  --oc-bg: #FFFFFF;
+  --oc-bg-alt: #F8FAFC;
+  --oc-border: rgba(79, 110, 247, 0.1);
+  --oc-border-red: rgba(229, 57, 53, 0.15);
+  --oc-border-cyan: rgba(0, 188, 212, 0.15);
+  --oc-radius: 16px;
+  --oc-radius-sm: 12px;
+  --oc-padding: 28px;
+  --oc-padding-sm: 20px;
+  --oc-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --oc-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --oc-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========== Section ========== */
+.oc-section {
+  padding: 60px 20px;
+  background: var(--oc-bg);
+}
+.oc-section-alt {
+  background: var(--oc-bg-alt);
+}
+.oc-section-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.oc-section-header h2 {
+  font-size: 2rem;
+  color: var(--oc-text);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+.oc-section-header h2 i {
+  color: var(--oc-primary);
+  margin-right: 6px;
+}
+.oc-section-header p {
+  color: var(--oc-text-light);
+  font-size: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ========== Card Base ========== */
+.oc-card {
+  background: var(--oc-bg);
+  border-radius: var(--oc-radius);
+  padding: var(--oc-padding);
+  border: 1px solid var(--oc-border);
+  transition: var(--oc-transition);
+}
+.oc-card:hover {
+  box-shadow: var(--oc-shadow-hover);
+  transform: translateY(-2px);
+}
+/* Color variants */
+.oc-card-red {
+  border-color: var(--oc-border-red);
+}
+.oc-card-cyan {
+  border-color: var(--oc-border-cyan);
+}
+.oc-card-green {
+  border-color: rgba(76, 175, 80, 0.15);
+}
+.oc-card-orange {
+  border-color: rgba(255, 152, 0, 0.15);
+}
+.oc-card-purple {
+  border-color: rgba(156, 39, 176, 0.15);
+}
+/* Card with centered text */
+.oc-card-center {
+  text-align: center;
+}
+.oc-card-center .oc-card-body {
+  text-align: center;
+}
+/* Card body text */
+.oc-card-body h3 {
+  font-size: 1.15rem;
+  color: var(--oc-text);
+  margin-bottom: 8px;
+}
+.oc-card-body p {
+  color: var(--oc-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ========== Icon Containers ========== */
+.oc-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.oc-icon-square {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.oc-icon-circle-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.oc-icon-mode {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 24px;
+  color: #fff;
+}
+
+/* ========== Grid System ========== */
+.oc-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+.oc-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.oc-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.oc-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+.oc-grid-2-sm {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* ========== Agent Card Layout ========== */
+.oc-agent-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* ========== Specs Table ========== */
+.oc-specs-table {
+  max-width: 700px;
+  margin: 0 auto;
+  border: 1px solid var(--oc-border);
+  border-radius: var(--oc-radius-sm);
+  overflow: hidden;
+}
+.oc-specs-table-wide {
+  max-width: 800px;
+}
+.oc-spec-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--oc-border);
+  gap: 12px;
+}
+.oc-spec-row:last-child {
+  border-bottom: none;
+}
+.oc-spec-row .oc-spec-label {
+  min-width: 100px;
+  font-size: 0.82rem;
+  color: var(--oc-text-light);
+  flex-shrink: 0;
+}
+.oc-spec-row .oc-spec-value {
+  flex: 1;
+  color: var(--oc-text-secondary);
+  font-size: 0.9rem;
+}
+.oc-spec-row .oc-spec-action {
+  font-size: 0.8rem;
+  color: var(--oc-primary);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+/* ========== Showcase Layout ========== */
+.oc-showcase-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+.oc-showcase-image {
+  border-radius: var(--oc-radius);
+  overflow: hidden;
+  background: var(--oc-bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.oc-showcase-image img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.oc-showcase-text h3 {
+  font-size: 1.5rem;
+  color: var(--oc-text);
+  margin-bottom: 12px;
+}
+.oc-showcase-text p {
+  color: var(--oc-text-secondary);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+.oc-showcase-list {
+  list-style: none;
+  padding: 0;
+}
+.oc-showcase-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  color: var(--oc-text-secondary);
+  font-size: 0.95rem;
+}
+.oc-showcase-list li i {
+  color: #10b981;
+  width: 20px;
+  text-align: center;
+}
+
+/* ========== Photo Card ========== */
+.oc-photo-card {
+  border-radius: var(--oc-radius);
+  overflow: hidden;
+  background: var(--oc-bg);
+  border: 1px solid var(--oc-border);
+}
+.oc-photo-card img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+}
+.oc-photo-caption {
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  color: var(--oc-text-secondary);
+  text-align: center;
+}
+
+/* ========== Workflow ========== */
+.oc-workflow {
+  max-width: 600px;
+  margin: 32px auto 0;
+  background: var(--oc-bg);
+  border-radius: var(--oc-radius-sm);
+  padding: var(--oc-padding-sm);
+  border: 1px solid var(--oc-border);
+}
+.oc-workflow-title {
+  font-weight: 600;
+  color: var(--oc-text);
+  margin-bottom: 12px;
+  text-align: center;
+}
+.oc-workflow-steps {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.oc-workflow-step {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #fff;
+  white-space: nowrap;
+}
+.oc-workflow-step-1 {
+  background: var(--oc-primary);
+  background: linear-gradient(135deg, #4F6EF7, #6C5CE7);
+}
+.oc-workflow-step-2 {
+  background: #FF9800;
+}
+.oc-workflow-step-3 {
+  background: #4CAF50;
+}
+.oc-workflow-arrow {
+  color: var(--oc-text-light);
+  display: flex;
+  align-items: center;
+}
+/* Hide arrows on mobile wrap */
+@media (max-width: 600px) {
+  .oc-workflow-steps {
+    flex-direction: column;
+  }
+  .oc-workflow-arrow {
+    transform: rotate(90deg);
+  }
+}
+
+/* ========== Defect Card ========== */
+.oc-defect-card {
+  background: var(--oc-bg);
+  border-radius: var(--oc-radius-sm);
+  padding: var(--oc-padding-sm);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border: 1px solid var(--oc-border-red);
+}
+
+/* ========== Use Case Card ========== */
+.oc-use-case-card {
+  background: var(--oc-bg);
+  border-radius: var(--oc-radius-sm);
+  padding: var(--oc-padding-sm);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--oc-border);
+}
+
+/* ========== Color Dot ========== */
+.oc-color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ========== Gallery ========== */
+.oc-gallery {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.oc-gallery-main {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1;
+  border-radius: var(--oc-radius);
+  overflow: hidden;
+  background: linear-gradient(135deg, #F8FAFC, #EFF6FF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--oc-border);
+}
+.oc-gallery-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 0.3s;
+}
+.oc-gallery-thumbs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.oc-gallery-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  background: var(--oc-bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.oc-gallery-thumb:hover {
+  border-color: var(--oc-primary);
+}
+.oc-gallery-thumb.active {
+  border-color: var(--oc-primary);
+  box-shadow: 0 0 0 2px rgba(79, 110, 247, 0.2);
+}
+.oc-gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ========== Sticky Navigation ========== */
+.oc-sticky-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--oc-border);
+  padding: 0 20px;
+  display: none;
+}
+.oc-sticky-nav.oc-sticky-nav-visible {
+  display: block;
+}
+.oc-sticky-nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 8px 0;
+}
+.oc-sticky-nav-inner::-webkit-scrollbar {
+  display: none;
+}
+.oc-sticky-nav-link {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  color: var(--oc-text-secondary);
+  text-decoration: none;
+  border-radius: 8px;
+  white-space: nowrap;
+  transition: var(--oc-transition);
+  flex-shrink: 0;
+}
+.oc-sticky-nav-link:hover {
+  background: var(--oc-bg-alt);
+  color: var(--oc-primary);
+}
+.oc-sticky-nav-buy {
+  margin-left: auto;
+  background: var(--oc-primary);
+  color: #fff !important;
+  font-weight: 600;
+  padding: 8px 20px;
+}
+.oc-sticky-nav-buy:hover {
+  background: var(--oc-primary-dark) !important;
+  color: #fff !important;
+}
+
+/* ========== Sticky Purchase Bar ========== */
+.oc-sticky-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--oc-border);
+  padding: 12px 20px;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+}
+.oc-sticky-bar.oc-sticky-bar-visible {
+  transform: translateY(0);
+}
+.oc-sticky-bar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.oc-sticky-bar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.oc-sticky-bar-name {
+  font-size: 0.9rem;
+  color: var(--oc-text-secondary);
+}
+.oc-sticky-bar-variant {
+  font-size: 0.8rem;
+  color: var(--oc-text-light);
+}
+.oc-sticky-bar-price {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--oc-primary);
+}
+.oc-sticky-bar-btn {
+  padding: 10px 28px;
+  background: var(--oc-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--oc-radius-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--oc-transition);
+  white-space: nowrap;
+}
+.oc-sticky-bar-btn:hover {
+  background: var(--oc-primary-dark);
+  transform: translateY(-1px);
+}
+
+/* ========== Responsive Breakpoints ========== */
+@media (max-width: 900px) {
+  .oc-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .oc-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .oc-showcase-grid {
+    grid-template-columns: 1fr;
+  }
+  .oc-gallery-thumb {
+    width: 52px;
+    height: 52px;
+  }
+  .oc-section {
+    padding: 40px 16px;
+  }
+  .oc-section-header h2 {
+    font-size: 1.6rem;
+  }
+  .oc-sticky-nav {
+    padding: 0 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .oc-spec-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 12px 16px;
+  }
+  .oc-spec-row .oc-spec-label {
+    min-width: auto;
+  }
+  .oc-grid-2-sm {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .oc-grid-2,
+  .oc-grid-3,
+  .oc-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  .oc-section-header h2 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .oc-sticky-nav {
+    display: none !important;
+  }
+  .oc-sticky-bar {
+    display: none !important;
+  }
+  .oc-gallery-thumb {
+    width: 44px;
+    height: 44px;
+  }
+  .oc-hero-actions .btn {
+    padding: 10px 18px;
+    font-size: 0.9rem;
+  }
+}

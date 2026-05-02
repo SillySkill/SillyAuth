@@ -554,30 +554,145 @@ def seed_config_data(cur):
     # --- SillyClaw Product ---
     _seed_config(cur, "sillyclaw", "product", {
         "name": "傻福虾盘",
-        "description": "即插即用的 AI 技能 USB 设备，内置 100+ 实用 Skills，让 AI 能力触手可及",
-        "capacity_range": "8GB - 128GB",
-        "production_count": "首批限量 1000 件",
-        "purchase_links": {"taobao": "#"},
-        "variants": [
-            {"capacity": "8GB", "color": "科技蓝", "price": "¥99", "tags": ["入门", "便携"]},
-            {"capacity": "32GB", "color": "赛博紫", "price": "¥199", "tags": ["推荐", "高性价比"]},
-            {"capacity": "128GB", "color": "尊贵金", "price": "¥399", "tags": ["专业", "大容量"]},
+        "subtitle": "双接口 AI USB 设备，即插即用",
+        "description": "傻福虾盘是一款内置 OpenClaw AI 系统的双接口 USB 设备。配备 USB-A 3.2 Gen 1 和 USB-C 双接口，兼容电脑、平板、手机等多种设备。内置双 Agent 协作系统，提供三种运行模式、四维安全保障和四色视觉系统，让 AI 能力触手可及。",
+        "capacity_range": "128GB - 1TB",
+        "speed": "读取高达 400MB/s",
+        "dimensions": "约 65.9 × 18.5 × 9.8 mm",
+        "interface": "USB-A 3.2 Gen 1 / USB-C",
+        "material": "锌合金外壳 + 哑光表面处理",
+        "colors": "银色 / 枪灰银",
+        "warranty": "两年质保",
+        "compatible": "Windows / macOS / Linux / Android",
+        "serial": "SC-2026-OPEN-001",
+        "ai_system": "OpenClaw AI v2.0",
+        "production_count": "首批限量 240 件",
+        "purchase_links": {
+            "taobao": "https://shop.taobao.com/sillyclaw",
+            "jd": "https://item.jd.com/sillyclaw",
+            "pdd": "https://mobile.yangkeduo.com/sillyclaw"
+        },
+        "images": [
+            {"src": "/static/img/sillyclaw/product-front-silver.png", "alt": "银色正面"},
+            {"src": "/static/img/sillyclaw/dual-interface.png", "alt": "双接口"},
+            {"src": "/static/img/sillyclaw/side-view.png", "alt": "侧面"},
+            {"src": "/static/img/sillyclaw/back-view.png", "alt": "背面"},
+            {"src": "/static/img/sillyclaw/glowing.jpg", "alt": "发光效果"}
+        ],
+        "showcase": {
+            "image": "/static/img/sillyclaw/dual-interface.png",
+            "title": "USB-A + Type-C 双接口",
+            "desc": "傻福虾U盘配备 USB-A 和 USB-C 双接口设计，兼容电脑、平板、手机等多种设备。无需转接头，即插即用。",
+            "features": [
+                "USB-A 3.2 Gen 1 — 兼容台式机、笔记本",
+                "Type-C — 兼容 MacBook、Android 手机、平板",
+                "免驱动设计，即插即用"
+            ]
+        },
+        "photos": [
+            {"src": "/static/img/sillyclaw/glowing.jpg", "alt": "发光效果", "caption": "两款颜色发光效果"},
+            {"src": "/static/img/sillyclaw/promo-poster.png", "alt": "场景展示", "caption": "OpenClaw 场景展示"},
+            {"src": "/static/img/sillyclaw/product-black.png", "alt": "黑色款", "caption": "枪灰银／黑色款效果"}
+        ],
+        "agents": {
+            "openclaw": {
+                "name": "OpenClaw",
+                "color": "红色系",
+                "color_hex": "#E53935",
+                "version": "v1.0",
+                "tech_stack": "Python + Rust + TensorFlow Lite",
+                "strength": "复杂逻辑推理与代码生成",
+                "good_at": "数据分析、代码编写、流程自动化、系统集成"
+            },
+            "hermens": {
+                "name": "Hermens",
+                "color": "蓝色系",
+                "color_hex": "#00BCD4",
+                "version": "v1.0",
+                "tech_stack": "Python + NLP + RAG Pipeline",
+                "strength": "精细信息提取与知识问答",
+                "good_at": "知识检索、文档理解、语义搜索、内容总结"
+            }
+        },
+        "modes": [
+            {"name": "OpenClaw 独立模式", "desc": "完全由 OpenClaw Agent 接管，适合复杂逻辑推理、数据分析和代码生成任务", "icon": "fa-fire", "color": "#E53935"},
+            {"name": "Hermens 独立模式", "desc": "完全由 Hermens Agent 接管，适合精细信息提取、知识问答和内容总结任务", "icon": "fa-cube", "color": "#00BCD4"},
+            {"name": "协作模式", "desc": "双 Agent 协同工作，OpenClaw 负责逻辑分析，Hermens 负责知识验证，输出质量更高", "icon": "fa-handshake", "color": "#9C27B0"}
+        ],
+        "why_collab": [
+            {"icon": "fa-times-circle", "issue": "单一 Agent 存在认知盲区", "desc": "所有 AI 模型都存在知识盲点和认知偏差，单一 Agent 无法自我发现这些盲区"},
+            {"icon": "fa-exclamation-triangle", "issue": "错误无法自检", "desc": "单一 Agent 缺乏独立的交叉验证机制，输出错误时难以自行发现和纠正"},
+            {"icon": "fa-balance-scale", "issue": "缺乏多角度分析", "desc": "复杂问题需要从不同角度审视，单一视角容易导致片面结论"},
+            {"icon": "fa-shield-alt", "issue": "安全性难以保障", "desc": "缺乏独立的监督机制，在处理敏感操作时存在安全隐患"}
+        ],
+        "quality_dimensions": [
+            {"icon": "fa-brain", "title": "逻辑推理性", "desc": "OpenClaw 负责深度逻辑分析", "effect": "推理准确率提升 40%"},
+            {"icon": "fa-book", "title": "知识准确性", "desc": "Hermens 负责知识验证", "effect": "知识准确率提升 35%"},
+            {"icon": "fa-random", "title": "多样性", "desc": "双视角碰撞产生更丰富方案", "effect": "方案多样性提升 50%"},
+            {"icon": "fa-check-double", "title": "一致性", "desc": "交叉验证确保输出一致性", "effect": "输出一致性提升 45%"},
+            {"icon": "fa-shield-halved", "title": "安全性", "desc": "独立安全审计机制", "effect": "安全风险降低 60%"},
+            {"icon": "fa-gem", "title": "用户满意度", "desc": "多维度保障带来更好体验", "effect": "满意度提升 30%"}
+        ],
+        "security_dimensions": [
+            {"icon": "fa-user-shield", "title": "身份认证", "desc": "多因素身份认证", "effect": "确保操作者身份可信"},
+            {"icon": "fa-shield-virus", "title": "行为审计", "desc": "全链路操作日志记录", "effect": "所有操作可追溯"},
+            {"icon": "fa-robot", "title": "Agent 监督", "desc": "Agent A 执行，Agent B 监督", "effect": "交叉验证防误操作"},
+            {"icon": "fa-file-shield", "title": "数据保护", "desc": "敏感信息脱敏处理", "effect": "防止数据泄露"},
+            {"icon": "fa-ban", "title": "异常检测", "desc": "实时行为模式分析", "effect": "及时发现异常行为"},
+            {"icon": "fa-history", "title": "回滚机制", "desc": "一键回滚到安全状态", "effect": "快速恢复安全状态"}
+        ],
+        "color_system": [
+            {"mode": "OpenClaw 独立", "color": "#E53935", "border": "红色", "indicator": "红色指示灯常亮"},
+            {"mode": "Hermens 独立", "color": "#00BCD4", "border": "青色", "indicator": "青色指示灯常亮"},
+            {"mode": "协作模式", "color": "#9C27B0", "border": "紫色", "indicator": "紫色指示灯呼吸"},
+            {"mode": "安全模式", "color": "#4CAF50", "border": "绿色", "indicator": "绿色指示灯闪烁"}
+        ],
+        "tech_specs": [
+            {"label": "系统内存占用", "value": "OpenClaw: 245MB / Hermens: 188MB"},
+            {"label": "模型加载时间", "value": "OpenClaw: 1.2s / Hermens: 0.8s"},
+            {"label": "推理速度", "value": "OpenClaw: 45 tokens/s / Hermens: 62 tokens/s"},
+            {"label": "上下文窗口", "value": "OpenClaw: 8K tokens / Hermens: 16K tokens"},
+            {"label": "支持语言", "value": "中文 / English / 日本語 (部分)"},
+            {"label": "更新机制", "value": "OTA 在线更新，自动推送"},
+            {"label": "支持系统", "value": "Windows 10+ / macOS 11+ / Linux (x86_64)"}
+        ],
+        "use_cases": [
+            {"scene": "日常办公文档处理", "mode": "协作", "mode_icon": "fa-handshake", "desc": "自动生成报告、整理数据、提取关键信息"},
+            {"scene": "编程开发辅助", "mode": "OpenClaw", "mode_icon": "fa-fire", "desc": "代码编写、Debug、重构、自动化测试"},
+            {"scene": "学术研究", "mode": "Hermens", "mode_icon": "fa-cube", "desc": "文献检索、知识提取、内容总结"},
+            {"scene": "数据安全防护", "mode": "安全监督", "mode_icon": "fa-shield-alt", "desc": "敏感操作审核、异常行为检测、安全回滚"}
         ]
     }); count += 1
 
-    # --- OpenClaw ---
+    # --- SillyClaw Variants ---
+    _seed_config(cur, "sillyclaw", "variants", [
+        {"capacity": "128GB", "color": "银色", "price": "¥69", "badge": "热销", "tags": ["入门", "便携"]},
+        {"capacity": "256GB", "color": "银色", "price": "¥99", "badge": "推荐", "tags": ["性价比之选"]},
+        {"capacity": "512GB", "color": "枪灰银", "price": "¥169", "tags": ["主流", "大容量"]},
+        {"capacity": "1TB", "color": "枪灰银", "price": "¥269", "featured": True, "tags": ["专业", "超大容量"]}
+    ]); count += 1
+
+    # --- OpenClaw Store Config ---
     _seed_config(cur, "sillyclaw", "openclaw", {
-        "hero_title": "OpenClaw - 开源 AI Skills 平台",
-        "hero_desc": "开源、可扩展的 AI Skills 生态系统，让每个人都能构建和分享 AI 能力",
-        "features": [
-            {"icon_bg": "#667eea", "icon_class": "fas fa-rocket", "title": "开源免费", "description": "完全开源的 Skills 平台，自由使用和定制"},
-            {"icon_bg": "#f093fb", "icon_class": "fas fa-puzzle-piece", "title": "模块化设计", "description": "可插拔的 Skills 架构，灵活组合"},
-            {"icon_bg": "#4facfe", "icon_class": "fas fa-globe", "title": "跨平台支持", "description": "Windows / macOS / Linux 全覆盖"},
-            {"icon_bg": "#43e97b", "icon_class": "fas fa-users", "title": "社区驱动", "description": "全球开发者社区共同维护和改进"},
-            {"icon_bg": "#fa709a", "icon_class": "fas fa-shield-halved", "title": "安全可靠", "description": "内置安全沙箱，保护您的数据和隐私"},
-            {"icon_bg": "#0066FF", "icon_class": "fas fa-bolt", "title": "高性能", "description": "Rust 编写，极致性能体验"},
+        "store_name": "OpenClaw 商城",
+        "subtitle": "傻福虾U盘 - 官方授权线上销售渠道",
+        "hero_video": "/assets/hero/openclaw-hero.mp4",
+        "hero_poster": "/static/img/sillyclaw/hero-product.png",
+        "badges": ["官方正品", "全国包邮", "两年质保"],
+        "ai_features": [
+            {"icon": "fa-brain", "title": "AI 智能对话", "desc": "与 OpenClaw 自然对话，获取即时 AI 帮助"},
+            {"icon": "fa-code", "title": "代码自动生成", "desc": "支持多种编程语言的代码生成和优化"},
+            {"icon": "fa-file-alt", "title": "文档智能处理", "desc": "自动分析、总结和生成各类文档"},
+            {"icon": "fa-chart-line", "title": "数据分析", "desc": "智能数据分析和可视化报告生成"},
+            {"icon": "fa-language", "title": "多语言翻译", "desc": "支持多种语言的实时翻译和处理"},
+            {"icon": "fa-cogs", "title": "流程自动化", "desc": "自定义自动化工作流，提升效率"}
         ],
-        "roadmap": []
+        "channels": [
+            {"key": "taobao", "icon": "fa-shopping-bag", "title": "淘宝官方店", "desc": "官方直营，正品保障"},
+            {"key": "jd", "icon": "fa-shopping-bag", "title": "京东旗舰店", "desc": "京东物流，极速配送"},
+            {"key": "pdd", "icon": "fa-shopping-bag", "title": "拼多多品牌店", "desc": "拼多多官方品牌授权店"}
+        ],
+        "qr_labels": ["淘宝扫码购买", "京东扫码购买"]
     }); count += 1
 
     # --- Contact Info ---

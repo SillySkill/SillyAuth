@@ -1,203 +1,668 @@
 {% extends "base.html" %}
 
-{% block title %}OpenClaw - 开源的 AI Skills 平台{% endblock %}
+{% block title %}OpenClaw 商城 - {{ product.name if product else '' }} 官方购买{% endblock %}
 
 {% block extra_head %}
-<meta name="description" content="OpenClaw - 面向未来的开源 AI Skills 平台，支持自定义技能、插件扩展、社区共享，助力 AI 应用开发">
-<meta property="og:title" content="OpenClaw - 开源的 AI Skills 平台">
-<meta property="og:description" content="面向未来的开源 AI Skills 平台">
-
+<meta name="description" content="OpenClaw 商城 - {{ product.name if product else '' }} 官方购买渠道">
+<meta property="og:title" content="OpenClaw 商城 - {{ product.name if product else '' }}">
+<meta property="og:description" content="{{ product.description if product else '' }}">
+<meta property="og:image" content="/static/img/sillyclaw/product-front-silver.png">
+<link rel="stylesheet" href="/static/css/openclaw.css">
 {% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="oc-hero">
-    <div class="oc-hero-content">
-        <div class="oc-hero-badge">
-            <i class="fas fa-star"></i>
-            开源免费 - 社区驱动
-        </div>
-        <h1>Open<span>Claw</span></h1>
-        <p>面向未来的开源 AI Skills 平台，支持自定义技能、插件扩展、社区共享，让 AI 应用开发更简单、更自由。</p>
-        <div class="oc-hero-buttons">
-            <a href="/register" class="btn btn-primary">
-                <i class="fas fa-rocket"></i>
-                立即开始
-            </a>
-            <a href="https://github.com" target="_blank" class="btn btn-secondary" style="color:white;border-color:rgba(255,255,255,0.2);">
-                <i class="fab fa-github"></i>
-                GitHub
-            </a>
-        </div>
-        <div class="oc-hero-code">
-            <span class="prompt">$</span>
-            <span class="command">npm install -g openclaw</span>
-        </div>
-        <div class="oc-stats">
-            <div class="stat-item">
-                <div class="stat-value">500+</div>
-                <div class="stat-label">开源 Skills</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">10K+</div>
-                <div class="stat-label">社区成员</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">50+</div>
-                <div class="stat-label">活跃群组</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">99.9%</div>
-                <div class="stat-label">可用性</div>
-            </div>
-        </div>
-    </div>
+{% macro oc_section(title, icon=None, subtitle=None, alt=False, id=None) %}
+<section class="oc-section{% if alt %} oc-section-alt{% endif %}"{% if id %} id="{{ id }}"{% endif %}>
+  <div class="oc-section-header">
+    <h2>{% if icon %}<i class="fas {{ icon }}"></i> {% endif %}{{ title }}</h2>
+    {% if subtitle %}<p>{{ subtitle }}</p>{% endif %}
+  </div>
+  {{ caller() }}
 </section>
+{% endmacro %}
 
-<!-- Features Section -->
-<section class="oc-features" id="features">
-    <div class="oc-section-header">
-        <h2>为什么选择 OpenClaw</h2>
-        <p>强大的功能，简单的使用，让你的 AI 应用如虎添翼</p>
-    </div>
-    <div class="oc-features-grid">
-        <div class="oc-feature-card">
-            <div class="oc-feature-icon"><i class="fas fa-cubes"></i></div>
-            <h3>模块化 Skills</h3>
-            <p>采用 Skills 架构，每个技能都是独立模块，可复用、可组合、可分享，快速构建复杂 AI 应用。</p>
-        </div>
-        <div class="oc-feature-card">
-            <div class="oc-feature-icon"><i class="fas fa-plug"></i></div>
-            <h3>插件扩展</h3>
-            <p>支持插件系统，可以轻松扩展平台能力，集成第三方服务，构建定制化解决方案。</p>
-        </div>
-        <div class="oc-feature-card">
-            <div class="oc-feature-icon"><i class="fas fa-users"></i></div>
-            <h3>社区共享</h3>
-            <p>开放的技能市场，分享你的 Skills，发现社区优秀作品，与全球开发者一起成长。</p>
-        </div>
-        <div class="oc-feature-card">
-            <div class="oc-feature-icon"><i class="fas fa-bolt"></i></div>
-            <h3>开箱即用</h3>
-            <p>丰富的预置技能，开箱即用，无需从零开始，大幅提升开发效率。</p>
-        </div>
-        <div class="oc-feature-card">
-            <div class="oc-feature-icon"><i class="fas fa-shield-alt"></i></div>
-            <h3>安全可靠</h3>
-            <p>企业级安全标准，数据加密传输，权限精细控制，保障你的 AI 应用安全运行。</p>
-        </div>
-        <div class="oc-feature-card">
-            <div class="oc-feature-icon"><i class="fas fa-code-branch"></i></div>
-            <h3>开源免费</h3>
-            <p>完全开源，免费使用，MIT 许可证，你可以自由使用、修改、分发，无后顾之忧。</p>
-        </div>
-    </div>
-</section>
+{% macro oc_card(color_variant=None) %}
+<div class="oc-card{% if color_variant %} oc-card-{{ color_variant }}{% endif %}">
+  {{ caller() }}
+</div>
+{% endmacro %}
 
-<!-- Shrimp Farmer Club Section -->
-<section class="oc-club" id="club">
-    <div class="oc-club-content">
-        <div class="oc-club-header">
-            <h2>傻福虾群 (Shrimp Farmer Club)</h2>
-            <p>加入我们的社区，认识志同道合的伙伴，一起探索 AI 的无限可能</p>
-        </div>
-        <div class="oc-club-grid">
-            <div class="oc-club-card">
-                <div class="oc-club-card-icon"><i class="fas fa-comments"></i></div>
-                <h3>交流讨论</h3>
-                <p>与全球开发者交流心得，分享经验，解决问题，共同成长</p>
+<div class="openclaw-store">
+    <!-- 视频 Hero 背景 -->
+    <section class="oc-hero-section" id="hero">
+        <video class="hero-video" autoplay muted loop playsinline preload="auto" poster="{{ (openclaw.hero_poster if openclaw else '') or '/static/img/sillyclaw/hero-product.png' }}">
+            <source src="{{ (openclaw.hero_video if openclaw else '') or '/assets/hero/openclaw-hero.mp4' }}" type="video/mp4">
+        </video>
+        <div class="hero-overlay"></div>
+        <div class="oc-hero-content">
+            <div class="oc-store-badge">
+                <i class="fas fa-check-circle"></i>
+                官方正品
             </div>
-            <div class="oc-club-card">
-                <div class="oc-club-card-icon"><i class="fas fa-gift"></i></div>
-                <h3>专属福利</h3>
-                <p>优先体验新功能 exclusive skills 免费使用，限量周边赠送</p>
-            </div>
-            <div class="oc-club-card">
-                <div class="oc-club-card-icon"><i class="fas fa-chalkboard-teacher"></i></div>
-                <h3>技术分享</h3>
-                <p>定期技术分享会，大咖直播教学，深入理解 OpenClaw</p>
-            </div>
-            <div class="oc-club-card">
-                <div class="oc-club-card-icon"><i class="fas fa-trophy"></i></div>
-                <h3>挑战活动</h3>
-                <p>参与技能开发挑战赛，展示才华赢取奖励，成为社区明星</p>
+            <h1><i class="fas fa-store"></i> {{ (openclaw.store_name if openclaw else '') or 'OpenClaw 商城' }}</h1>
+            <p>{{ (openclaw.subtitle if openclaw else '') or '傻福虾U盘 - 官方授权线上销售渠道' }}</p>
+            <div class="oc-hero-actions">
+                <a href="#variants" class="btn btn-primary btn-lg"><i class="fas fa-shopping-cart"></i> 立即选购</a>
+                <a href="#specs" class="btn btn-outline btn-lg"><i class="fas fa-info-circle"></i> 查看规格</a>
             </div>
         </div>
-        <div class="oc-club-cta">
-            <a href="/login" class="btn">
-                <i class="fas fa-sign-in-alt"></i>
-                登录后随机加入一个群组
-            </a>
-        </div>
-    </div>
-</section>
+    </section>
 
-<!-- Architecture Section -->
-<section class="oc-architecture" id="architecture">
-    <div class="oc-section-header">
-        <h2>系统架构</h2>
-        <p>模块化设计，灵活扩展，满足各种场景需求</p>
-    </div>
-    <div class="oc-arch-diagram">
-        <div class="oc-arch-layers">
-            <div class="oc-arch-layer">
-                <div class="oc-arch-layer-label">展示层</div>
-                <div class="oc-arch-layer-content">
-                    <div class="oc-arch-component"><i class="fas fa-desktop"></i> Web 控制台</div>
-                    <div class="oc-arch-component"><i class="fas fa-mobile-alt"></i> 移动端</div>
-                    <div class="oc-arch-component"><i class="fas fa-terminal"></i> CLI</div>
+    <!-- 粘性导航 -->
+    <nav class="oc-sticky-nav" id="stickyNav">
+        <div class="oc-sticky-nav-inner">
+            <a href="#overview" class="oc-sticky-nav-link">产品概览</a>
+            <a href="#agents" class="oc-sticky-nav-link">双Agent</a>
+            <a href="#modes" class="oc-sticky-nav-link">运行模式</a>
+            <a href="#security" class="oc-sticky-nav-link">安全保障</a>
+            <a href="#variants" class="oc-sticky-nav-link">规格价格</a>
+            <a href="#purchase" class="oc-sticky-nav-link oc-sticky-nav-buy"><i class="fas fa-shopping-cart"></i> 立即购买</a>
+        </div>
+    </nav>
+
+    <!-- 产品概览（带图库） -->
+    {% if product %}
+    <section class="oc-product-overview" id="overview">
+        <div class="oc-overview-content">
+            <div class="oc-overview-image">
+                <div class="oc-gallery" id="productGallery">
+                    <div class="oc-gallery-main">
+                        <img id="galleryMainImg" src="/static/img/sillyclaw/product-front-silver.png" alt="{{ product.name }}">
+                    </div>
+                    <div class="oc-gallery-thumbs">
+                        {% if product.images %}
+                        {% for img in product.images %}
+                        <div class="oc-gallery-thumb{% if loop.first %} active{% endif %}" onclick="switchGallery('{{ img.src }}', this)">
+                            <img src="{{ img.src }}" alt="{{ img.alt }}">
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <!-- Fallback hardcoded gallery if DB images not set -->
+                        <div class="oc-gallery-thumb active" onclick="switchGallery('/static/img/sillyclaw/product-front-silver.png', this)">
+                            <img src="/static/img/sillyclaw/product-front-silver.png" alt="正面">
+                        </div>
+                        <div class="oc-gallery-thumb" onclick="switchGallery('/static/img/sillyclaw/dual-interface.png', this)">
+                            <img src="/static/img/sillyclaw/dual-interface.png" alt="双接口">
+                        </div>
+                        <div class="oc-gallery-thumb" onclick="switchGallery('/static/img/sillyclaw/side-view.png', this)">
+                            <img src="/static/img/sillyclaw/side-view.png" alt="侧面">
+                        </div>
+                        <div class="oc-gallery-thumb" onclick="switchGallery('/static/img/sillyclaw/back-view.png', this)">
+                            <img src="/static/img/sillyclaw/back-view.png" alt="背面">
+                        </div>
+                        <div class="oc-gallery-thumb" onclick="switchGallery('/static/img/sillyclaw/glowing.jpg', this)">
+                            <img src="/static/img/sillyclaw/glowing.jpg" alt="发光效果">
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-            <div class="oc-arch-connector"></div>
-            <div class="oc-arch-layer">
-                <div class="oc-arch-layer-label">Gateway</div>
-                <div class="oc-arch-layer-content">
-                    <div class="oc-arch-component"><i class="fas fa-server"></i> OpenClaw Gateway</div>
-                    <div class="oc-arch-component"><i class="fas fa-plug"></i> 插件系统</div>
-                    <div class="oc-arch-component"><i class="fas fa-shield-alt"></i> 认证授权</div>
-                </div>
-            </div>
-            <div class="oc-arch-connector"></div>
-            <div class="oc-arch-layer">
-                <div class="oc-arch-layer-label">Skills</div>
-                <div class="oc-arch-layer-content">
-                    <div class="oc-arch-component"><i class="fas fa-puzzle-piece"></i> 预置技能</div>
-                    <div class="oc-arch-component"><i class="fas fa-store"></i> 技能市场</div>
-                    <div class="oc-arch-component"><i class="fas fa-user-plus"></i> 自定义技能</div>
-                </div>
-            </div>
-            <div class="oc-arch-connector"></div>
-            <div class="oc-arch-layer">
-                <div class="oc-arch-layer-label">AI 模型</div>
-                <div class="oc-arch-layer-content">
-                    <div class="oc-arch-component"><i class="fas fa-brain"></i> Claude</div>
-                    <div class="oc-arch-component"><i class="fas fa-comment-dots"></i> GPT-4</div>
-                    <div class="oc-arch-component"><i class="fas fa-robot"></i> 本地模型</div>
+            <div class="oc-overview-info">
+                <span class="oc-overview-badge">新品上市</span>
+                <h2>{{ product.name }}</h2>
+                <p class="oc-overview-subtitle">{{ product.subtitle or '' }}</p>
+                <p class="oc-overview-desc">{{ product.description or '' }}</p>
+                <div class="oc-overview-specs">
+                    {% if product.interface %}
+                    <div class="oc-overview-spec">
+                        <span class="oc-spec-label">接口</span>
+                        <span class="oc-spec-value">{{ product.interface }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.speed %}
+                    <div class="oc-overview-spec">
+                        <span class="oc-spec-label">读取速度</span>
+                        <span class="oc-spec-value">{{ product.speed }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.dimensions %}
+                    <div class="oc-overview-spec">
+                        <span class="oc-spec-label">尺寸</span>
+                        <span class="oc-spec-value">{{ product.dimensions }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.capacity_range %}
+                    <div class="oc-overview-spec">
+                        <span class="oc-spec-label">容量</span>
+                        <span class="oc-spec-value">{{ product.capacity_range }}</span>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+    {% endif %}
 
-<!-- CTA Section -->
-<section class="oc-cta">
-    <div class="oc-section-header" style="color:white;">
-        <h2>准备好开始了吗？</h2>
-        <p style="color:rgba(255,255,255,0.7);">加入 OpenClaw 社区，开始构建你的 AI 应用之旅</p>
+    <!-- 双 Agent 系统 -->
+    {% if product and product.agents %}
+    {% call oc_section('双 Agent 系统', 'fa-robot', 'OpenClaw（红色系）+ Hermens（蓝色系），各司其职，协同工作', alt=True, id='agents') %}
+    <div class="oc-grid-2" style="max-width: 900px; margin: 0 auto;">
+        {% if product.agents.openclaw %}
+        {% set a = product.agents.openclaw %}
+        <div class="oc-card oc-card-red">
+            <div class="oc-agent-header">
+                <div class="oc-icon-circle" style="background:{{ a.color_hex }};">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div>
+                    <div style="font-size:1.3rem;font-weight:700;color:var(--oc-text);">{{ a.name }}</div>
+                    <div style="font-size:0.85rem;color:var(--oc-text-light);">{{ a.color }} · {{ a.version }}</div>
+                </div>
+            </div>
+            <div class="oc-specs-table" style="max-width:100%;border:1px solid var(--oc-border);">
+                <div class="oc-spec-row"><span class="oc-spec-label">技术栈</span><span class="oc-spec-value">{{ a.tech_stack }}</span></div>
+                <div class="oc-spec-row"><span class="oc-spec-label">优势</span><span class="oc-spec-value">{{ a.strength }}</span></div>
+                <div class="oc-spec-row"><span class="oc-spec-label">擅长</span><span class="oc-spec-value">{{ a.good_at }}</span></div>
+            </div>
+        </div>
+        {% endif %}
+        {% if product.agents.hermens %}
+        {% set b = product.agents.hermens %}
+        <div class="oc-card oc-card-cyan">
+            <div class="oc-agent-header">
+                <div class="oc-icon-circle" style="background:{{ b.color_hex }};">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <div>
+                    <div style="font-size:1.3rem;font-weight:700;color:var(--oc-text);">{{ b.name }}</div>
+                    <div style="font-size:0.85rem;color:var(--oc-text-light);">{{ b.color }} · {{ b.version }}</div>
+                </div>
+            </div>
+            <div class="oc-specs-table" style="max-width:100%;border:1px solid var(--oc-border);">
+                <div class="oc-spec-row"><span class="oc-spec-label">技术栈</span><span class="oc-spec-value">{{ b.tech_stack }}</span></div>
+                <div class="oc-spec-row"><span class="oc-spec-label">优势</span><span class="oc-spec-value">{{ b.strength }}</span></div>
+                <div class="oc-spec-row"><span class="oc-spec-label">擅长</span><span class="oc-spec-value">{{ b.good_at }}</span></div>
+            </div>
+        </div>
+        {% endif %}
     </div>
-    <div class="oc-cta-buttons">
-        <a href="/register" class="btn btn-primary">
-            <i class="fas fa-user-plus"></i>
-            立即注册
-        </a>
-        <a href="#" class="btn btn-secondary" style="color:white;border-color:rgba(255,255,255,0.2);">
-            <i class="fas fa-book"></i>
-            阅读文档
-        </a>
+    {% endcall %}
+    {% endif %}
+
+    <!-- 三种运行模式 -->
+    {% if product and product.modes %}
+    {% call oc_section('三种运行模式', 'fa-sliders-h', '按需选择，灵活切换', id='modes') %}
+    <div class="oc-grid-3" style="max-width: 1000px; margin: 0 auto;">
+        {% for mode in product.modes %}
+        <div class="oc-card oc-card-center" style="border-color:{{ mode.color }}33;">
+            <div class="oc-icon-mode" style="background:{{ mode.color }};">
+                <i class="fas {{ mode.icon }}"></i>
+            </div>
+            <div class="oc-card-body">
+                <h3>{{ mode.name }}</h3>
+                <p>{{ mode.desc }}</p>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-</section>
+    {% endcall %}
+    {% endif %}
+
+    <!-- 协作模式质量保证 -->
+    {% if product and product.why_collab %}
+    {% call oc_section('为什么需要协作模式？', 'fa-handshake', '单一 Agent 工作存在固有缺陷', alt=True, id='collab') %}
+    <div class="oc-grid-2-sm" style="max-width: 1000px; margin: 0 auto;">
+        {% for item in product.why_collab %}
+        <div class="oc-defect-card">
+            <div class="oc-icon-circle-sm" style="background:#fff5f5;color:#E53935;">
+                <i class="fas {{ item.icon }}"></i>
+            </div>
+            <div>
+                <div style="font-weight:600;color:var(--oc-text);margin-bottom:4px;">{{ item.issue }}</div>
+                <div style="font-size:0.9rem;color:var(--oc-text-secondary);">{{ item.desc }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% if product.quality_dimensions %}
+    <div style="max-width: 1000px; margin: 48px auto 0;">
+        <h3 style="text-align:center;font-size:1.3rem;color:var(--oc-text);margin-bottom:24px;">六维质量保障体系</h3>
+        <div class="oc-grid-3" style="max-width:1000px;">
+            {% for q in product.quality_dimensions %}
+            <div class="oc-card" style="text-align:center;">
+                <div class="oc-icon-square" style="background:var(--oc-primary);margin:0 auto 12px;">
+                    <i class="fas {{ q.icon }}"></i>
+                </div>
+                <div style="font-weight:600;color:var(--oc-text);margin-bottom:4px;">{{ q.title }}</div>
+                <div style="font-size:0.85rem;color:var(--oc-text-secondary);margin-bottom:4px;">{{ q.desc }}</div>
+                <div style="font-size:0.8rem;color:#10b981;">效果：{{ q.effect }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% if product.collab_workflow or product.why_collab %}
+    <div class="oc-workflow">
+        <div class="oc-workflow-title">协作工作流程</div>
+        <div class="oc-workflow-steps">
+            <span class="oc-workflow-step oc-workflow-step-1">阶段一：各自独立分析</span>
+            <span class="oc-workflow-arrow"><i class="fas fa-arrow-right"></i></span>
+            <span class="oc-workflow-step oc-workflow-step-2">阶段二：交叉评审讨论</span>
+            <span class="oc-workflow-arrow"><i class="fas fa-arrow-right"></i></span>
+            <span class="oc-workflow-step oc-workflow-step-3">阶段三：执行与安全监督</span>
+        </div>
+    </div>
+    {% endif %}
+    {% endcall %}
+    {% endif %}
+
+    <!-- 四维安全保障体系 -->
+    {% if product and product.security_dimensions %}
+    {% call oc_section('四维安全保障体系', 'fa-shield-alt', '全方位保护您的数据和操作安全', id='security') %}
+    <div class="oc-grid-4" style="max-width: 1000px; margin: 0 auto;">
+        {% for s in product.security_dimensions %}
+        <div class="oc-card oc-card-center">
+            <div class="oc-icon-circle" style="background:#fff5f5;color:#E53935;margin:0 auto 12px;">
+                <i class="fas {{ s.icon }}"></i>
+            </div>
+            <div style="font-weight:600;color:var(--oc-text);margin-bottom:4px;">{{ s.title }}</div>
+            <div style="font-size:0.85rem;color:var(--oc-text-secondary);margin-bottom:6px;">{{ s.desc }}</div>
+            <div style="font-size:0.8rem;color:#10b981;">{{ s.effect }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% if product.security_items %}
+    <div style="max-width: 800px; margin: 32px auto 0;">
+        <h3 style="text-align:center;font-size:1.1rem;color:var(--oc-text);margin-bottom:16px;">安全审计细则</h3>
+        <div class="oc-specs-table oc-specs-table-wide" style="max-width:700px;">
+            {% for item in product.security_items %}
+            <div class="oc-spec-row">
+                <span class="oc-spec-label" style="font-weight:600;">{{ item.type }}</span>
+                <span class="oc-spec-value" style="font-weight:400;color:var(--oc-text-secondary);font-size:0.85rem;">{{ item.desc }}</span>
+                <span class="oc-spec-action">{{ item.action }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endcall %}
+    {% endif %}
+
+    <!-- 四色视觉系统 -->
+    {% if product and product.color_system %}
+    {% call oc_section('四色视觉系统', 'fa-palette', '一眼识别当前运行状态', alt=True) %}
+    <div class="oc-specs-table" style="max-width:700px;">
+        {% for c in product.color_system %}
+        <div class="oc-spec-row">
+            <span style="display:flex;align-items:center;gap:8px;">
+                <span class="oc-color-dot" style="background:{{ c.color }};"></span>
+                <span style="font-weight:600;">{{ c.mode }}</span>
+            </span>
+            <span class="oc-spec-value" style="font-size:0.85rem;">边框 {{ c.border }} · {{ c.indicator }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endcall %}
+    {% endif %}
+
+    <!-- 双接口展示（从 product.showcase 驱动） -->
+    {% if product and product.showcase %}
+    <section class="oc-section" id="showcase">
+        <div class="oc-showcase-grid">
+            <div class="oc-showcase-image">
+                <img src="{{ product.showcase.image }}" alt="{{ product.showcase.title }}">
+            </div>
+            <div class="oc-showcase-text">
+                <h3><i class="fas fa-plug" style="color: var(--oc-primary);"></i> {{ product.showcase.title }}</h3>
+                <p>{{ product.showcase.desc }}</p>
+                <ul class="oc-showcase-list">
+                    {% for f in product.showcase.features %}
+                    <li><i class="fas fa-check-circle"></i> {{ f }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- 使用场景 -->
+    {% if product and product.use_cases %}
+    {% call oc_section('适用场景', 'fa-tasks', '按需选择推荐模式', alt=True) %}
+    <div class="oc-grid-2-sm" style="max-width: 800px; margin: 0 auto;">
+        {% for uc in product.use_cases %}
+        <div class="oc-use-case-card">
+            <div class="oc-icon-square" style="background:var(--oc-primary);">
+                <i class="fas {{ uc.mode_icon }}"></i>
+            </div>
+            <div>
+                <div style="font-weight:600;color:var(--oc-text);margin-bottom:2px;">{{ uc.scene }}</div>
+                <div style="font-size:0.85rem;color:var(--oc-text-secondary);">推荐 {{ uc.mode }} 模式 · {{ uc.desc }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endcall %}
+    {% endif %}
+
+    <!-- 技术规格 -->
+    {% if product and product.tech_specs %}
+    {% call oc_section('技术规格', 'fa-microchip', '系统运行参数') %}
+    <div class="oc-specs-table" style="max-width:600px;">
+        {% for spec in product.tech_specs %}
+        <div class="oc-spec-row">
+            <span class="oc-spec-label" style="font-weight:500;">{{ spec.label }}</span>
+            <span class="oc-spec-value">{{ spec.value }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endcall %}
+    {% endif %}
+
+    <!-- 产品实拍（从 product.photos 驱动） -->
+    {% if product and product.photos %}
+    {% call oc_section('产品实拍', subtitle='精致工艺，细节呈现', alt=True) %}
+    <div class="oc-grid-auto" style="max-width: 1100px; margin: 0 auto;">
+        {% for photo in product.photos %}
+        <div class="oc-photo-card">
+            <img src="{{ photo.src }}" alt="{{ photo.alt }}">
+            <p class="oc-photo-caption">{{ photo.caption }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endcall %}
+    {% endif %}
+
+    <!-- AI 能力 -->
+    {% if openclaw and openclaw.ai_features %}
+    <section class="oc-ai-features" id="ai">
+        <div class="oc-ai-features-inner">
+            <div class="oc-section-header">
+                <h2>AI 智能能力</h2>
+                <p>预装 OpenClaw，连接电脑即刻拥有 AI 能力</p>
+            </div>
+            <div class="oc-ai-grid">
+                {% for feature in openclaw.ai_features %}
+                <div class="oc-ai-card">
+                    <div class="oc-ai-icon"><i class="fas {{ feature.icon or 'fa-brain' }}"></i></div>
+                    <h3>{{ feature.title or '' }}</h3>
+                    <p>{{ feature.desc or '' }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- 规格选择 -->
+    <section class="oc-variants" id="variants">
+        <div class="oc-section-header">
+            <h2>选择规格</h2>
+            <p>多种容量，满足不同存储需求</p>
+        </div>
+        {% if variants and variants|length > 0 %}
+        <div class="oc-variants-grid">
+            {% for variant in variants %}
+            {% set img_src = '/static/img/sillyclaw/product-front-silver.png' %}
+            {% if variant.color and ('黑' in variant.color or '灰' in variant.color) %}
+                {% set img_src = '/static/img/sillyclaw/product-front-black.png' %}
+            {% endif %}
+            <div class="oc-variant-card{% if variant.featured %} oc-variant-featured{% endif %}">
+                <div class="oc-variant-image">
+                    <img src="{{ img_src }}" alt="{{ variant.capacity }}">
+                    {% if variant.badge %}
+                    <span class="oc-variant-badge">{{ variant.badge }}</span>
+                    {% endif %}
+                </div>
+                <div class="oc-variant-info">
+                    <div class="oc-variant-capacity">{{ variant.capacity }}</div>
+                    <div class="oc-variant-color">{{ variant.color }}</div>
+                    <div class="oc-variant-price">
+                        <span class="oc-variant-price-value">{{ variant.price }}</span>
+                    </div>
+                    {% if variant.tags %}
+                    <div class="oc-variant-tags">
+                        {% for tag in variant.tags %}
+                        <span class="oc-variant-tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <button class="oc-btn-buy oc-btn-block" onclick="ocShowPurchase('{{ variant.capacity }}', '{{ variant.color }}')">
+                        <i class="fas fa-shopping-cart"></i> 立即购买
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center;padding:60px 20px;color:var(--oc-text-light);">
+            <i class="fas fa-box-open" style="font-size:3rem;opacity:0.4;margin-bottom:16px;display:block;"></i>
+            <p>暂无规格信息</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- 购买渠道 -->
+    <section class="oc-channels" id="purchase">
+        <div class="oc-section-header">
+            <h2>购买渠道</h2>
+            <p>通过官方渠道购买，确保正品，享受完整质保服务</p>
+        </div>
+        {% if openclaw and openclaw.channels %}
+        <div class="oc-channels-content">
+            <div class="oc-channels-links">
+                {% for channel in openclaw.channels %}
+                {% set channel_key = channel.key or '' %}
+                {% set channel_url = '#' %}
+                {% if product and product.purchase_links %}
+                    {% if channel_key in product.purchase_links %}
+                        {% set channel_url = product.purchase_links[channel_key] %}
+                    {% endif %}
+                {% endif %}
+                <a href="{{ channel_url }}" target="_blank" class="oc-channel-card">
+                    <div class="oc-channel-icon"><i class="fab {{ channel.icon or 'fa-store' }}"></i></div>
+                    <div class="oc-channel-text">
+                        <div class="oc-channel-title">{{ channel.title or '' }}</div>
+                        <div class="oc-channel-desc">{{ channel.desc or '' }}</div>
+                    </div>
+                    <i class="fas fa-external-link-alt oc-channel-ext"></i>
+                </a>
+                {% endfor %}
+            </div>
+            {% if openclaw.qr_labels %}
+            <div class="oc-channels-qr">
+                <div class="oc-qr-grid">
+                    {% for label in openclaw.qr_labels %}
+                    <div class="oc-qr-item">
+                        <div class="oc-qr-placeholder">
+                            <i class="fas fa-qrcode"></i>
+                            <span class="oc-qr-label">{{ label }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <p class="oc-qr-note">扫码直达购买页面</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        <div class="oc-channels-footer">
+            <i class="fas fa-info-circle"></i>
+            如需批量采购或定制，请联系客服
+        </div>
+    </section>
+
+    <!-- 产品规格 -->
+    {% if product %}
+    <section class="oc-specs" id="specs">
+        <div class="oc-section-header">
+            <h2>技术参数</h2>
+            <p>详细规格数据</p>
+        </div>
+        <div class="oc-specs-table">
+            {% if product.name %}
+            <div class="oc-spec-row">
+                <span class="oc-spec-label">产品名称</span>
+                <span class="oc-spec-value">{{ product.name }}</span>
+            </div>
+            {% endif %}
+            {% if product.ai_system %}
+            <div class="oc-spec-row">
+                <span class="oc-spec-label">AI 系统</span>
+                <span class="oc-spec-value">{{ product.ai_system }}</span>
+            </div>
+            {% endif %}
+            {% if product.capacity_range %}
+            <div class="oc-spec-row">
+                <span class="oc-spec-label">容量选项</span>
+                <span class="oc-spec-value">{{ product.capacity_range }}</span>
+            </div>
+            {% endif %}
+            {% if product.interface %}
+            <div class="oc-spec-row">
+                <span class="oc-spec-label">接口类型</span>
+                <span class="oc-spec-value">{{ product.interface }}</span>
+            </div>
+            {% endif %}
+            {% if product.speed %}
+            <div class="oc-spec-row">
+                <span class="oc-spec-label">读取速度</span>
+                <span class="oc-spec-value">{{ product.speed }}</span>
+            </div>
+            {% endif %}
+            {% if product.dimensions %}
+            <div class="oc-spec-row">
+                <span class="oc-spec-label">产品尺寸</span>
+                <span class="oc-spec-value">{{ product.dimensions }}</span>
+            </div>
+            {% endif %}
+            {% if product.material %}
+            <div class="oc-spec-row">
+                <span class="oc-spec-label">外壳材质</span>
+                <span class="oc-spec-value">{{ product.material }}</span>
+            </div>
+            {% endif %}
+            {% if product.colors %}
+            <div class="oc-spec-row">
+                <span class="oc-spec-label">颜色选项</span>
+                <span class="oc-spec-value">{{ product.colors }}</span>
+            </div>
+            {% endif %}
+            {% if product.compatible %}
+            <div class="oc-spec-row">
+                <span class="oc-spec-label">系统兼容</span>
+                <span class="oc-spec-value">{{ product.compatible }}</span>
+            </div>
+            {% endif %}
+            {% if product.warranty %}
+            <div class="oc-spec-row">
+                <span class="oc-spec-label">质保期限</span>
+                <span class="oc-spec-value">{{ product.warranty }}</span>
+            </div>
+            {% endif %}
+            {% if product.serial %}
+            <div class="oc-spec-row">
+                <span class="oc-spec-label">序列号</span>
+                <span class="oc-spec-value">{{ product.serial }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- 粘性购买栏 -->
+    <div class="oc-sticky-bar" id="stickyBar">
+        <div class="oc-sticky-bar-inner">
+            <div class="oc-sticky-bar-info">
+                <span class="oc-sticky-bar-name">{{ product.name if product else '傻福虾盘' }}</span>
+                <span class="oc-sticky-bar-variant" id="stickyVariant">选择规格</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;">
+                <span class="oc-sticky-bar-price" id="stickyPrice">—</span>
+                <button class="oc-sticky-bar-btn" onclick="ocOpenPurchaseBar()"><i class="fas fa-shopping-cart"></i> 立即购买</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 购买弹窗 -->
+    <div class="oc-modal" id="purchaseModal">
+        <div class="oc-modal-content oc-purchase-content">
+            <div class="oc-modal-header">
+                <h3><i class="fas fa-shopping-cart"></i> 选择购买方式</h3>
+                <button class="oc-modal-close" onclick="ocCloseModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="oc-purchase-body">
+                <div class="oc-purchase-selected" id="purchaseSelected">
+                    {{ product.name if product else '' }} <span id="selectedVariant"></span>
+                </div>
+                <div class="oc-purchase-options">
+                    {% if openclaw and openclaw.channels %}
+                    {% for channel in openclaw.channels %}
+                    {% set ch_key = channel.key or '' %}
+                    {% set ch_url = '#' %}
+                    {% if product and product.purchase_links and ch_key in product.purchase_links %}
+                        {% set ch_url = product.purchase_links[ch_key] %}
+                    {% endif %}
+                    <a href="{{ ch_url }}" target="_blank" class="oc-purchase-option">
+                        <i class="fab {{ channel.icon or 'fa-store' }}"></i>
+                        <div>
+                            <div class="oc-purchase-option-title">{{ channel.title or '' }}</div>
+                            <div class="oc-purchase-option-desc">{{ channel.desc or '' }}</div>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="/static/js/openclaw.js"></script>
+<script>
+function ocShowPurchase(capacity, color) {
+    if (document.getElementById('selectedVariant')) {
+        document.getElementById('selectedVariant').textContent = ' - ' + capacity + ' / ' + color;
+    }
+    document.getElementById('purchaseModal').classList.add('oc-modal-active');
+}
+function ocCloseModal() {
+    document.getElementById('purchaseModal').classList.remove('oc-modal-active');
+}
+function ocOpenPurchaseBar() {
+    document.getElementById('purchaseModal').classList.add('oc-modal-active');
+}
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('oc-modal')) {
+        e.target.classList.remove('oc-modal-active');
+    }
+});
+
+function switchGallery(src, el) {
+    var mainImg = document.getElementById('galleryMainImg');
+    if (mainImg) mainImg.src = src;
+    var thumbs = document.querySelectorAll('.oc-gallery-thumb');
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    if (el) el.classList.add('active');
+}
+
+// Sticky nav visibility
+(function() {
+    var hero = document.querySelector('.oc-hero-section');
+    var nav = document.getElementById('stickyNav');
+    if (hero && nav) {
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                nav.classList.toggle('oc-sticky-nav-visible', !entry.isIntersecting);
+            });
+        }, { threshold: 0 });
+        observer.observe(hero);
+    }
+})();
+
+// Sticky purchase bar visibility
+(function() {
+    var variants = document.getElementById('variants');
+    var bar = document.getElementById('stickyBar');
+    if (variants && bar) {
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                bar.classList.toggle('oc-sticky-bar-visible', !entry.isIntersecting);
+            });
+        }, { threshold: 0 });
+        observer.observe(variants);
+    }
+})();
+</script>
 {% endblock %}
