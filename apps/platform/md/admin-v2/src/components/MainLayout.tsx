@@ -115,6 +115,24 @@ const menuItems: MenuProps['items'] = [
     key: '/store',
     icon: <ShoppingCartOutlined />,
     label: '商城管理',
+    children: [
+      {
+        key: '/store',
+        label: '商品管理',
+      },
+      {
+        key: '/store/orders',
+        label: '订单管理',
+      },
+      {
+        key: '/store/inventory',
+        label: '库存管理',
+      },
+      {
+        key: '/store/stats',
+        label: '商城统计',
+      },
+    ],
   },
   {
     key: '/tasks',

@@ -29,7 +29,6 @@ class DownloadItemCreate(BaseModel):
     version: Optional[str] = Field(None, description="Version string (optional)")
     size: int = Field(..., description="File size in bytes")
     downloads_count: int = Field(default=0, description="Number of downloads")
-    slug: Optional[str] = Field(None, description="URL-friendly slug for slug-based lookup")
 
     model_config = {"from_attributes": True}
 
@@ -44,9 +43,9 @@ class DownloadItemResponse(BaseModel):
     version: Optional[str] = Field(None, description="Version string")
     size: int = Field(..., description="File size in bytes")
     downloads_count: int = Field(..., description="Number of downloads")
-    like_count: int = Field(default=0, description="Number of likes/favorites")
-    view_count: int = Field(default=0, description="Number of views")
-    slug: Optional[str] = Field(None, description="URL-friendly slug for lookup")
+    is_published: bool = Field(default=True, description="Whether item is published")
+    is_featured: bool = Field(default=False, description="Whether item is featured")
+    position: int = Field(default=0, description="Display position")
     download_url: str = Field(..., description="Signed download URL")
     created_at: Optional[datetime] = Field(None, description="Creation timestamp")
     updated_at: Optional[datetime] = Field(None, description="Update timestamp")
@@ -56,17 +55,14 @@ class DownloadItemResponse(BaseModel):
         "json_schema_extra": {
             "example": {
                 "id": 1,
-                "name": "SillyClaw 控制面板",
-                "description": "SillyClaw 桌面控制面板程序",
+                "name": "SillyFu 控制面板",
+                "description": "SillyFu 桌面控制面板程序",
                 "category": "application",
-                "file_key": "sillyclaw/releases/v1.2.0/SillyClaw-Setup.exe",
+                "file_key": "sillyfu/releases/v1.2.0/SillyFu-Setup.exe",
                 "version": "1.2.0",
                 "size": 52428800,
                 "downloads_count": 1523,
-                "like_count": 42,
-                "view_count": 500,
-                "slug": "sillyclaw-control-panel",
-                "download_url": "https://skills.sillymd.com/sillyclaw/releases/v1.2.0/SillyClaw-Setup.exe?signed=true&expires=1234567890",
+                "download_url": "https://skills.sillymd.com/sillyfu/releases/v1.2.0/SillyFu-Setup.exe?signed=true&expires=1234567890",
                 "created_at": "2026-03-20T10:00:00Z",
                 "updated_at": "2026-03-20T10:00:00Z"
             }
@@ -107,7 +103,7 @@ class VersionedDownload(BaseModel):
             "example": {
                 "item_id": 1,
                 "version": "1.2.0",
-                "download_url": "https://skills.sillymd.com/sillyclaw/releases/v1.2.0/SillyClaw-Setup.exe",
+                "download_url": "https://skills.sillymd.com/sillyfu/releases/v1.2.0/SillyFu-Setup.exe",
                 "release_date": "2026-03-20",
                 "file_size": 52428800,
                 "checksum": "a1b2c3d4e5f6..."
@@ -150,10 +146,10 @@ class FeaturedDownloadResponse(BaseModel):
                 "items": [
                     {
                         "id": 1,
-                        "name": "SillyClaw 控制面板",
-                        "description": "SillyClaw 桌面控制面板程序",
+                        "name": "SillyFu 控制面板",
+                        "description": "SillyFu 桌面控制面板程序",
                         "category": "application",
-                        "file_key": "sillyclaw/releases/v1.2.0/SillyClaw-Setup.exe",
+                        "file_key": "sillyfu/releases/v1.2.0/SillyFu-Setup.exe",
                         "version": "1.2.0",
                         "size": 52428800,
                         "downloads_count": 1523,
@@ -167,7 +163,7 @@ class FeaturedDownloadResponse(BaseModel):
 
 
 class SillyClawDownloadResponse(BaseModel):
-    """Response schema for SillyClaw download"""
+    """Response schema for SillyFu download"""
     version: str = Field(..., description="Version number")
     release_date: str = Field(..., description="Release date")
     download_url: str = Field(..., description="Download URL")
@@ -181,7 +177,7 @@ class SillyClawDownloadResponse(BaseModel):
             "example": {
                 "version": "1.2.0",
                 "release_date": "2026-03-20",
-                "download_url": "https://skills.sillymd.com/sillyclaw/releases/v1.2.0/SillyClaw-Setup.exe",
+                "download_url": "https://skills.sillymd.com/sillyfu/releases/v1.2.0/SillyFu-Setup.exe",
                 "release_notes": "1. 新增大虾塘动画效果\n2. 优化虾拳馆 PK 流程\n3. 修复若干 Bug",
                 "file_size": 52428800,
                 "checksum": "a1b2c3d4e5f6..."
@@ -193,7 +189,7 @@ class SillyClawDownloadResponse(BaseModel):
 class LikeResponse(BaseModel):
     """Response schema for like/favorite action"""
     success: bool = Field(..., description="Operation success status")
-    like_count: int = Field(..., description="Updated like count")
+    download_count: int = Field(..., description="Updated download count")
     item_id: int = Field(..., description="Download item ID")
 
     model_config = {
@@ -201,7 +197,7 @@ class LikeResponse(BaseModel):
         "json_schema_extra": {
             "example": {
                 "success": True,
-                "like_count": 43,
+                "download_count": 43,
                 "item_id": 1
             }
         }
@@ -229,7 +225,6 @@ class RecordDownloadResponse(BaseModel):
 class DownloadDetailResponse(BaseModel):
     """Response schema for full download detail including version history"""
     id: int = Field(..., description="Unique identifier")
-    slug: Optional[str] = Field(None, description="URL-friendly slug")
     name: str = Field(..., description="Download item name")
     description: str = Field(..., description="Download item description")
     category: str = Field(..., description="Category of the download")
@@ -237,8 +232,9 @@ class DownloadDetailResponse(BaseModel):
     version: Optional[str] = Field(None, description="Version string")
     size: int = Field(..., description="File size in bytes")
     downloads_count: int = Field(..., description="Number of downloads")
-    like_count: int = Field(default=0, description="Number of likes")
-    view_count: int = Field(default=0, description="Number of views")
+    is_published: bool = Field(default=True, description="Whether item is published")
+    is_featured: bool = Field(default=False, description="Whether item is featured")
+    position: int = Field(default=0, description="Display position")
     download_url: str = Field(..., description="Signed download URL")
     screenshot_urls: List[str] = Field(default_factory=list, description="List of screenshot URLs")
     versions: List[VersionedDownload] = Field(default_factory=list, description="List of available versions")
@@ -250,16 +246,13 @@ class DownloadDetailResponse(BaseModel):
         "json_schema_extra": {
             "example": {
                 "id": 1,
-                "slug": "sillyclaw-control-panel",
-                "name": "SillyClaw 控制面板",
-                "description": "SillyClaw 桌面控制面板程序",
+                "name": "SillyFu 控制面板",
+                "description": "SillyFu 桌面控制面板程序",
                 "category": "application",
-                "file_key": "sillyclaw/releases/v1.2.0/SillyClaw-Setup.exe",
+                "file_key": "sillyfu/releases/v1.2.0/SillyFu-Setup.exe",
                 "version": "1.2.0",
                 "size": 52428800,
                 "downloads_count": 1523,
-                "like_count": 42,
-                "view_count": 500,
                 "download_url": "https://skills.sillymd.com/...",
                 "screenshot_urls": [],
                 "versions": [],

@@ -36,6 +36,7 @@ from .schemas import (
     CreateOrderResponse,
 )
 from .services import StoreService, AdminStoreService
+from .inventory import InventoryService
 
 
 # ==================== Public Router ====================
@@ -508,3 +509,44 @@ async def admin_get_store_stats():
         return StoreStats(**result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==================== Admin Inventory API ====================
+
+@admin_router.post("/products/{product_id}/stock-adjust")
+async def admin_adjust_stock(product_id: int, body: dict):
+    """库存调整（管理面板）"""
+    try:
+        return InventoryService.adjust_stock(
+            product_id, body['change_type'], body['quantity'],
+            note=body.get('note'), operator_id=body.get('operator_id'),
+            reference_no=body.get('reference_no'),
+            source='admin')
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@admin_router.get("/products/{product_id}/stock-logs")
+async def admin_get_stock_logs(
+    product_id: int,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+):
+    """产品库存变动日志"""
+    return InventoryService.get_logs(product_id, page=page, page_size=page_size)
+
+
+@admin_router.get("/inventory")
+async def admin_get_inventory(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
+    search: str = Query(None),
+    low_stock_only: bool = Query(False),
+    collection_key: str = Query(None),
+):
+    """库存概览"""
+    return InventoryService.list_stock(
+        page, page_size, search=search,
+        low_stock_only=low_stock_only,
+        collection_key=collection_key,
+    )

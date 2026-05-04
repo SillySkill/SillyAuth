@@ -17,7 +17,7 @@ src/
 ├── modules/                   # 可插拔模块
 │   ├── auth/                 # 认证模块
 │   ├── skills/               # Skills 平台
-│   ├── sillyclaw/            # SillyClaw 版本管理
+│   ├── sillyfu/            # SillyFu 版本管理
 │   ├── payment/              # 支付模块
 │   ├── transaction/          # 交易系统
 │   ├── vendor/              # 开发者入驻

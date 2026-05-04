@@ -32,7 +32,7 @@ EXPECTED_MODULES = [
     "admin", "affiliate", "analytics", "arena", "auth", "cms",
     "config_data", "config_sync", "dashboard", "downloads", "goods",
     "i18n", "logistics", "marketplace", "messages", "payment",
-    "points", "promotion", "recommendations", "sillyclaw", "skills",
+    "points", "promotion", "recommendations", "sillyfu", "skills",
     "staff", "storage", "store", "tasks", "transaction", "tutorials", "vendor",
 ]
 

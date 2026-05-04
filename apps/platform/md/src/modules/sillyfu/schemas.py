@@ -1,5 +1,5 @@
 """
-SillyClaw Version Management Module - Schemas
+SillyFu Version Management Module - Schemas
 
 Pydantic schemas for version management API requests and responses.
 """
@@ -30,7 +30,7 @@ class VersionInfo(BaseModel):
             "example": {
                 "version": "1.2.0",
                 "release_date": "2026-03-20",
-                "download_url": "https://skills.sillymd.com/sillyclaw/releases/v1.2.0/SillyClaw-Setup.exe",
+                "download_url": "https://skills.sillymd.com/sillyfu/releases/v1.2.0/SillyFu-Setup.exe",
                 "release_notes": "1. 新增大虾塘动画效果\n2. 优化虾拳馆 PK 流程\n3. 修复若干 Bug",
                 "file_size": 52428800,
                 "checksum": "a1b2c3d4e5f6..."
@@ -57,7 +57,7 @@ class VersionCheckResponse(BaseModel):
                 "latest": {
                     "version": "1.2.0",
                     "release_date": "2026-03-20",
-                    "download_url": "https://skills.sillymd.com/sillyclaw/releases/v1.2.0/SillyClaw-Setup.exe",
+                    "download_url": "https://skills.sillymd.com/sillyfu/releases/v1.2.0/SillyFu-Setup.exe",
                     "release_notes": "1. 新增大虾塘动画效果\n2. 优化虾拳馆 PK 流程"
                 }
             }

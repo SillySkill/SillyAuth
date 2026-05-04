@@ -190,20 +190,20 @@ def seed_articles(cur):
             })
         },
         {
-            "title": "SillyClaw 自动化引擎",
+            "title": "SillyFu 自动化引擎",
             "content": "强大的自动化工作流引擎",
-            "slug": "sillyclaw-automation",
-            "summary": "SillyClaw 自动化引擎，连接 AI Skills 与实际业务场景，实现端到端的智能化工作流程。",
+            "slug": "sillyfu-automation",
+            "summary": "SillyFu 自动化引擎，连接 AI Skills 与实际业务场景，实现端到端的智能化工作流程。",
             "cover_image": "/assets/hero/sillyclaw.mp4",
             "type": "video",
-            "tags": "自动化,SillyClaw,引擎",
+            "tags": "自动化,SillyFu,引擎",
             "featured": True, "is_featured": True, "is_hot": True, "is_top": True,
             "status": "published", "view_count": 7200, "like_count": 530,
             "category_id": 4, "author_id": 33,
             "metadata": json.dumps({
                 "badge": "自动化引擎",
                 "title_parts": [
-                    {"text": "SillyClaw", "gradient": True, "break": True},
+                    {"text": "SillyFu", "gradient": True, "break": True},
                     {"text": "自动化引擎", "gradient": False, "break": False}
                 ],
                 "actions": [
@@ -282,9 +282,9 @@ def seed_tutorials(cur):
 
     tutorials = [
         {
-            "title": "SillyClaw + SillyMD 快速上手",
-            "description": "从零开始学习如何使用 SillyClaw 客户端连接 SillyMD 平台，快速创建你的第一个自动化工作流。",
-            "slug": "sillyclaw-quickstart",
+            "title": "SillyFu + SillyMD 快速上手",
+            "description": "从零开始学习如何使用 SillyFu 客户端连接 SillyMD 平台，快速创建你的第一个自动化工作流。",
+            "slug": "sillyfu-quickstart",
             "category": "入门教程", "duration": "8分钟", "level": "初级",
             "icon": "🎬", "gradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
             "cover_image": "", "status": "published", "view_count": 12500, "like_count": 856,
@@ -416,7 +416,7 @@ def seed_config_data(cur):
     _seed_config(cur, "hero_slides", "slides", [
         {"title_key": "sillymd-platform", "order": 1},
         {"title_key": "ai-security", "order": 2},
-        {"title_key": "sillyclaw-automation", "order": 3},
+        {"title_key": "sillyfu-automation", "order": 3},
     ]); count += 1
 
     # --- Market Stats ---
@@ -551,8 +551,8 @@ def seed_config_data(cur):
         "content": "<h2>服务条款</h2><p>最后更新日期：2026年1月1日</p><h3>1. 接受条款</h3><p>使用 SillyMD 平台即表示您同意遵守本服务条款。如果您不同意，请不要使用我们的服务。</p><h3>2. 用户账户</h3><p>您负责维护账户的安全性，并对账户下的所有活动负责。请勿分享您的账户凭据。</p><h3>3. Skills 内容</h3><p>发布 Skills 时，您保证拥有该内容的所有必要权利，且内容不侵犯任何第三方的知识产权。</p><h3>4. 交易规则</h3><p>所有 Skills 交易均受平台交易规则约束。平台保留取消欺诈性交易的权利。</p><h3>5. 知识产权</h3><p>Skills 的知识产权归创作者所有。平台拥有平台本身的全部知识产权。</p><h3>6. 责任限制</h3><p>在法律允许的最大范围内，SillyMD 不对因使用平台而产生的任何间接损失承担责任。</p><h3>7. 终止</h3><p>我们保留因违反条款而暂停或终止您账户的权利。</p>"
     }); count += 1
 
-    # --- SillyClaw Product ---
-    _seed_config(cur, "sillyclaw", "product", {
+    # --- SillyFu Product ---
+    _seed_config(cur, "sillyfu", "product", {
         "name": "傻福虾盘",
         "subtitle": "双接口 AI USB 设备，即插即用",
         "description": "傻福虾盘是一款内置 OpenClaw AI 系统的双接口 USB 设备。配备 USB-A 3.2 Gen 1 和 USB-C 双接口，兼容电脑、平板、手机等多种设备。内置双 Agent 协作系统，提供三种运行模式、四维安全保障和四色视觉系统，让 AI 能力触手可及。",
@@ -568,9 +568,9 @@ def seed_config_data(cur):
         "ai_system": "OpenClaw AI v2.0",
         "production_count": "首批限量 240 件",
         "purchase_links": {
-            "taobao": "https://shop.taobao.com/sillyclaw",
-            "jd": "https://item.jd.com/sillyclaw",
-            "pdd": "https://mobile.yangkeduo.com/sillyclaw"
+            "taobao": "https://shop.taobao.com/sillyfu",
+            "jd": "https://item.jd.com/sillyfu",
+            "pdd": "https://mobile.yangkeduo.com/sillyfu"
         },
         "images": [
             {"src": "/static/img/sillyclaw/product-front-silver.png", "alt": "银色正面"},
@@ -664,8 +664,8 @@ def seed_config_data(cur):
         ]
     }); count += 1
 
-    # --- SillyClaw Variants ---
-    _seed_config(cur, "sillyclaw", "variants", [
+    # --- SillyFu Variants ---
+    _seed_config(cur, "sillyfu", "variants", [
         {"capacity": "128GB", "color": "银色", "price": "¥69", "badge": "热销", "tags": ["入门", "便携"]},
         {"capacity": "256GB", "color": "银色", "price": "¥99", "badge": "推荐", "tags": ["性价比之选"]},
         {"capacity": "512GB", "color": "枪灰银", "price": "¥169", "tags": ["主流", "大容量"]},
@@ -673,7 +673,7 @@ def seed_config_data(cur):
     ]); count += 1
 
     # --- OpenClaw Store Config ---
-    _seed_config(cur, "sillyclaw", "openclaw", {
+    _seed_config(cur, "sillyfu", "openclaw", {
         "store_name": "OpenClaw 商城",
         "subtitle": "傻福虾U盘 - 官方授权线上销售渠道",
         "hero_video": "/assets/hero/openclaw-hero.mp4",

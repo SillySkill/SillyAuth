@@ -47,8 +47,8 @@ const { TextArea } = Input;
 const { Title } = Typography;
 
 interface CollectionFormValues {
-  name: string;
-  slug?: string;
+  name_zh: string;
+  collection_key?: string;
   description?: string;
   image_url?: string;
   sort_order?: number;
@@ -56,14 +56,14 @@ interface CollectionFormValues {
 }
 
 interface ProductFormValues {
-  name: string;
-  slug?: string;
-  description: string;
+  name_zh: string;
+  product_key?: string;
+  description_zh: string;
   price: number;
-  currency?: string;
-  images?: string;
+  original_price?: number;
+  image_url?: string;
   collection_id?: number;
-  stock?: number;
+  stock_count?: number;
   is_active?: boolean;
   sort_order?: number;
 }
@@ -186,8 +186,8 @@ const StoreManagement: React.FC = () => {
     setEditingCollection(null);
     collectionForm.resetFields();
     collectionForm.setFieldsValue({
-      name: '',
-      slug: '',
+      name_zh: '',
+      collection_key: '',
       description: '',
       image_url: '',
       sort_order: 0,
@@ -199,8 +199,8 @@ const StoreManagement: React.FC = () => {
   const handleEditCollection = (record: Collection) => {
     setEditingCollection(record);
     collectionForm.setFieldsValue({
-      name: record.name,
-      slug: record.slug,
+      name_zh: record.name_zh,
+      collection_key: record.collection_key,
       description: record.description,
       image_url: record.image_url,
       sort_order: record.sort_order,
@@ -250,14 +250,14 @@ const StoreManagement: React.FC = () => {
     setEditingProduct(null);
     productForm.resetFields();
     productForm.setFieldsValue({
-      name: '',
-      slug: '',
-      description: '',
+      name_zh: '',
+      product_key: '',
+      description_zh: '',
       price: 0,
-      currency: 'CNY',
-      images: '',
+      original_price: undefined,
+      image_url: '',
       collection_id: undefined,
-      stock: 0,
+      stock_count: 0,
       is_active: true,
       sort_order: 0,
     });
@@ -267,14 +267,14 @@ const StoreManagement: React.FC = () => {
   const handleEditProduct = (record: Product) => {
     setEditingProduct(record);
     productForm.setFieldsValue({
-      name: record.name,
-      slug: record.slug,
-      description: record.description,
+      name_zh: record.name_zh,
+      product_key: record.product_key,
+      description_zh: record.description_zh,
       price: record.price,
-      currency: record.currency || 'CNY',
-      images: record.images ? record.images.join(', ') : '',
+      original_price: record.original_price,
+      image_url: record.image_url,
       collection_id: record.collection_id,
-      stock: record.stock,
+      stock_count: record.stock_count,
       is_active: record.is_active,
       sort_order: record.sort_order,
     });
@@ -295,12 +295,7 @@ const StoreManagement: React.FC = () => {
     setProductSubmitting(true);
     try {
       const values = await productForm.validateFields();
-      const data: ProductCreateRequest = {
-        ...values,
-        images: values.images
-          ? values.images.split(',').map((s) => s.trim()).filter(Boolean)
-          : undefined,
-      };
+      const data: ProductCreateRequest = { ...values };
 
       if (editingProduct) {
         await updateProduct(editingProduct.id, data);
@@ -331,20 +326,20 @@ const StoreManagement: React.FC = () => {
       width: 70,
     },
     {
-      title: '名称',
-      dataIndex: 'name',
-      key: 'name',
+      title: '名称 (中文)',
+      dataIndex: 'name_zh',
+      key: 'name_zh',
       width: 200,
       ellipsis: true,
     },
     {
       title: '标识键',
-      dataIndex: 'slug',
-      key: 'slug',
+      dataIndex: 'collection_key',
+      key: 'collection_key',
       width: 160,
-      render: (slug: string) => (
+      render: (key: string) => (
         <Tag color="blue" style={{ fontFamily: 'monospace' }}>
-          {slug}
+          {key}
         </Tag>
       ),
     },
@@ -429,9 +424,9 @@ const StoreManagement: React.FC = () => {
       width: 70,
     },
     {
-      title: '名称',
-      dataIndex: 'name',
-      key: 'name',
+      title: '名称 (中文)',
+      dataIndex: 'name_zh',
+      key: 'name_zh',
       width: 220,
       ellipsis: true,
     },
@@ -440,32 +435,46 @@ const StoreManagement: React.FC = () => {
       dataIndex: 'price',
       key: 'price',
       width: 130,
-      render: (price: number, record: Product) => (
+      render: (price: number) => (
         <span style={{ fontWeight: 600, color: '#cf1322' }}>
-          {formatCurrency(price, record.currency || 'CNY')}
+          {formatCurrency(price)}
         </span>
       ),
     },
     {
+      title: '原价',
+      dataIndex: 'original_price',
+      key: 'original_price',
+      width: 130,
+      render: (original_price: number) =>
+        original_price ? (
+          <span style={{ textDecoration: 'line-through', color: '#999' }}>
+            {formatCurrency(original_price)}
+          </span>
+        ) : (
+          '-'
+        ),
+    },
+    {
       title: '商品集合',
-      dataIndex: 'collection',
-      key: 'collection',
+      dataIndex: 'collection_name',
+      key: 'collection_name',
       width: 150,
-      render: (collection: Collection) =>
-        collection ? (
-          <Tag color="blue">{collection.name}</Tag>
+      render: (collectionName: string) =>
+        collectionName ? (
+          <Tag color="blue">{collectionName}</Tag>
         ) : (
           <Tag color="default">未分类</Tag>
         ),
     },
     {
       title: '库存',
-      dataIndex: 'stock',
-      key: 'stock',
+      dataIndex: 'stock_count',
+      key: 'stock_count',
       width: 90,
       render: (stock: number) => (
         <span style={{ color: stock === 0 ? '#ff4d4f' : 'inherit' }}>
-          {stock ?? '-'}
+          {stock >= 0 ? stock : '无限'}
         </span>
       ),
     },
@@ -663,13 +672,13 @@ const StoreManagement: React.FC = () => {
           preserve={false}
         >
           <Form.Item
-            label="名称"
-            name="name"
+            label="名称 (中文)"
+            name="name_zh"
             rules={[{ required: true, message: '请输入集合名称' }]}
           >
             <Input placeholder="e.g. 热门推荐" />
           </Form.Item>
-          <Form.Item label="标识键 (Slug)" name="slug">
+          <Form.Item label="标识键 (Key)" name="collection_key">
             <Input placeholder="e.g. hot-picks" />
           </Form.Item>
           <Form.Item label="描述" name="description">
@@ -717,8 +726,8 @@ const StoreManagement: React.FC = () => {
           <Row gutter={16}>
             <Col span={16}>
               <Form.Item
-                label="商品名称"
-                name="name"
+                label="商品名称 (中文)"
+                name="name_zh"
                 rules={[{ required: true, message: '请输入商品名称' }]}
               >
                 <Input placeholder="e.g. SillyMD Pro 会员" />
@@ -726,22 +735,22 @@ const StoreManagement: React.FC = () => {
             </Col>
             <Col span={8}>
               <Form.Item
-                label="标识键 (Slug)"
-                name="slug"
+                label="标识键 (Key)"
+                name="product_key"
               >
                 <Input placeholder="e.g. sillymd-pro" />
               </Form.Item>
             </Col>
           </Row>
           <Form.Item
-            label="描述"
-            name="description"
+            label="描述 (中文)"
+            name="description_zh"
             rules={[{ required: true, message: '请输入商品描述' }]}
           >
             <TextArea rows={3} placeholder="商品详细描述" />
           </Form.Item>
           <Row gutter={16}>
-            <Col span={8}>
+            <Col span={6}>
               <Form.Item
                 label="价格"
                 name="price"
@@ -755,29 +764,38 @@ const StoreManagement: React.FC = () => {
                 />
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
+              <Form.Item label="原价" name="original_price">
+                <InputNumber
+                  min={0}
+                  precision={2}
+                  style={{ width: '100%' }}
+                  addonAfter="CNY"
+                />
+              </Form.Item>
+            </Col>
+            <Col span={6}>
               <Form.Item label="所属集合" name="collection_id">
                 <Select placeholder="选择集合" allowClear>
                   {collections.map((col) => (
                     <Select.Option key={col.id} value={col.id}>
-                      {col.name}
+                      {col.name_zh}
                     </Select.Option>
                   ))}
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={8}>
-              <Form.Item label="库存" name="stock">
-                <InputNumber min={0} style={{ width: '100%' }} />
+            <Col span={6}>
+              <Form.Item label="库存" name="stock_count" tooltip="-1 表示无限库存">
+                <InputNumber min={-1} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
           </Row>
           <Form.Item
-            label="图片列表"
-            name="images"
-            tooltip="多个URL用英文逗号分隔"
+            label="图片URL"
+            name="image_url"
           >
-            <Input placeholder="https://img1.jpg, https://img2.jpg" />
+            <Input placeholder="https://example.com/product.jpg" />
           </Form.Item>
           <Row gutter={16}>
             <Col span={12}>

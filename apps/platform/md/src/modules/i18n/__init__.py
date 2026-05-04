@@ -45,9 +45,14 @@ class SillyMDModule:
 
         # 初始化服务
         self.service = I18nService(self.config)
+        # 设置模块级引用以便 get_i18n_service 访问
+        import sys
+        mod = sys.modules.get('modules.i18n')
+        if mod:
+            mod.service = self.service
 
         # 注册路由
-        app.include_router(router, prefix="/api/i18n", tags=["i18n"])
+        app.include_router(router, prefix="/api/v1/i18n", tags=["i18n"])
 
         logger.info("i18n module installed")
 
@@ -63,6 +68,10 @@ class SillyMDModule:
             "version": self.version,
             "supported_languages": SUPPORTED_LANGUAGES,
         }
+
+
+# Module-level service reference (set during install)
+service: I18nService = None
 
 
 # 导出模块类

@@ -1,7 +1,7 @@
 """
 Downloads Module - Routes
 
-FastAPI routes for download listing, retrieval, and SillyClaw-specific downloads.
+FastAPI routes for download listing, retrieval, and SillyFu-specific downloads.
 """
 
 import logging
@@ -231,19 +231,19 @@ async def download_file(
 
 
 @router.get(
-    "/sillyclaw",
+    "/sillyfu",
     response_model=SillyClawDownloadResponse,
-    summary="Get SillyClaw latest",
-    description="Get the latest SillyClaw download",
+    summary="Get SillyFu latest",
+    description="Get the latest SillyFu download",
     responses={
-        404: {"model": ErrorResponse, "description": "No SillyClaw version found"}
+        404: {"model": ErrorResponse, "description": "No SillyFu version found"}
     }
 )
 async def get_sillyclaw_latest(
     service=Depends(get_download_service)
 ) -> SillyClawDownloadResponse:
     """
-    Get the latest SillyClaw version download.
+    Get the latest SillyFu version download.
 
     Returns:
         SillyClawDownloadResponse with latest version info
@@ -253,24 +253,24 @@ async def get_sillyclaw_latest(
         if download_info is None:
             raise HTTPException(
                 status_code=404,
-                detail="No SillyClaw version found"
+                detail="No SillyFu version found"
             )
         return SillyClawDownloadResponse(**download_info)
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error getting SillyClaw latest: {e}")
+        logger.error(f"Error getting SillyFu latest: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to get SillyClaw version: {str(e)}"
+            detail=f"Failed to get SillyFu version: {str(e)}"
         )
 
 
 @router.get(
-    "/sillyclaw/{version}",
+    "/sillyfu/{version}",
     response_model=SillyClawDownloadResponse,
-    summary="Get SillyClaw specific version",
-    description="Get a specific SillyClaw version download",
+    summary="Get SillyFu specific version",
+    description="Get a specific SillyFu version download",
     responses={
         404: {"model": ErrorResponse, "description": "Version not found"}
     }
@@ -280,7 +280,7 @@ async def get_sillyclaw_version(
     service=Depends(get_download_service)
 ) -> SillyClawDownloadResponse:
     """
-    Get a specific SillyClaw version download.
+    Get a specific SillyFu version download.
 
     Args:
         version: Version string (e.g., "1.2.0" or "v1.2.0")
@@ -293,16 +293,16 @@ async def get_sillyclaw_version(
         if download_info is None:
             raise HTTPException(
                 status_code=404,
-                detail=f"SillyClaw version {version} not found"
+                detail=f"SillyFu version {version} not found"
             )
         return SillyClawDownloadResponse(**download_info)
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error getting SillyClaw version {version}: {e}")
+        logger.error(f"Error getting SillyFu version {version}: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to get SillyClaw version: {str(e)}"
+            detail=f"Failed to get SillyFu version: {str(e)}"
         )
 
 
@@ -313,8 +313,8 @@ async def get_sillyclaw_version(
 @router.get(
     "/slug/{slug}",
     response_model=DownloadItemResponse,
-    summary="Get download by slug",
-    description="Get details of a download item by its URL-friendly slug",
+    summary="Get download by identifier",
+    description="Get details of a download item by numeric ID or name search",
     responses={
         404: {"model": ErrorResponse, "description": "Download item not found"}
     }
@@ -324,12 +324,12 @@ async def get_download_by_slug(
     service=Depends(get_download_service)
 ) -> DownloadItemResponse:
     """
-    Get details of a download item using its slug.
+    Get details of a download item using a numeric ID or name search.
 
-    Supports slug-based lookup as an alternative to numeric ID.
+    Tries numeric ID lookup first, then falls back to name-based search.
 
     Args:
-        slug: URL-friendly slug identifier
+        slug: Numeric ID or name substring to search for
 
     Returns:
         DownloadItemResponse with full details including signed URL
@@ -339,7 +339,7 @@ async def get_download_by_slug(
         if item is None:
             raise HTTPException(
                 status_code=404,
-                detail=f"Download item with slug '{slug}' not found"
+                detail=f"Download item with identifier '{slug}' not found"
             )
         return item
     except HTTPException:
@@ -368,13 +368,13 @@ async def like_download(
     """
     Like/favorite a download item.
 
-    Increments the like_count for the specified download item.
+    Increments the download_count as a proxy for user engagement.
 
     Args:
         item_id: Download item ID
 
     Returns:
-        LikeResponse with success status and updated like count
+        LikeResponse with success status and updated download count
     """
     try:
         result = service.like_download(item_id)
@@ -434,3 +434,37 @@ async def record_download(
             status_code=500,
             detail=f"Failed to record download: {str(e)}"
         )
+
+
+# ============================================
+# Admin CRUD endpoints
+# ============================================
+
+@router.post("", summary="Create download item")
+async def create_download(data: dict, service=Depends(get_download_service)):
+    """Create a new download item (admin)."""
+    try:
+        result = service.create_download(data)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/{item_id}", summary="Update download item")
+async def update_download(item_id: int, data: dict, service=Depends(get_download_service)):
+    """Update a download item (admin)."""
+    try:
+        result = service.update_download(item_id, data)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/{item_id}", summary="Delete download item")
+async def delete_download(item_id: int, service=Depends(get_download_service)):
+    """Delete a download item (admin)."""
+    try:
+        result = service.delete_download(item_id)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

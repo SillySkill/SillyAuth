@@ -1,15 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}{{ product.name if product else '傻福虾U盘' }} - SillyClaw 智能存储设备{% endblock %}
+{% block title %}{{ product.name if product else '傻福虾U盘' }} - SillyFu 智能存储设备{% endblock %}
 
 {% block extra_head %}
-<meta name="description" content="{{ product.description if product else '傻福虾U盘 (SillyClaw) - 双接口高速USB闪存盘' }}">
-<meta property="og:title" content="{{ product.name if product else '傻福虾U盘' }} - SillyClaw">
+<meta name="description" content="{{ product.description if product else '傻福虾U盘 (SillyFu) - 双接口高速USB闪存盘' }}">
+<meta property="og:title" content="{{ product.name if product else '傻福虾U盘' }} - SillyFu">
 <meta property="og:description" content="{{ product.description if product else '双接口高速USB闪存盘' }}">
 
 {% endblock %}
 
 {% block content %}
+<div class="sillyclaw-landing">
 <!-- Product Hero -->
 <section class="product-hero">
     <div class="hero-content">
@@ -24,7 +25,7 @@
                 <i class="fas fa-shopping-cart"></i>
                 查看规格
             </a>
-            <a href="#purchase" class="btn btn-secondary" style="color:white;border-color:white;">
+            <a href="#purchase" class="btn btn-secondary btn-hero-ghost">
                 <i class="fas fa-store"></i>
                 购买渠道
             </a>
@@ -153,7 +154,7 @@
         {% endfor %}
     </div>
     {% else %}
-    <div style="text-align:center;padding:2rem;color:var(--text-light);">
+    <div class="empty-variants">
         <p>暂无规格信息</p>
     </div>
     {% endif %}
@@ -168,7 +169,7 @@
     <div class="specs-table">
         <div class="spec-row">
             <div class="spec-label">产品名称</div>
-            <div class="spec-value">{{ product.name if product else '傻福虾U盘 (SillyClaw USB Drive)' }}</div>
+            <div class="spec-value">{{ product.name if product else '傻福虾U盘 (SillyFu USB Drive)' }}</div>
         </div>
         <div class="spec-row">
             <div class="spec-label">容量选项</div>
@@ -233,7 +234,7 @@
                     <i class="fab fa-alipay"></i>
                     <div class="purchase-link-text">
                         <div class="purchase-link-title">支付宝小程序</div>
-                        <div class="purchase-link-desc">SillyClaw 官方商城</div>
+                        <div class="purchase-link-desc">SillyFu 官方商城</div>
                     </div>
                     <i class="fas fa-external-link-alt"></i>
                 </a>
@@ -280,10 +281,11 @@
                     </div>
                 </div>
             </div>
-            <p style="color:var(--text-light);font-size:0.85rem;">扫码直达购买页面</p>
+            <p class="qr-note">扫码直达购买页面</p>
         </div>
     </div>
 </section>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}

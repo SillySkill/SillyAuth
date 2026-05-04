@@ -42,21 +42,89 @@
             <h1><i class="fas fa-store"></i> {{ (openclaw.store_name if openclaw else '') or 'OpenClaw 商城' }}</h1>
             <p>{{ (openclaw.subtitle if openclaw else '') or '傻福虾U盘 - 官方授权线上销售渠道' }}</p>
             <div class="oc-hero-actions">
-                <a href="#variants" class="btn btn-primary btn-lg"><i class="fas fa-shopping-cart"></i> 立即选购</a>
+                <a href="#purchase-section" class="btn btn-primary btn-lg"><i class="fas fa-shopping-cart"></i> 立即选购</a>
                 <a href="#specs" class="btn btn-outline btn-lg"><i class="fas fa-info-circle"></i> 查看规格</a>
             </div>
         </div>
     </section>
 
+    <!-- 规格选择 + 在线购买（Store API 驱动） -->
+    {% if store_products and store_products|length > 0 %}
+    <section class="oc-purchase-section" id="purchase-section">
+        <div class="oc-section-header">
+            <h2><i class="fas fa-shopping-cart"></i> 选择规格购买</h2>
+            <p>官方在线下单，支持微信/支付宝支付</p>
+        </div>
+        <div class="oc-variants-grid">
+            {% for sp in store_products %}
+            <div class="oc-variant-card{% if loop.first %} oc-variant-featured{% endif %}" onclick="selectVariant({{ sp.id }}, {{ sp.price }}, '{{ sp.name_zh|e }}', '{{ sp.image_url or '' }}')" id="variant-{{ sp.id }}">
+                <div class="oc-variant-image">
+                    {% if sp.image_url %}
+                    <img src="{{ sp.image_url }}" alt="{{ sp.name_zh }}">
+                    {% else %}
+                    <div class="oc-variant-image-placeholder">
+                        <i class="fas fa-box" style="font-size: 3rem; opacity: 0.3;"></i>
+                    </div>
+                    {% endif %}
+                    {% if sp.original_price and sp.original_price > sp.price %}
+                    <span class="oc-variant-badge">优惠</span>
+                    {% endif %}
+                </div>
+                <div class="oc-variant-info">
+                    <div class="oc-variant-capacity">{{ sp.name_zh }}</div>
+                    {% if sp.description_zh %}
+                    <div class="oc-variant-color">{{ sp.description_zh }}</div>
+                    {% endif %}
+                    <div class="oc-variant-price">
+                        <span class="oc-variant-price-value">¥{{ "%.2f"|format(sp.price / 100) }}</span>
+                        {% if sp.original_price and sp.original_price > sp.price %}
+                        <span class="oc-variant-price-original">¥{{ "%.2f"|format(sp.original_price / 100) }}</span>
+                        {% endif %}
+                    </div>
+                    {% if sp.stock_count == -1 %}
+                    <div class="oc-variant-stock oc-variant-stock-unlimited">货源充足</div>
+                    {% elif sp.stock_count > 0 %}
+                    <div class="oc-variant-stock oc-variant-stock-ok">库存 {{ sp.stock_count }} 件</div>
+                    {% else %}
+                    <div class="oc-variant-stock oc-variant-stock-zero">暂时缺货</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="oc-purchase-form">
+            <div class="oc-purchase-selected-info" id="selectedVariantInfo" style="display:none;">
+                <strong>已选：</strong><span id="selectedVariantName"></span>
+                <span class="oc-purchase-selected-price" id="selectedVariantPrice"></span>
+            </div>
+            <div class="oc-purchase-actions">
+                <div class="oc-quantity-control">
+                    <label>数量：</label>
+                    <button class="oc-qty-btn" onclick="changeQty(-1)">&#8722;</button>
+                    <input type="number" id="quantity" value="1" min="1" max="99" class="oc-qty-input" onchange="validateQty()">
+                    <button class="oc-qty-btn" onclick="changeQty(1)">+</button>
+                </div>
+                <button class="oc-btn-cart" onclick="addToCart()" id="btnAddCart">
+                    <i class="fas fa-shopping-cart"></i> 加入购物车
+                </button>
+                <button class="oc-btn-buy" onclick="buyNow()" id="btnBuyNow">
+                    <i class="fas fa-bolt"></i> 立即购买
+                </button>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
     <!-- 粘性导航 -->
     <nav class="oc-sticky-nav" id="stickyNav">
         <div class="oc-sticky-nav-inner">
+            <a href="#purchase-section" class="oc-sticky-nav-link">规格购买</a>
             <a href="#overview" class="oc-sticky-nav-link">产品概览</a>
             <a href="#agents" class="oc-sticky-nav-link">双Agent</a>
             <a href="#modes" class="oc-sticky-nav-link">运行模式</a>
             <a href="#security" class="oc-sticky-nav-link">安全保障</a>
-            <a href="#variants" class="oc-sticky-nav-link">规格价格</a>
-            <a href="#purchase" class="oc-sticky-nav-link oc-sticky-nav-buy"><i class="fas fa-shopping-cart"></i> 立即购买</a>
+            <a href="#purchase-section" class="oc-sticky-nav-link oc-sticky-nav-buy"><i class="fas fa-shopping-cart"></i> 立即购买</a>
         </div>
     </nav>
 
@@ -568,41 +636,7 @@
             </div>
             <div style="display:flex;align-items:center;gap:16px;">
                 <span class="oc-sticky-bar-price" id="stickyPrice">—</span>
-                <button class="oc-sticky-bar-btn" onclick="ocOpenPurchaseBar()"><i class="fas fa-shopping-cart"></i> 立即购买</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 购买弹窗 -->
-    <div class="oc-modal" id="purchaseModal">
-        <div class="oc-modal-content oc-purchase-content">
-            <div class="oc-modal-header">
-                <h3><i class="fas fa-shopping-cart"></i> 选择购买方式</h3>
-                <button class="oc-modal-close" onclick="ocCloseModal()"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="oc-purchase-body">
-                <div class="oc-purchase-selected" id="purchaseSelected">
-                    {{ product.name if product else '' }} <span id="selectedVariant"></span>
-                </div>
-                <div class="oc-purchase-options">
-                    {% if openclaw and openclaw.channels %}
-                    {% for channel in openclaw.channels %}
-                    {% set ch_key = channel.key or '' %}
-                    {% set ch_url = '#' %}
-                    {% if product and product.purchase_links and ch_key in product.purchase_links %}
-                        {% set ch_url = product.purchase_links[ch_key] %}
-                    {% endif %}
-                    <a href="{{ ch_url }}" target="_blank" class="oc-purchase-option">
-                        <i class="fab {{ channel.icon or 'fa-store' }}"></i>
-                        <div>
-                            <div class="oc-purchase-option-title">{{ channel.title or '' }}</div>
-                            <div class="oc-purchase-option-desc">{{ channel.desc or '' }}</div>
-                        </div>
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                    {% endfor %}
-                    {% endif %}
-                </div>
+                <button class="oc-sticky-bar-btn" onclick="addToCart()"><i class="fas fa-shopping-cart"></i> 加入购物车</button>
             </div>
         </div>
     </div>
@@ -611,23 +645,129 @@
 
 {% block extra_scripts %}
 <script>
-function ocShowPurchase(capacity, color) {
-    if (document.getElementById('selectedVariant')) {
-        document.getElementById('selectedVariant').textContent = ' - ' + capacity + ' / ' + color;
+// ============================================================
+// Store Cart / Purchase Logic
+// ============================================================
+
+var selectedProductId = null;
+var selectedProductPrice = 0;
+var collectionId = {{ collection_id or 0 }};
+
+function selectVariant(productId, price, name, imageUrl) {
+    selectedProductId = productId;
+    selectedProductPrice = price;
+
+    // Highlight selected card
+    document.querySelectorAll('.oc-variant-card').forEach(function(c) {
+        c.classList.remove('oc-variant-featured');
+    });
+    var card = document.getElementById('variant-' + productId);
+    if (card) card.classList.add('oc-variant-featured');
+
+    // Update info display
+    var priceDisplayed = (price / 100).toFixed(2);
+    var info = document.getElementById('selectedVariantInfo');
+    if (info) info.style.display = 'block';
+    var nameEl = document.getElementById('selectedVariantName');
+    if (nameEl) nameEl.textContent = name;
+    var priceEl = document.getElementById('selectedVariantPrice');
+    if (priceEl) priceEl.textContent = ' \u00a5' + priceDisplayed;
+
+    // Update sticky bar
+    var sv = document.getElementById('stickyVariant');
+    if (sv) sv.textContent = name;
+    var sp = document.getElementById('stickyPrice');
+    if (sp) sp.textContent = '\u00a5' + priceDisplayed;
+}
+
+function changeQty(delta) {
+    var input = document.getElementById('quantity');
+    if (!input) return;
+    var val = parseInt(input.value) || 1;
+    val += delta;
+    if (val < 1) val = 1;
+    if (val > 99) val = 99;
+    input.value = val;
+}
+
+function validateQty() {
+    var input = document.getElementById('quantity');
+    if (!input) return;
+    var val = parseInt(input.value) || 1;
+    if (val < 1) val = 1;
+    if (val > 99) val = 99;
+    input.value = val;
+}
+
+function showToast(msg, isError) {
+    var toast = document.createElement('div');
+    toast.className = 'oc-toast' + (isError ? ' oc-toast-error' : '');
+    toast.textContent = msg;
+    toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:10000;'
+        + 'background:' + (isError ? '#ff4d4f' : '#52c41a') + ';color:#fff;padding:12px 24px;'
+        + 'border-radius:8px;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.remove(); }, 3000);
+}
+
+async function addToCart() {
+    if (!selectedProductId) {
+        showToast('\u8bf7\u5148\u9009\u62e9\u89c4\u683c', true);
+        return;
     }
-    document.getElementById('purchaseModal').classList.add('oc-modal-active');
-}
-function ocCloseModal() {
-    document.getElementById('purchaseModal').classList.remove('oc-modal-active');
-}
-function ocOpenPurchaseBar() {
-    document.getElementById('purchaseModal').classList.add('oc-modal-active');
-}
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('oc-modal')) {
-        e.target.classList.remove('oc-modal-active');
+    if (!collectionId) {
+        showToast('\u5546\u57ce\u6570\u636e\u52a0\u8f7d\u5931\u8d25\uff0c\u8bf7\u5237\u65b0\u9875\u9762', true);
+        return;
     }
-});
+    var qty = parseInt(document.getElementById('quantity').value) || 1;
+    try {
+        var resp = await fetch(
+            '/api/v1/store/cart?user_id=1&collection_id=' + collectionId,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: selectedProductId, quantity: qty })
+            }
+        );
+        if (resp.ok) {
+            var data = await resp.json();
+            showToast(data.message || '\u5df2\u52a0\u5165\u8d2d\u7269\u8f66');
+            incrementCartCount();
+        } else {
+            var err = await resp.json();
+            showToast(err.detail || '\u52a0\u5165\u8d2d\u7269\u8f66\u5931\u8d25', true);
+        }
+    } catch (e) {
+        showToast('\u7f51\u7edc\u9519\u8bef\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5', true);
+    }
+}
+
+function incrementCartCount() {
+    var badge = document.getElementById('cartBadge');
+    if (!badge) {
+        badge = document.createElement('span');
+        badge.id = 'cartBadge';
+        badge.style.cssText = 'position:fixed;top:16px;right:16px;z-index:10001;'
+            + 'background:#ff4d4f;color:#fff;border-radius:12px;padding:4px 10px;font-size:12px;font-weight:600;';
+        document.body.appendChild(badge);
+        badge.textContent = '1';
+    } else {
+        badge.textContent = (parseInt(badge.textContent) || 0) + 1;
+    }
+}
+
+async function buyNow() {
+    if (!selectedProductId) {
+        showToast('\u8bf7\u5148\u9009\u62e9\u89c4\u683c', true);
+        return;
+    }
+    await addToCart();
+    window.location.href = '/store/checkout?collection=sillyfu';
+}
+
+// ============================================================
+// Gallery
+// ============================================================
 
 function switchGallery(src, el) {
     var mainImg = document.getElementById('galleryMainImg');
@@ -637,7 +777,10 @@ function switchGallery(src, el) {
     if (el) el.classList.add('active');
 }
 
-// Sticky nav visibility
+// ============================================================
+// Sticky Nav
+// ============================================================
+
 (function() {
     var hero = document.querySelector('.oc-hero-section');
     var nav = document.getElementById('stickyNav');
@@ -651,17 +794,20 @@ function switchGallery(src, el) {
     }
 })();
 
-// Sticky purchase bar visibility
+// ============================================================
+// Sticky Purchase Bar
+// ============================================================
+
 (function() {
-    var variants = document.getElementById('variants');
+    var purchaseSection = document.getElementById('purchase-section');
     var bar = document.getElementById('stickyBar');
-    if (variants && bar) {
+    if (purchaseSection && bar) {
         var observer = new IntersectionObserver(function(entries) {
             entries.forEach(function(entry) {
                 bar.classList.toggle('oc-sticky-bar-visible', !entry.isIntersecting);
             });
         }, { threshold: 0 });
-        observer.observe(variants);
+        observer.observe(purchaseSection);
     }
 })();
 </script>

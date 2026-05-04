@@ -1,7 +1,7 @@
 """
-SillyClaw Version Management Module
+SillyFu Version Management Module
 
-A SillyMD module for managing SillyClaw desktop application versions.
+A SillyMD module for managing SillyFu desktop application versions.
 Provides version checking, downloading, and publishing functionality.
 """
 
@@ -10,7 +10,7 @@ import logging
 from typing import Optional, Dict, Any
 
 from fastapi import FastAPI, Request
-from starlette.responses import HTMLResponse
+from starlette.responses import HTMLResponse, RedirectResponse
 from core.template_helpers import render_template
 
 logger = logging.getLogger(__name__)
@@ -18,25 +18,25 @@ logger = logging.getLogger(__name__)
 
 class ModuleInfo:
     """Module metadata"""
-    id: str = "sillyclaw"
-    name: str = "SillyClaw 版本管理模块"
+    id: str = "sillyfu"
+    name: str = "SillyFu 版本管理模块"
     version: str = "1.0.0"
-    description: str = "提供 SillyClaw 版本检查、下载、发布功能"
+    description: str = "提供 SillyFu 版本检查、下载、发布功能"
     dependencies: list = ["storage"]
 
 
 class SillyMDModule:
     """
-    SillyClaw Version Management Module for SillyMD.
+    SillyFu Version Management Module for SillyMD.
 
     This module provides:
-    - Version checking API for SillyClaw control panel
+    - Version checking API for SillyFu control panel
     - Version download redirects
     - Admin interface for publishing new versions
     - Version comparison and update detection
     """
 
-    module_id: str = "sillyclaw"
+    module_id: str = "sillyfu"
 
     @property
     def info(self):
@@ -45,7 +45,7 @@ class SillyMDModule:
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """
-        Initialize the SillyClaw module.
+        Initialize the SillyFu module.
 
         Args:
             config: Optional configuration dictionary
@@ -79,7 +79,7 @@ class SillyMDModule:
                 'bucket': 'sillymd-skills',
                 'custom_domain': 'skills.sillymd.com'
             },
-            'release_path': 'sillyclaw/releases/',
+            'release_path': 'sillyfu/releases/',
             'version_check_cache_ttl': 3600
         }
 
@@ -123,54 +123,22 @@ class SillyMDModule:
         app.include_router(router)
         app.include_router(check_update_router)
 
-        logger.info(f"Registered SillyClaw module v{ModuleInfo.version}")
+        logger.info(f"Registered SillyFu module v{ModuleInfo.version}")
 
         # Page routes
-        @app.get("/sillyclaw", response_class=HTMLResponse, include_in_schema=False)
-        async def sillyclaw_page(request: Request):
-            try:
-                from core.db_adapter import get_db_cursor
-                product = {}
-                variants = []
-                try:
-                    with get_db_cursor() as cur:
-                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyclaw", "product"))
-                        row = cur.fetchone()
-                        if row and row.get("data"):
-                            raw = row["data"]
-                            import json as _js
-                            product = _js.loads(raw) if isinstance(raw, str) else raw
-                except Exception:
-                    product = {}
-
-                try:
-                    with get_db_cursor() as cur:
-                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyclaw", "variants"))
-                        row = cur.fetchone()
-                        if row and row.get("data"):
-                            raw = row["data"]
-                            import json as _jv
-                            variants = _jv.loads(raw) if isinstance(raw, str) else raw
-                except Exception:
-                    variants = []
-            except Exception:
-                product, variants = {}, []
-
-            return render_template(request, "sillyclaw/product.html", {
-                "product": product,
-                "variants": variants,
-            })
-
-        @app.get("/openclaw", response_class=HTMLResponse, include_in_schema=False)
-        async def openclaw_page(request: Request):
+        @app.get("/sillyfu", response_class=HTMLResponse, include_in_schema=False)
+        async def sillyfu_page(request: Request):
+            """Render the sillyfu page with full OpenClaw content + Store integration."""
             try:
                 from core.db_adapter import get_db_cursor
                 product = {}
                 variants = []
                 openclaw_data = {}
+                store_products = []
+                collection_id = 0
                 try:
                     with get_db_cursor() as cur:
-                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyclaw", "product"))
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyfu", "product"))
                         row = cur.fetchone()
                         if row and row.get("data"):
                             raw = row["data"]
@@ -181,7 +149,7 @@ class SillyMDModule:
 
                 try:
                     with get_db_cursor() as cur:
-                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyclaw", "variants"))
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyfu", "variants"))
                         row = cur.fetchone()
                         if row and row.get("data"):
                             raw = row["data"]
@@ -196,7 +164,7 @@ class SillyMDModule:
 
                 try:
                     with get_db_cursor() as cur:
-                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyclaw", "openclaw"))
+                        cur.execute("SELECT data FROM config_data WHERE category=%s AND name=%s", ("sillyfu", "openclaw"))
                         row = cur.fetchone()
                         if row and row.get("data"):
                             raw = row["data"]
@@ -204,20 +172,74 @@ class SillyMDModule:
                             openclaw_data = _jo.loads(raw) if isinstance(raw, str) else raw
                 except Exception:
                     openclaw_data = {}
-            except Exception:
-                product, variants, openclaw_data = {}, [], {}
 
-            return render_template(request, "sillyclaw/openclaw.html", {
+                # Query store_products for sillyfu collection (commerce data)
+                try:
+                    with get_db_cursor() as cur:
+                        cur.execute("""
+                            SELECT sp.*, sc.id as collection_id
+                            FROM store_products sp
+                            JOIN store_collections sc ON sp.collection_id = sc.id
+                            WHERE sc.collection_key = 'sillyfu' AND sp.is_active = TRUE
+                            ORDER BY sp.sort_order, sp.id
+                        """)
+                        rows = cur.fetchall()
+                        for r in rows:
+                            store_products.append({
+                                "id": r.get("id"),
+                                "collection_id": r.get("collection_id"),
+                                "product_key": r.get("product_key", ""),
+                                "name_zh": r.get("name_zh", r.get("name", "")),
+                                "name_en": r.get("name_en", ""),
+                                "description_zh": r.get("description_zh", r.get("description", "")),
+                                "description_en": r.get("description_en", ""),
+                                "image_url": r.get("image_url", ""),
+                                "price": int(r.get("price", 0) or 0),
+                                "original_price": r.get("original_price"),
+                                "stock_count": r.get("stock_count", r.get("stock", 0)),
+                                "sold_count": r.get("sold_count", 0),
+                                "is_active": r.get("is_active", True),
+                                "sort_order": r.get("sort_order", 0),
+                            })
+                        if rows:
+                            collection_id = rows[0].get("collection_id", 0)
+
+                    if collection_id == 0:
+                        with get_db_cursor() as cur:
+                            cur.execute("SELECT id FROM store_collections WHERE collection_key='sillyfu'")
+                            crow = cur.fetchone()
+                            if crow:
+                                collection_id = crow.get("id", 0)
+                except Exception:
+                    store_products = []
+                    collection_id = 0
+            except Exception:
+                product, variants, openclaw_data, store_products = {}, [], {}, []
+                collection_id = 0
+
+            return render_template(request, "sillyfu/openclaw.html", {
                 "product": product,
                 "variants": variants,
                 "openclaw": openclaw_data,
+                "store_products": store_products,
+                "collection_id": collection_id,
             })
+
+        @app.get("/openclaw", include_in_schema=False)
+        async def openclaw_redirect():
+            """Redirect /openclaw to /sillyfu."""
+            return RedirectResponse(url="/sillyfu", status_code=301)
+
+        @app.get("/sillyclaw", include_in_schema=False)
+        async def sillyclaw_redirect():
+            """Redirect /sillyclaw to /sillyfu."""
+            return RedirectResponse(url="/sillyfu", status_code=301)
 
     def install(self, app: FastAPI) -> None:
         """Alias for register() - for PluginManager compatibility."""
-        logger.info(f"SillyClaw install called with app: {app}")
+        logger.info(f"SillyFu install called with app: {app}")
         self.register(app)
-        logger.info(f"SillyClaw install complete. Routes count: {len(app.routes)}")
+        logger.info(f"SillyFu install complete. Routes count: {len(app.routes)}")
 
     def on_startup(self) -> None:
         """
@@ -226,7 +248,7 @@ class SillyMDModule:
         Initializes services, database tables, and sets up the version service.
         Called when the application starts.
         """
-        logger.info("Starting SillyClaw module...")
+        logger.info("Starting SillyFu module...")
 
         # Load configuration
         module_config = self._load_config()
@@ -249,8 +271,8 @@ class SillyMDModule:
         )
 
         # Create version service
-        from .services import SillyClawVersionService
-        self.version_service = SillyClawVersionService(
+        from .services import SillyFuVersionService
+        self.version_service = SillyFuVersionService(
             db_config=db_config,
             tos_client=tos_client,
             cache_ttl=module_config.get('version_check_cache_ttl', 3600)
@@ -263,7 +285,7 @@ class SillyMDModule:
         # Initialize database tables
         try:
             self.version_service.initialize_database()
-            logger.info("SillyClaw database tables initialized")
+            logger.info("SillyFu database tables initialized")
         except Exception as e:
             logger.error(f"Failed to initialize database tables: {e}")
             raise
@@ -271,7 +293,7 @@ class SillyMDModule:
         # Store TOS client reference
         self.tos_client = tos_client
 
-        logger.info("SillyClaw module started successfully")
+        logger.info("SillyFu module started successfully")
 
     def on_shutdown(self) -> None:
         """
@@ -280,7 +302,7 @@ class SillyMDModule:
         Called when the application shuts down.
         Cleans up resources and connections.
         """
-        logger.info("Shutting down SillyClaw module...")
+        logger.info("Shutting down SillyFu module...")
 
         # Clear service references
         self.version_service = None
@@ -290,7 +312,7 @@ class SillyMDModule:
         global _version_service
         _version_service = None
 
-        logger.info("SillyClaw module shut down successfully")
+        logger.info("SillyFu module shut down successfully")
 
     def get_routes(self) -> list:
         """
@@ -301,37 +323,37 @@ class SillyMDModule:
         """
         return [
             {
-                "path": "/sillyclaw/version",
+                "path": "/sillyfu/version",
                 "methods": ["GET"],
                 "summary": "Get latest version"
             },
             {
-                "path": "/sillyclaw/version/{version}",
+                "path": "/sillyfu/version/{version}",
                 "methods": ["GET"],
                 "summary": "Get specific version"
             },
             {
-                "path": "/sillyclaw/version/{version}/download",
+                "path": "/sillyfu/version/{version}/download",
                 "methods": ["GET"],
                 "summary": "Download version file"
             },
             {
-                "path": "/sillyclaw/version/all",
+                "path": "/sillyfu/version/all",
                 "methods": ["GET"],
                 "summary": "List all versions"
             },
             {
-                "path": "/sillyclaw/version",
+                "path": "/sillyfu/version",
                 "methods": ["POST"],
                 "summary": "Publish new version (Admin)"
             },
             {
-                "path": "/sillyclaw/check-update",
+                "path": "/sillyfu/check-update",
                 "methods": ["GET"],
                 "summary": "Check for updates"
             },
             {
-                "path": "/sillyclaw/version/{version}",
+                "path": "/sillyfu/version/{version}",
                 "methods": ["DELETE"],
                 "summary": "Delete version (Admin)"
             }
@@ -339,12 +361,12 @@ class SillyMDModule:
 
 
 # Global service instance for route access
-_version_service: Optional['SillyClawVersionService'] = None
+_version_service: Optional['SillyFuVersionService'] = None
 
 
 def create_module(config: Optional[Dict[str, Any]] = None) -> SillyMDModule:
     """
-    Factory function to create a SillyClaw module instance.
+    Factory function to create a SillyFu module instance.
 
     Args:
         config: Optional configuration dictionary
@@ -356,13 +378,13 @@ def create_module(config: Optional[Dict[str, Any]] = None) -> SillyMDModule:
 
 
 # For backwards compatibility with direct imports
-SillyClawVersionService = None
+SillyFuVersionService = None
 
 
 def _lazy_import_services():
     """Lazy import to avoid circular imports."""
-    global SillyClawVersionService
-    if SillyClawVersionService is None:
-        from .services import SillyClawVersionService as SVS
-        SillyClawVersionService = SVS
-    return SillyClawVersionService
+    global SillyFuVersionService
+    if SillyFuVersionService is None:
+        from .services import SillyFuVersionService as SVS
+        SillyFuVersionService = SVS
+    return SillyFuVersionService

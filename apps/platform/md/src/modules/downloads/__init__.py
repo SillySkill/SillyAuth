@@ -2,13 +2,13 @@
 Downloads Module
 
 A SillyMD module for managing downloadable resources including
-SillyClaw program downloads.
+SillyFu program downloads.
 
 This module provides:
 - Download item management with categories
 - Signed URL generation for secure downloads
 - Download counting and analytics
-- SillyClaw-specific download endpoints
+- SillyFu-specific download endpoints
 - Featured downloads for homepage
 
 Usage:
@@ -27,14 +27,14 @@ Example config.yaml:
     id: downloads
     name: 下载区模块
     version: 1.0.0
-    description: 提供 SillyClaw 程序下载功能
-    dependencies: [storage, sillyclaw]
+    description: 提供 SillyFu 程序下载功能
+    dependencies: [storage, sillyfu]
 
     config:
       download_base_url: https://skills.sillymd.com
       featured_downloads:
-        - id: sillyclaw
-          name: SillyClaw 控制面板
+        - id: sillyfu
+          name: SillyFu 控制面板
           category: application
           latest_version_required: true
       cache_ttl: 3600
@@ -91,8 +91,8 @@ class ModuleInfo:
     id: str = "downloads"
     name: str = "下载区模块"
     version: str = "1.0.0"
-    description: str = "提供 SillyClaw 程序下载功能"
-    dependencies = ["storage", "sillyclaw"]  # type: list
+    description: str = "提供 SillyFu 程序下载功能"
+    dependencies = ["storage", "sillyfu"]  # type: list
 
 
 class DownloadsModule:
@@ -103,7 +103,7 @@ class DownloadsModule:
     - Download item listing with categories
     - Signed URL generation for secure downloads
     - Download counting
-    - SillyClaw-specific download endpoints
+    - SillyFu-specific download endpoints
     - Featured downloads
     """
 
@@ -149,8 +149,8 @@ class DownloadsModule:
             'download_base_url': 'https://skills.sillymd.com',
             'featured_downloads': [
                 {
-                    'id': 'sillyclaw',
-                    'name': 'SillyClaw 控制面板',
+                    'id': 'sillyfu',
+                    'name': 'SillyFu 控制面板',
                     'category': 'application',
                     'latest_version_required': True
                 }
@@ -208,11 +208,10 @@ class DownloadsModule:
                 try:
                     with get_db_cursor() as cur:
                         cur.execute("""
-                            SELECT d.*, COALESCE(dc.name, d.category) as category_name
+                            SELECT d.*, d.category as category_name
                             FROM download_items d
-                            LEFT JOIN download_categories dc ON d.category = dc.slug
-                            WHERE d.is_deleted = FALSE
-                            ORDER BY d.download_count DESC, d.created_at DESC
+                            WHERE d.is_published = TRUE
+                            ORDER BY d.downloads_count DESC, d.position ASC, d.created_at DESC
                             LIMIT 20
                         """)
                         rows = cur.fetchall()
@@ -220,37 +219,37 @@ class DownloadsModule:
                             downloads.append({
                                 "name": r.get("name", ""),
                                 "version": r.get("version", ""),
-                                "is_official": r.get("author") == "official" if r.get("author") else False,
-                                "platform_name": r.get("platform", ""),
-                                "file_type": r.get("file_type", ""),
+                                "is_official": True,
+                                "platform_name": r.get("category", ""),
+                                "file_type": r.get("category", ""),
                                 "description": r.get("description", ""),
-                                "file_url": r.get("file_url", ""),
+                                "file_url": r.get("file_key", ""),
                                 "file_size": str(r.get("size", "")) if r.get("size") else "",
-                                "mirror_url": r.get("mirror_url", ""),
-                                "mirror_name": r.get("mirror_name", ""),
-                                "github_url": r.get("source_url", ""),
-                                "download_count": r.get("download_count", 0),
-                                "view_count": r.get("view_count", 0),
+                                "mirror_url": r.get("file_key", ""),
+                                "mirror_name": r.get("name", ""),
+                                "github_url": "",
+                                "download_count": r.get("downloads_count", 0),
+                                "view_count": r.get("downloads_count", 0),
                                 "category_icon": "",
                             })
                 except Exception:
                     downloads = []
 
-                # Load categories from DB
+                # Load categories from DB (grouped from download_items since download_categories table does not exist)
                 try:
                     with get_db_cursor() as cur:
                         cur.execute("""
-                            SELECT dc.slug, dc.icon, dc.name, COUNT(di.id) as count
-                            FROM download_categories dc
-                            LEFT JOIN download_items di ON dc.slug = di.category AND di.is_deleted = FALSE
-                            GROUP BY dc.slug, dc.icon, dc.name
+                            SELECT category as slug, category as name, COUNT(id) as count
+                            FROM download_items
+                            WHERE is_published = TRUE
+                            GROUP BY category
                             ORDER BY count DESC
                         """)
                         cat_rows = cur.fetchall()
                         for c in cat_rows:
                             categories.append({
                                 "slug": c.get("slug", ""),
-                                "icon": c.get("icon", "fa-download"),
+                                "icon": "fa-download",
                                 "name": c.get("name", c.get("slug", "")),
                                 "count": c.get("count", 0),
                             })
@@ -398,14 +397,14 @@ class DownloadsModule:
                 "summary": "Record download event"
             },
             {
-                "path": "/downloads/sillyclaw",
+                "path": "/downloads/sillyfu",
                 "methods": ["GET"],
-                "summary": "Get SillyClaw latest"
+                "summary": "Get SillyFu latest"
             },
             {
-                "path": "/downloads/sillyclaw/{version}",
+                "path": "/downloads/sillyfu/{version}",
                 "methods": ["GET"],
-                "summary": "Get SillyClaw specific version"
+                "summary": "Get SillyFu specific version"
             }
         ]
 

@@ -697,8 +697,8 @@ async def stub_update_exchange_status(exchange_id: int):
 # === Downloads (DB/TOS fallback stub) ===
 
 _mock_downloads = [
-    {"id": 1, "title": "SillyClaw v1.0.0", "slug": "sillyclaw-v1", "description": "SillyClaw 桌面客户端", "file_url": "https://example.com/sillyclaw-v1.zip", "file_size": 52428800, "file_type": "zip", "version": "1.0.0", "category": "client", "platform": "windows", "download_count": 1280, "is_active": True, "created_at": (_now - timedelta(days=60)).isoformat(), "updated_at": _now.isoformat()},
-    {"id": 2, "title": "SillyClaw v1.0.0 (macOS)", "slug": "sillyclaw-v1-mac", "description": "SillyClaw 桌面客户端 for macOS", "file_url": "https://example.com/sillyclaw-v1.dmg", "file_size": 48234567, "file_type": "dmg", "version": "1.0.0", "category": "client", "platform": "mac", "download_count": 856, "is_active": True, "created_at": (_now - timedelta(days=60)).isoformat(), "updated_at": _now.isoformat()},
+    {"id": 1, "title": "SillyFu v1.0.0", "slug": "sillyfu-v1", "description": "SillyFu 桌面客户端", "file_url": "https://example.com/sillyfu-v1.zip", "file_size": 52428800, "file_type": "zip", "version": "1.0.0", "category": "client", "platform": "windows", "download_count": 1280, "is_active": True, "created_at": (_now - timedelta(days=60)).isoformat(), "updated_at": _now.isoformat()},
+    {"id": 2, "title": "SillyFu v1.0.0 (macOS)", "slug": "sillyfu-v1-mac", "description": "SillyFu 桌面客户端 for macOS", "file_url": "https://example.com/sillyfu-v1.dmg", "file_size": 48234567, "file_type": "dmg", "version": "1.0.0", "category": "client", "platform": "mac", "download_count": 856, "is_active": True, "created_at": (_now - timedelta(days=60)).isoformat(), "updated_at": _now.isoformat()},
     {"id": 3, "title": "AI 模型入门指南 PDF", "slug": "ai-guide-pdf", "description": "AI 模型入门学习资料", "file_url": "https://example.com/ai-guide.pdf", "file_size": 10485760, "file_type": "pdf", "version": "1.0", "category": "document", "platform": "all", "download_count": 3520, "is_active": True, "created_at": (_now - timedelta(days=30)).isoformat(), "updated_at": _now.isoformat()},
 ]
 
@@ -835,14 +835,14 @@ async def stub_config_delete(category: str, name: str):
 # ===========================================================================
 
 _mock_collections = [
-    {"id": 1, "name": "SillyClaw 系列", "slug": "sillyclaw-series", "description": "SillyClaw 实体产品", "image_url": "", "sort_order": 1, "is_active": True, "created_at": _now.isoformat(), "updated_at": _now.isoformat()},
+    {"id": 1, "name": "SillyFu 系列", "slug": "sillyfu-series", "description": "SillyFu 实体产品", "image_url": "", "sort_order": 1, "is_active": True, "created_at": _now.isoformat(), "updated_at": _now.isoformat()},
     {"id": 2, "name": "周边商品", "slug": "merchandise", "description": "品牌周边商品", "image_url": "", "sort_order": 2, "is_active": True, "created_at": _now.isoformat(), "updated_at": _now.isoformat()},
     {"id": 3, "name": "数字产品", "slug": "digital", "description": "数字下载产品", "image_url": "", "sort_order": 3, "is_active": True, "created_at": _now.isoformat(), "updated_at": _now.isoformat()},
 ]
 
 _mock_store_products = [
-    {"id": 1, "name": "SillyClaw U盘 128GB", "slug": "sillyclaw-usb-128", "description": "SillyClaw 定制 U 盘 128GB", "price": 99.00, "currency": "CNY", "images": [], "collection_id": 1, "collection": {"id": 1, "name": "SillyClaw 系列"}, "stock": 200, "is_active": True, "sort_order": 1, "created_at": _now.isoformat(), "updated_at": _now.isoformat()},
-    {"id": 2, "name": "SillyClaw T恤", "slug": "sillyclaw-tshirt", "description": "品牌限量 T 恤", "price": 49.90, "currency": "CNY", "images": [], "collection_id": 2, "collection": {"id": 2, "name": "周边商品"}, "stock": 500, "is_active": True, "sort_order": 2, "created_at": _now.isoformat(), "updated_at": _now.isoformat()},
+    {"id": 1, "name": "SillyFu U盘 128GB", "slug": "sillyfu-usb-128", "description": "SillyFu 定制 U 盘 128GB", "price": 99.00, "currency": "CNY", "images": [], "collection_id": 1, "collection": {"id": 1, "name": "SillyFu 系列"}, "stock": 200, "is_active": True, "sort_order": 1, "created_at": _now.isoformat(), "updated_at": _now.isoformat()},
+    {"id": 2, "name": "SillyFu T恤", "slug": "sillyfu-tshirt", "description": "品牌限量 T 恤", "price": 49.90, "currency": "CNY", "images": [], "collection_id": 2, "collection": {"id": 2, "name": "周边商品"}, "stock": 500, "is_active": True, "sort_order": 2, "created_at": _now.isoformat(), "updated_at": _now.isoformat()},
     {"id": 3, "name": "AI Skills 模板包", "slug": "ai-skills-template", "description": "AI Skills 开发模板合集", "price": 29.90, "currency": "CNY", "images": [], "collection_id": 3, "collection": {"id": 3, "name": "数字产品"}, "stock": 9999, "is_active": True, "sort_order": 3, "created_at": _now.isoformat(), "updated_at": _now.isoformat()},
 ]
 

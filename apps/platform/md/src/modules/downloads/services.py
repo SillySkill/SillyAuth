@@ -111,9 +111,9 @@ class DownloadService:
             version=row.get('version'),
             size=row.get('size', 0),
             downloads_count=row.get('downloads_count', 0),
-            like_count=row.get('like_count', 0),
-            view_count=row.get('view_count', 0),
-            slug=row.get('slug'),
+            is_published=row.get('is_published', True),
+            is_featured=row.get('is_featured', False),
+            position=row.get('position', 0),
             download_url=download_url,
             created_at=row.get('created_at'),
             updated_at=row.get('updated_at')
@@ -139,8 +139,8 @@ class DownloadService:
                 with conn.cursor(cursor_factory=RealDictCursor) as cur:
                     cur.execute("""
                         SELECT id, name, description, category, file_key,
-                               version, size, downloads_count, like_count,
-                               view_count, slug, created_at, updated_at
+                               version, size, downloads_count, is_published,
+                               is_featured, position, created_at, updated_at
                         FROM download_items
                         WHERE id = %s AND is_published = TRUE
                     """, (item_id,))
@@ -197,8 +197,8 @@ class DownloadService:
                     offset = (page - 1) * limit
                     list_query = f"""
                         SELECT id, name, description, category, file_key,
-                               version, size, downloads_count, like_count,
-                               view_count, slug, created_at, updated_at
+                               version, size, downloads_count, is_published,
+                               is_featured, position, created_at, updated_at
                         FROM download_items
                         WHERE {' AND '.join(conditions)}
                         ORDER BY position ASC, created_at DESC
@@ -300,41 +300,41 @@ class DownloadService:
 
     def get_featured_download(self) -> Optional[DownloadItemResponse]:
         """
-        Get the featured SillyClaw download with latest version.
+        Get the featured SillyFu download with latest version.
 
-        This retrieves the SillyClaw featured download based on module config.
+        This retrieves the SillyFu featured download based on module config.
 
         Returns:
             DownloadItemResponse for featured item, or None if not found
         """
         import psycopg2
 
-        # Find sillyclaw in featured downloads
-        sillyclaw_config = None
+        # Find sillyfu in featured downloads
+        sillyfu_config = None
         for item in self.featured_downloads:
-            if item.get('id') == 'sillyclaw':
-                sillyclaw_config = item
+            if item.get('id') == 'sillyfu':
+                sillyfu_config = item
                 break
 
-        if not sillyclaw_config:
-            logger.warning("SillyClaw not found in featured downloads config")
+        if not sillyfu_config:
+            logger.warning("SillyFu not found in featured downloads config")
             return None
 
         try:
             with self._get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                    # Get the latest SillyClaw version
+                    # Get the latest SillyFu version
                     cur.execute("""
                         SELECT v.id, v.name, v.description, v.category, v.file_key,
                                v.version, v.size, v.downloads_count,
-                               v.like_count, v.view_count, v.slug,
+                               v.is_published, v.is_featured, v.position,
                                v.created_at, v.updated_at
                         FROM download_items v
                         INNER JOIN (
                             SELECT file_key, MAX(created_at) as max_date
                             FROM download_items
                             WHERE category = 'application'
-                            AND name LIKE '%SillyClaw%'
+                            AND name LIKE '%SillyFu%'
                             AND is_published = TRUE
                             GROUP BY file_key
                         ) latest ON v.file_key = latest.file_key
@@ -357,7 +357,7 @@ class DownloadService:
 
     def get_sillyclaw_download(self, version: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
-        Get SillyClaw download information.
+        Get SillyFu download information.
 
         If version is provided, returns that specific version.
         Otherwise returns the latest version.
@@ -366,7 +366,7 @@ class DownloadService:
             version: Optional specific version to retrieve
 
         Returns:
-            Dictionary with SillyClaw download info, or None if not found
+            Dictionary with SillyFu download info, or None if not found
         """
         import psycopg2
 
@@ -423,18 +423,21 @@ class DownloadService:
                     return None
 
         except psycopg2.Error as e:
-            logger.error(f"Database error getting SillyClaw download: {e}")
+            logger.error(f"Database error getting SillyFu download: {e}")
             raise
 
     def like_download(self, item_id: int) -> dict:
         """
-        Increment the like count for a download item.
+        Increment the download count for a download item (like action).
+
+        Since the like_count column does not exist in the actual schema,
+        this increments download_count as a proxy for user engagement.
 
         Args:
             item_id: Download item ID
 
         Returns:
-            Dict with success status and updated like count
+            Dict with success status and updated download count
 
         Raises:
             ValueError: If item not found
@@ -447,9 +450,9 @@ class DownloadService:
                 with conn.cursor(cursor_factory=RealDictCursor) as cur:
                     cur.execute("""
                         UPDATE download_items
-                        SET like_count = like_count + 1
+                        SET downloads_count = downloads_count + 1
                         WHERE id = %s AND is_published = TRUE
-                        RETURNING like_count
+                        RETURNING downloads_count
                     """, (item_id,))
                     row = cur.fetchone()
 
@@ -459,7 +462,7 @@ class DownloadService:
                     conn.commit()
                     return {
                         "success": True,
-                        "like_count": row['like_count'],
+                        "download_count": row['downloads_count'],
                         "item_id": item_id
                     }
 
@@ -469,12 +472,14 @@ class DownloadService:
 
     def get_download_by_slug(self, slug: str) -> Optional[DownloadItemResponse]:
         """
-        Get a download item by its URL-friendly slug.
+        Get a download item by its identifier.
 
-        Supports slug-based lookup as an alternative to numeric ID.
+        Since the slug column does not exist in the actual schema,
+        this method first tries to interpret the slug as a numeric ID
+        and falls back to searching by name.
 
         Args:
-            slug: URL-friendly slug string
+            slug: Identifier string (numeric ID or name to search)
 
         Returns:
             DownloadItemResponse with signed URL, or None if not found
@@ -487,13 +492,23 @@ class DownloadService:
         try:
             with self._get_db_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    # First try numeric ID lookup
+                    try:
+                        item_id = int(slug)
+                        return self.get_download_item(item_id)
+                    except (ValueError, TypeError):
+                        pass
+
+                    # Fall back to name-based search
                     cur.execute("""
                         SELECT id, name, description, category, file_key,
-                               version, size, downloads_count, like_count,
-                               view_count, slug, created_at, updated_at
+                               version, size, downloads_count, is_published,
+                               is_featured, position, created_at, updated_at
                         FROM download_items
-                        WHERE slug = %s AND is_published = TRUE
-                    """, (slug,))
+                        WHERE name ILIKE %s AND is_published = TRUE
+                        ORDER BY position ASC, created_at DESC
+                        LIMIT 1
+                    """, (f"%{slug}%",))
                     row = cur.fetchone()
 
                     if row:
@@ -509,7 +524,8 @@ class DownloadService:
         """
         Record a download event and increment download count.
 
-        This also logs the download in download_records table for analytics.
+        Also attempts to log the download in download_records table for
+        analytics, gracefully handling the case where that table does not exist.
 
         Args:
             item_id: Download item ID
@@ -541,32 +557,27 @@ class DownloadService:
 
                     new_count = row['downloads_count']
 
-                    # Log download record if download_records table exists
-                    try:
-                        cur.execute("""
-                            INSERT INTO download_records (user_id, download_id, download_status, created_at)
-                            VALUES (%s, %s, 'completed', CURRENT_TIMESTAMP)
-                        """, (user_id, item_id))
-                    except psycopg2.Error:
-                        # download_records table may not exist yet, that's OK
-                        conn.rollback()
-                        # Re-run the increment since we rolled back
-                        cur.execute("""
-                            UPDATE download_items
-                            SET downloads_count = downloads_count + 1
-                            WHERE id = %s AND is_published = TRUE
-                            RETURNING downloads_count
-                        """, (item_id,))
-                        row = cur.fetchone()
-                        if row:
-                            new_count = row['downloads_count']
-
+                    # Commit the increment immediately
                     conn.commit()
-                    return {
-                        "success": True,
-                        "download_count": new_count,
-                        "item_id": item_id
-                    }
+
+                # Log download record in a separate transaction if the table exists
+                if user_id is not None:
+                    try:
+                        with conn.cursor() as cur:
+                            cur.execute("""
+                                INSERT INTO download_records (user_id, download_id, download_status, created_at)
+                                VALUES (%s, %s, 'completed', CURRENT_TIMESTAMP)
+                            """, (user_id, item_id))
+                            conn.commit()
+                    except psycopg2.Error:
+                        # download_records table may not exist, that's OK
+                        conn.rollback()
+
+                return {
+                    "success": True,
+                    "download_count": new_count,
+                    "item_id": item_id
+                }
 
         except psycopg2.Error as e:
             logger.error(f"Database error recording download for {item_id}: {e}")
@@ -593,9 +604,6 @@ class DownloadService:
             version VARCHAR(50),
             size BIGINT DEFAULT 0,
             downloads_count INTEGER DEFAULT 0,
-            like_count INTEGER DEFAULT 0,
-            view_count INTEGER DEFAULT 0,
-            slug VARCHAR(255),
             is_published BOOLEAN DEFAULT TRUE,
             is_featured BOOLEAN DEFAULT FALSE,
             position INTEGER DEFAULT 0,
@@ -646,6 +654,99 @@ class DownloadService:
 
         except psycopg2.Error as e:
             logger.error(f"Database error initializing table: {e}")
+            raise
+
+
+    def create_download(self, data: dict) -> Dict[str, Any]:
+        """
+        Create a new download item.
+
+        Args:
+            data: Dictionary with download item fields (name, description, category, etc.)
+
+        Returns:
+            Dict with success status and created item id
+        """
+        import psycopg2
+        try:
+            with self._get_db_connection() as conn:
+                with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    cur.execute("""
+                        INSERT INTO download_items
+                            (name, description, category, file_key, version, size,
+                             is_published, is_featured, downloads_count, position)
+                        VALUES (%s, %s, %s, %s, %s, %s, TRUE, FALSE, 0, 0)
+                        RETURNING id
+                    """, (
+                        data.get("name", ""),
+                        data.get("description", ""),
+                        data.get("category", "other"),
+                        data.get("file_key", ""),
+                        data.get("version"),
+                        data.get("size", 0),
+                    ))
+                    row = cur.fetchone()
+                    conn.commit()
+                    item_id = row["id"] if row else 0
+                    return {"success": True, "data": {"id": item_id}}
+        except psycopg2.Error as e:
+            logger.error(f"Database error creating download: {e}")
+            raise
+
+    def update_download(self, item_id: int, data: dict) -> Dict[str, Any]:
+        """
+        Update an existing download item.
+
+        Args:
+            item_id: Download item ID
+            data: Dictionary with fields to update
+
+        Returns:
+            Dict with success status
+        """
+        import psycopg2
+        try:
+            with self._get_db_connection() as conn:
+                with conn.cursor() as cur:
+                    sets = []
+                    params = []
+                    for field in ["name", "description", "category", "file_key",
+                                  "version", "size", "is_published", "is_featured", "position"]:
+                        if field in data:
+                            sets.append(f"{field} = %s")
+                            params.append(data[field])
+                    if not sets:
+                        return {"success": True, "message": "No fields to update"}
+                    params.append(item_id)
+                    cur.execute(f"""
+                        UPDATE download_items SET {', '.join(sets)}
+                        WHERE id = %s
+                    """, params)
+                    conn.commit()
+                    return {"success": True, "message": "Download item updated"}
+        except psycopg2.Error as e:
+            logger.error(f"Database error updating download {item_id}: {e}")
+            raise
+
+    def delete_download(self, item_id: int) -> Dict[str, Any]:
+        """
+        Delete a download item.
+
+        Args:
+            item_id: Download item ID
+
+        Returns:
+            Dict with success status
+        """
+        import psycopg2
+        try:
+            with self._get_db_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("DELETE FROM download_items WHERE id = %s", (item_id,))
+                    conn.commit()
+                    return {"success": True, "message": "Download item deleted"}
+        except psycopg2.Error as e:
+            logger.error(f"Database error deleting download {item_id}: {e}")
             raise
 
 

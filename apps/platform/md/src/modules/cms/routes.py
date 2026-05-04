@@ -105,6 +105,11 @@ async def get_current_user(
                     detail="用户已被禁用"
                 )
 
+            # Use token-stored role so dev-login (super_admin) takes effect
+            token_role = payload.get("role")
+            if token_role:
+                user["role"] = token_role
+
             return user
         else:
             raise credentials_exception
@@ -131,7 +136,8 @@ async def get_current_admin_user(
     Raises:
         HTTPException: If user is not admin
     """
-    if current_user.get('role') not in ['admin', 'moderator']:
+    role = (current_user.get('role') or '').lower()
+    if role not in ['admin', 'moderator', 'super_admin']:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="需要管理员权限"
@@ -149,7 +155,8 @@ def check_admin_permission(user: dict) -> bool:
     Returns:
         True if user is admin or moderator
     """
-    return user.get('role') in ['admin', 'moderator']
+    role = (user.get('role') or '').lower()
+    return role in ['admin', 'moderator', 'super_admin']
 
 
 # ============================================================================
@@ -788,12 +795,16 @@ async def update_navigation(
     try:
         items_json = json.dumps(update_data.items, ensure_ascii=False)
         with get_db_cursor() as cur:
-            cur.execute("""
-                INSERT INTO config_data (category, name, data, updated_at)
-                VALUES (%s, %s, %s::jsonb, NOW())
-                ON CONFLICT (category, name)
-                DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()
-            """, ("navigation", "navbar", items_json))
+            # Try UPDATE first; if no row exists, INSERT
+            cur.execute(
+                "UPDATE config_data SET data = %s::jsonb, updated_at = NOW() WHERE category = %s AND name = %s",
+                (items_json, "navigation", "navbar")
+            )
+            if cur.rowcount == 0:
+                cur.execute(
+                    "INSERT INTO config_data (category, name, data, created_at, updated_at) VALUES (%s, %s, %s::jsonb, NOW(), NOW())",
+                    ("navigation", "navbar", items_json)
+                )
         logger.info(f"Navigation updated by user {current_user.get('id')}")
         return {"success": True, "message": "导航保存成功"}
     except Exception as e:
@@ -801,4 +812,77 @@ async def update_navigation(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="导航保存失败"
+        )
+
+
+# ============================================================================
+# SEO Settings
+# ============================================================================
+
+
+@router.get("/seo")
+async def get_seo_settings():
+    """Load SEO settings from config_data."""
+    try:
+        with get_db_cursor() as cur:
+            cur.execute(
+                "SELECT data FROM config_data WHERE category = %s AND name = %s",
+                ("seo", "settings")
+            )
+            row = cur.fetchone()
+            if row and row.get("data") is not None:
+                raw = row["data"]
+                data = json.loads(raw) if isinstance(raw, str) else raw
+            else:
+                data = {}
+        return data
+    except Exception as e:
+        logger.error(f"Failed to load SEO settings: {e}")
+        return {}
+
+
+class SEOUpdateRequest(BaseModel):
+    """Request body for updating SEO settings."""
+    site_title: Optional[str] = None
+    meta_description: Optional[str] = None
+    meta_keywords: Optional[str] = None
+    google_analytics_id: Optional[str] = None
+    baidu_analytics_id: Optional[str] = None
+    og_title: Optional[str] = None
+    og_description: Optional[str] = None
+    og_image: Optional[str] = None
+    robots_txt: Optional[str] = None
+    auto_generate_sitemap: Optional[bool] = None
+
+
+@router.put("/seo")
+async def update_seo_settings(
+    update_data: SEOUpdateRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update SEO settings. Requires admin/moderator role."""
+    if not check_admin_permission(current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="需要管理员权限"
+        )
+    try:
+        data_json = json.dumps(update_data.model_dump(exclude_unset=True), ensure_ascii=False)
+        with get_db_cursor() as cur:
+            cur.execute(
+                "UPDATE config_data SET data = %s::jsonb, updated_at = NOW() WHERE category = %s AND name = %s",
+                (data_json, "seo", "settings")
+            )
+            if cur.rowcount == 0:
+                cur.execute(
+                    "INSERT INTO config_data (category, name, data, created_at, updated_at) VALUES (%s, %s, %s::jsonb, NOW(), NOW())",
+                    ("seo", "settings", data_json)
+                )
+        logger.info(f"SEO settings updated by user {current_user.get('id')}")
+        return {"success": True, "message": "SEO设置保存成功"}
+    except Exception as e:
+        logger.error(f"Failed to update SEO settings: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="SEO设置保存失败"
         )

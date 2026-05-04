@@ -1,7 +1,7 @@
 """
-SillyClaw Version Management Module - Services
+SillyFu Version Management Module - Services
 
-Business logic for SillyClaw version management including version checking,
+Business logic for SillyFu version management including version checking,
 comparison, publishing, and retrieval.
 """
 
@@ -18,9 +18,9 @@ from .tos_client import TosClient, create_tos_client_from_config
 logger = logging.getLogger(__name__)
 
 
-class SillyClawVersionService:
+class SillyFuVersionService:
     """
-    Service for managing SillyClaw versions.
+    Service for managing SillyFu versions.
 
     Handles version storage, retrieval, comparison, and publishing
     operations with database and TOS integration.
@@ -138,7 +138,7 @@ class SillyClawVersionService:
                     cur.execute("""
                         SELECT version, release_date, download_url, release_notes,
                                file_size, checksum
-                        FROM sillyclaw_versions
+                        FROM sillyfu_versions
                         WHERE is_latest = TRUE
                         ORDER BY created_at DESC
                         LIMIT 1
@@ -150,7 +150,7 @@ class SillyClawVersionService:
                         cur.execute("""
                             SELECT version, release_date, download_url, release_notes,
                                    file_size, checksum
-                            FROM sillyclaw_versions
+                            FROM sillyfu_versions
                             ORDER BY created_at DESC
                             LIMIT 1
                         """)
@@ -197,7 +197,7 @@ class SillyClawVersionService:
                     cur.execute("""
                         SELECT version, release_date, download_url, release_notes,
                                file_size, checksum
-                        FROM sillyclaw_versions
+                        FROM sillyfu_versions
                         WHERE version = %s OR version = %s
                         ORDER BY created_at DESC
                         LIMIT 1
@@ -231,7 +231,7 @@ class SillyClawVersionService:
                     cur.execute("""
                         SELECT version, release_date, download_url, release_notes,
                                file_size, checksum
-                        FROM sillyclaw_versions
+                        FROM sillyfu_versions
                         ORDER BY created_at DESC
                     """)
                     rows = cur.fetchall()
@@ -327,7 +327,7 @@ class SillyClawVersionService:
                 with conn.cursor(cursor_factory=RealDictCursor) as cur:
                     # Check if version already exists
                     cur.execute(
-                        "SELECT id FROM sillyclaw_versions WHERE version = %s",
+                        "SELECT id FROM sillyfu_versions WHERE version = %s",
                         (version,)
                     )
                     if cur.fetchone():
@@ -335,14 +335,14 @@ class SillyClawVersionService:
 
                     # Clear is_latest flag from all other versions
                     cur.execute("""
-                        UPDATE sillyclaw_versions
+                        UPDATE sillyfu_versions
                         SET is_latest = FALSE
                         WHERE is_latest = TRUE
                     """)
 
                     # Insert new version
                     cur.execute("""
-                        INSERT INTO sillyclaw_versions
+                        INSERT INTO sillyfu_versions
                         (version, release_date, download_url, release_notes,
                          file_size, checksum, is_latest)
                         VALUES (%s, %s, %s, %s, %s, %s, TRUE)
@@ -379,7 +379,7 @@ class SillyClawVersionService:
         """
         Initialize the database table for version storage.
 
-        Creates the sillyclaw_versions table if it doesn't exist.
+        Creates the sillyfu_versions table if it doesn't exist.
 
         Raises:
             Exception: If table creation fails
@@ -387,7 +387,7 @@ class SillyClawVersionService:
         import psycopg2
 
         create_table_sql = """
-        CREATE TABLE IF NOT EXISTS sillyclaw_versions (
+        CREATE TABLE IF NOT EXISTS sillyfu_versions (
             id SERIAL PRIMARY KEY,
             version VARCHAR(20) NOT NULL UNIQUE,
             release_date DATE NOT NULL,
@@ -400,16 +400,16 @@ class SillyClawVersionService:
         );
 
         -- Create index for faster version lookups
-        CREATE INDEX IF NOT EXISTS idx_sillyclaw_versions_version
-        ON sillyclaw_versions(version);
+        CREATE INDEX IF NOT EXISTS idx_sillyfu_versions_version
+        ON sillyfu_versions(version);
 
         -- Create index for faster latest version queries
-        CREATE INDEX IF NOT EXISTS idx_sillyclaw_versions_is_latest
-        ON sillyclaw_versions(is_latest) WHERE is_latest = TRUE;
+        CREATE INDEX IF NOT EXISTS idx_sillyfu_versions_is_latest
+        ON sillyfu_versions(is_latest) WHERE is_latest = TRUE;
 
         -- Create index for faster date-based queries
-        CREATE INDEX IF NOT EXISTS idx_sillyclaw_versions_release_date
-        ON sillyclaw_versions(release_date DESC);
+        CREATE INDEX IF NOT EXISTS idx_sillyfu_versions_release_date
+        ON sillyfu_versions(release_date DESC);
         """
 
         try:
@@ -417,7 +417,7 @@ class SillyClawVersionService:
                 with conn.cursor() as cur:
                     cur.execute(create_table_sql)
                     conn.commit()
-                    logger.info("SillyClaw versions table initialized successfully")
+                    logger.info("SillyFu versions table initialized successfully")
 
         except psycopg2.Error as e:
             logger.error(f"Database error initializing table: {e}")
@@ -449,7 +449,7 @@ class SillyClawVersionService:
                 with conn.cursor(cursor_factory=RealDictCursor) as cur:
                     # Check if version exists
                     cur.execute(
-                        "SELECT id, is_latest FROM sillyclaw_versions WHERE version = %s",
+                        "SELECT id, is_latest FROM sillyfu_versions WHERE version = %s",
                         (version,)
                     )
                     row = cur.fetchone()
@@ -458,7 +458,7 @@ class SillyClawVersionService:
                         raise ValueError(f"Version {version} not found")
 
                     # Count total versions
-                    cur.execute("SELECT COUNT(*) as count FROM sillyclaw_versions")
+                    cur.execute("SELECT COUNT(*) as count FROM sillyfu_versions")
                     count_row = cur.fetchone()
 
                     if count_row['count'] == 1:
@@ -466,17 +466,17 @@ class SillyClawVersionService:
 
                     # Delete the version
                     cur.execute(
-                        "DELETE FROM sillyclaw_versions WHERE version = %s",
+                        "DELETE FROM sillyfu_versions WHERE version = %s",
                         (version,)
                     )
 
                     # If deleted version was latest, mark the most recent as latest
                     if row['is_latest']:
                         cur.execute("""
-                            UPDATE sillyclaw_versions
+                            UPDATE sillyfu_versions
                             SET is_latest = TRUE
                             WHERE version = (
-                                SELECT version FROM sillyclaw_versions
+                                SELECT version FROM sillyfu_versions
                                 ORDER BY created_at DESC LIMIT 1
                             )
                         """)

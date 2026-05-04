@@ -61,7 +61,7 @@ modules:
     - messages       # 消息系统
     - cms            # CMS 内容管理
     - downloads      # 下载区
-    - sillyclaw      # SillyClaw 版本管理
+    - sillyfu      # SillyFu 版本管理
     - arena          # 虾拳馆 PK
 
 # 日志配置

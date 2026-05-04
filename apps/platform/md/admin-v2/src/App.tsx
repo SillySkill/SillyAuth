@@ -22,6 +22,9 @@ import I18nManagement from '@/pages/I18nManagement';
 import ModuleManagement from '@/pages/ModuleManagement';
 import ConfigDataManagement from '@/pages/ConfigDataManagement';
 import StoreManagement from '@/pages/StoreManagement';
+import OrdersManagement from '@/pages/OrdersManagement';
+import InventoryManagement from '@/pages/InventoryManagement';
+import StoreStats from '@/pages/StoreStats';
 import TasksManagement from '@/pages/TasksManagement';
 
 // Protected route wrapper – redirects to /login if not authenticated
@@ -97,6 +100,9 @@ const App: React.FC = () => {
         <Route path="modules" element={<ModuleManagement />} />
         <Route path="config-data" element={<ConfigDataManagement />} />
         <Route path="store" element={<StoreManagement />} />
+        <Route path="store/orders" element={<OrdersManagement />} />
+        <Route path="store/inventory" element={<InventoryManagement />} />
+        <Route path="store/stats" element={<StoreStats />} />
         <Route path="tasks" element={<TasksManagement />} />
       </Route>
 

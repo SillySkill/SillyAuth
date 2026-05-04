@@ -12,7 +12,7 @@ Module Structure:
 
 Available Modules:
     - auth: User authentication module
-    - sillyclaw: SillyClaw version management module
+    - sillyfu: SillyFu version management module
     - payment: Payment module (WeChat, Alipay, PayPal)
     - storage: TOS object storage module
     - transaction: Transaction management module

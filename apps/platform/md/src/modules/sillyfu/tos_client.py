@@ -1,5 +1,5 @@
 """
-SillyClaw Version Management Module - TOS Client
+SillyFu Version Management Module - TOS Client
 
 Volces TOS (Table Object Storage) client for uploading and downloading
 version files.
@@ -21,7 +21,7 @@ class TosClient:
     TOS (Table Object Storage) client for version file management.
 
     Uses Volces TOS SDK to interact with object storage for storing
-    and retrieving SillyClaw version files.
+    and retrieving SillyFu version files.
     """
 
     def __init__(
@@ -32,7 +32,7 @@ class TosClient:
         secret_key: str,
         region: str = "cn-shanghai",
         custom_domain: Optional[str] = None,
-        release_path: str = "sillyclaw/releases/"
+        release_path: str = "sillyfu/releases/"
     ):
         """
         Initialize TOS client.
@@ -66,13 +66,13 @@ class TosClient:
 
         Args:
             version: Version number (e.g., "1.2.0")
-            filename: Optional filename, defaults to SillyClaw-{version}.exe
+            filename: Optional filename, defaults to SillyFu-{version}.exe
 
         Returns:
             Object key path in TOS
         """
         if filename is None:
-            filename = f"SillyClaw-{version}.exe"
+            filename = f"SillyFu-{version}.exe"
         # Normalize version (remove 'v' prefix if present)
         version = version.lstrip('v')
         return f"{self.release_path}v{version}/{filename}"
@@ -123,7 +123,7 @@ class TosClient:
 
         Args:
             version: Version number (e.g., "1.2.0")
-            filename: Optional filename, defaults to SillyClaw-{version}.exe
+            filename: Optional filename, defaults to SillyFu-{version}.exe
 
         Returns:
             File content as bytes
@@ -155,7 +155,7 @@ class TosClient:
 
         Args:
             version: Version number (e.g., "1.2.0")
-            filename: Optional filename, defaults to SillyClaw-{version}.exe
+            filename: Optional filename, defaults to SillyFu-{version}.exe
 
         Returns:
             Signed download URL (valid for 24 hours by default)
@@ -300,5 +300,5 @@ def create_tos_client_from_config(config: dict) -> TosClient:
         access_key=access_key,
         secret_key=secret_key,
         custom_domain=config.get("custom_domain"),
-        release_path=config.get("release_path", "sillyclaw/releases/")
+        release_path=config.get("release_path", "sillyfu/releases/")
     )

@@ -355,12 +355,24 @@ class StoreService:
                     item['quantity'], item['unit_price'], item['subtotal']
                 ))
 
-                # 更新库存（跳过无限库存）
-                cur.execute("""
-                    UPDATE store_products
-                    SET stock_count = stock_count - %s, sold_count = sold_count + %s
-                    WHERE id = %s AND stock_count != -1
-                """, (item['quantity'], item['quantity'], item['product_id']))
+                # 更新库存（跳过无限库存），记录进销存流水
+                cur.execute(
+                    "SELECT stock_count FROM store_products WHERE id=%s FOR UPDATE",
+                    (item['product_id'],))
+                prod = cur.fetchone()
+                old_stock = prod['stock_count'] if prod else -1
+                if old_stock != -1:
+                    cur.execute("""
+                        UPDATE store_products
+                        SET stock_count = stock_count - %s, sold_count = sold_count + %s
+                        WHERE id = %s AND stock_count != -1
+                    """, (item['quantity'], item['quantity'], item['product_id']))
+                    new_stock = old_stock - item['quantity']
+                    cur.execute("""INSERT INTO store_inventory_logs
+                        (product_id, change_type, change_quantity, stock_before, stock_after,
+                         reference_no, source)
+                        VALUES (%s,'order_deduct',%s,%s,%s,%s,'order')""",
+                        (item['product_id'], item['quantity'], old_stock, new_stock, order_no))
 
             # 清空购物车
             cur.execute(
@@ -1313,8 +1325,8 @@ class AdminStoreService:
             if current_status == 'cancelled':
                 raise HTTPException(status_code=400, detail="Cannot change status of cancelled order")
 
-            # 取消已支付/已发货订单时回滚库存
-            if status == 'cancelled' and current_status in ['paid', 'shipped']:
+            # 取消订单时回滚库存并记录进销存流水
+            if status == 'cancelled' and current_status in ['pending', 'paid', 'shipped']:
                 cur.execute("""
                     SELECT oi.product_id, oi.quantity
                     FROM store_order_items oi
@@ -1323,11 +1335,23 @@ class AdminStoreService:
                 """, (order_no,))
 
                 for item in cur.fetchall():
-                    cur.execute("""
-                        UPDATE store_products
-                        SET stock_count = stock_count + %s, sold_count = sold_count - %s
-                        WHERE id = %s AND stock_count != -1
-                    """, (item['quantity'], item['quantity'], item['product_id']))
+                    cur.execute(
+                        "SELECT stock_count, sold_count FROM store_products WHERE id=%s FOR UPDATE",
+                        (item['product_id'],))
+                    prod_row = cur.fetchone()
+                    if prod_row and prod_row['stock_count'] != -1:
+                        old_stock = prod_row['stock_count']
+                        cur.execute("""
+                            UPDATE store_products
+                            SET stock_count = stock_count + %s, sold_count = sold_count - %s
+                            WHERE id = %s AND stock_count != -1
+                        """, (item['quantity'], item['quantity'], item['product_id']))
+                        new_stock = old_stock + item['quantity']
+                        cur.execute("""INSERT INTO store_inventory_logs
+                            (product_id, change_type, change_quantity, stock_before, stock_after,
+                             reference_no, source)
+                            VALUES (%s,'order_cancel',%s,%s,%s,%s,'order')""",
+                            (item['product_id'], item['quantity'], old_stock, new_stock, order_no))
 
             cur.execute("""
                 UPDATE store_orders

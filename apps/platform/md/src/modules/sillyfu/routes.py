@@ -1,5 +1,5 @@
 """
-SillyClaw Version Management Module - Routes
+SillyFu Version Management Module - Routes
 
 FastAPI routes for version checking, downloading, and publishing.
 """
@@ -23,7 +23,7 @@ from .schemas import (
 logger = logging.getLogger(__name__)
 
 # Create router
-router = APIRouter(prefix="/api/v1/sillyclaw/version", tags=["sillyclaw"])
+router = APIRouter(prefix="/api/v1/sillyfu/version", tags=["sillyfu"])
 
 
 class MockVersionService:
@@ -34,7 +34,7 @@ class MockVersionService:
         return VersionInfo(
             version="1.2.0",
             release_date="2026-03-20",
-            download_url="https://skills.sillymd.com/sillyclaw/releases/v1.2.0/SillyClaw-Setup.exe",
+            download_url="https://skills.sillymd.com/sillyfu/releases/v1.2.0/SillyFu-Setup.exe",
             release_notes="1. 新增大虾塘动画效果\n2. 优化虾拳馆 PK 流程\n3. 修复若干 Bug",
             file_size=52428800,
             checksum="demo123"
@@ -46,13 +46,13 @@ class MockVersionService:
             VersionInfo(
                 version="1.2.0",
                 release_date="2026-03-20",
-                download_url="https://skills.sillymd.com/sillyclaw/releases/v1.2.0/SillyClaw-Setup.exe",
+                download_url="https://skills.sillymd.com/sillyfu/releases/v1.2.0/SillyFu-Setup.exe",
                 release_notes="Latest version"
             ),
             VersionInfo(
                 version="1.1.0",
                 release_date="2026-03-10",
-                download_url="https://skills.sillymd.com/sillyclaw/releases/v1.1.0/SillyClaw-Setup.exe",
+                download_url="https://skills.sillymd.com/sillyfu/releases/v1.1.0/SillyFu-Setup.exe",
                 release_notes="Previous version"
             )
         ]
@@ -62,7 +62,7 @@ class MockVersionService:
         return VersionInfo(
             version=version,
             release_date="2026-03-20",
-            download_url=f"https://skills.sillymd.com/sillyclaw/releases/{version}/SillyClaw-Setup.exe",
+            download_url=f"https://skills.sillymd.com/sillyfu/releases/{version}/SillyFu-Setup.exe",
             release_notes=f"Version {version} release"
         )
 
@@ -100,7 +100,7 @@ def require_admin(api_key: Optional[str] = Header(None)):
 
     # Get admin API key from environment or config
     try:
-        expected_key = __import__('os').getenv('SILLYCLAW_ADMIN_API_KEY')
+        expected_key = __import__('os').getenv('SILLYFU_ADMIN_API_KEY')
     except Exception:
         pass
 
@@ -117,13 +117,13 @@ def require_admin(api_key: Optional[str] = Header(None)):
     "",
     response_model=VersionInfo,
     summary="Get latest version",
-    description="Get information about the latest SillyClaw version"
+    description="Get information about the latest SillyFu version"
 )
 async def get_latest_version(
     service=Depends(get_version_service)
 ) -> VersionInfo:
     """
-    Get the latest SillyClaw version information.
+    Get the latest SillyFu version information.
 
     Returns the most recent version's details including:
     - Version number
@@ -157,13 +157,13 @@ async def get_latest_version(
     "/all",
     response_model=VersionListResponse,
     summary="List all versions",
-    description="Get a list of all SillyClaw versions"
+    description="Get a list of all SillyFu versions"
 )
 async def list_all_versions(
     service=Depends(get_version_service)
 ) -> VersionListResponse:
     """
-    Get a list of all SillyClaw versions.
+    Get a list of all SillyFu versions.
 
     Returns versions ordered by release date (newest first).
     """
@@ -185,14 +185,14 @@ async def list_all_versions(
     "/{version}",
     response_model=VersionInfo,
     summary="Get specific version",
-    description="Get information about a specific SillyClaw version"
+    description="Get information about a specific SillyFu version"
 )
 async def get_version(
     version: str,
     service=Depends(get_version_service)
 ) -> VersionInfo:
     """
-    Get information about a specific SillyClaw version.
+    Get information about a specific SillyFu version.
 
     Args:
         version: Version number (e.g., "1.2.0" or "v1.2.0")
@@ -268,7 +268,7 @@ async def download_version(
     response_model=VersionInfo,
     status_code=201,
     summary="Publish new version",
-    description="Publish a new SillyClaw version (Admin only)",
+    description="Publish a new SillyFu version (Admin only)",
     responses={
         401: {"model": ErrorResponse, "description": "Unauthorized"},
         400: {"model": ErrorResponse, "description": "Invalid request"},
@@ -281,7 +281,7 @@ async def publish_version(
     service=Depends(get_version_service)
 ) -> VersionInfo:
     """
-    Publish a new SillyClaw version.
+    Publish a new SillyFu version.
 
     This endpoint is restricted to admin users only. It will:
     1. Validate the version format
@@ -313,7 +313,7 @@ async def publish_version(
 
 
 # Separate router for update check (simpler endpoint)
-check_update_router = APIRouter(prefix="/api/v1/sillyclaw", tags=["sillyclaw"])
+check_update_router = APIRouter(prefix="/api/v1/sillyfu", tags=["sillyfu"])
 
 
 @check_update_router.get(
@@ -327,9 +327,9 @@ async def check_update(
     service=Depends(get_version_service)
 ) -> VersionCheckResponse:
     """
-    Check if an update is available for SillyClaw.
+    Check if an update is available for SillyFu.
 
-    This endpoint is used by the SillyClaw control panel to check
+    This endpoint is used by the SillyFu control panel to check
     for available updates.
 
     Args:
@@ -380,7 +380,7 @@ async def check_update(
 
 
 @check_update_router.delete(
-    "/sillyclaw/version/{version}",
+    "/sillyfu/version/{version}",
     summary="Delete version",
     description="Delete a specific version (Admin only)",
     responses={
@@ -394,7 +394,7 @@ async def delete_version(
     service=Depends(get_version_service)
 ):
     """
-    Delete a specific SillyClaw version.
+    Delete a specific SillyFu version.
 
     This endpoint is restricted to admin users only.
 

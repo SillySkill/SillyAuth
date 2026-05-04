@@ -170,6 +170,11 @@ class PaymentModule(BaseModule):
 
         logger.info(f"{self.name} 加载完成")
 
+    def install(self, app):
+        """安装模块路由到应用"""
+        app.include_router(router)
+        logger.info(f"Payment routes registered at /api/v1/payment")
+
     def get_routes(self):
         """获取模块路由"""
         return router

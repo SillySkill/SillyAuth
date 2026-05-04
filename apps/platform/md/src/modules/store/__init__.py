@@ -23,6 +23,7 @@ from core.template_helpers import render_template
 
 from .routes import router as store_router
 from .routes import admin_router as admin_store_router
+from .inventory_routes import external_router as inventory_external_router
 from .services import StoreService, AdminStoreService
 from .schemas import (
     StoreCollection,
@@ -99,6 +100,8 @@ class BaseModule:
     def install(self, app: FastAPI) -> None:
         """安装模块到应用"""
         app.include_router(self.router)
+        app.include_router(self.admin_router)
+        app.include_router(inventory_external_router)
         # Page routes
         @app.get("/store", response_class=HTMLResponse, include_in_schema=False)
         async def store_page(request: Request):

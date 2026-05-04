@@ -226,7 +226,7 @@ _TRANSLATIONS = {
     "home.feature_marketplace": "供应商市场",
     "home.feature_marketplace_desc": "成为供应商，变现你的技能",
     "home.feature_store": "商品商店",
-    "home.feature_store_desc": "购买 SillyClaw 等实体商品",
+    "home.feature_store_desc": "购买 SillyFu 等实体商品",
     "home.start_now": "立即开始",
     "home.learn_more": "了解更多",
     "home.featured_skills": "精选 Skills",
@@ -248,7 +248,7 @@ _TRANSLATIONS = {
     "features.hero_title": "SillyMD 平台功能特性",
     "features.hero_desc": "全方位 AI Skills 管理与交易平台",
     "store.hero_title": "SillyMD 商店",
-    "store.hero_desc": "精选 SillyClaw 实体商品和数字产品",
+    "store.hero_desc": "精选 SillyFu 实体商品和数字产品",
 
     # Footer
     "footer.product": "产品",
@@ -256,7 +256,7 @@ _TRANSLATIONS = {
     "footer.support": "支持",
     "footer.about": "关于",
     "footer.features": "功能特性",
-    "footer.sillyclaw": "SillyClaw",
+    "footer.sillyfu": "SillyFu",
     "footer.openclaw": "OpenClaw",
     "footer.docs": "文档",
     "footer.api": "API",

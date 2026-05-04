@@ -4,13 +4,16 @@ Payment Module Routes
 
 提供支付相关的 API 端点
 """
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, BackgroundTasks, Header
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, BackgroundTasks, Header
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 import logging
 import json
+import os
 import xml.etree.ElementTree as ET
+
+from jose import jwt, JWTError
 
 from .schemas import (
     PaymentCreate,
@@ -51,36 +54,43 @@ router = APIRouter(prefix="/api/v1/payment", tags=["支付"])
 # Auth Stubs (Token-based)
 # ============================================
 
+# JWT configuration
+SECRET_KEY = os.getenv("JWT_SECRET", "sillymd-dev-jwt-secret-key-2024")
+ALGORITHM = "HS256"
+
+
 def get_current_user_stub(authorization: str = Header(None)) -> dict:
     """
-    Stub auth dependency - extracts user info from Bearer token.
-    Token format: Bearer <user_id> (for development/stub usage).
-    In production, replace with real JWT validation.
+    Validate JWT Bearer token and return user info.
     """
     if not authorization:
         raise HTTPException(status_code=401, detail="Not authenticated")
     token = authorization.replace("Bearer ", "").strip()
     try:
-        user_id = int(token)
-    except (ValueError, TypeError):
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("user_id")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return {"id": user_id, "username": payload.get("username", f"user_{user_id}")}
+    except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
-    return {"id": user_id, "username": f"user_{user_id}"}
 
 
 def get_current_admin_stub(authorization: str = Header(None)) -> dict:
     """
-    Stub admin auth dependency - extracts user info from Bearer token.
-    Token format: Bearer <admin_user_id>.
-    In production, replace with real JWT + role validation.
+    Validate JWT Bearer token for admin endpoints.
     """
     if not authorization:
         raise HTTPException(status_code=401, detail="Not authenticated")
     token = authorization.replace("Bearer ", "").strip()
     try:
-        user_id = int(token)
-    except (ValueError, TypeError):
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("user_id")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return {"id": user_id, "username": payload.get("username", f"admin_{user_id}")}
+    except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
-    return {"id": user_id, "username": f"admin_{user_id}"}
 
 
 # ============================================
@@ -169,9 +179,175 @@ async def create_payment(
         raise HTTPException(status_code=500, detail=f"创建支付失败: {str(e)}")
 
 
+# ============================================
+# Static GET routes (must be defined BEFORE /{payment_id} to match first)
+# ============================================
+
+
+@router.get("/methods", response_model=dict)
+async def get_payment_methods(
+    payment_service: PaymentService = Depends(get_payment_service)
+):
+    """
+    获取可用支付方式
+
+    返回支持的支付方式列表
+    """
+    try:
+        result = payment_service.get_available_payment_methods()
+
+        methods_data = []
+        for method in result.methods:
+            methods_data.append({
+                "method": method.method.value,
+                "name": method.name,
+                "icon": method.icon,
+                "description": method.description,
+                "channels": [ch.value for ch in method.channels],
+                "currencies": method.currencies,
+                "enabled": method.enabled
+            })
+
+        return {
+            "success": True,
+            "data": {
+                "methods": methods_data,
+                "default_currency": result.default_currency
+            }
+        }
+
+    except Exception as e:
+        logger.error(f"获取支付方式失败: {e}")
+        raise HTTPException(status_code=500, detail=f"获取支付方式失败: {str(e)}")
+
+
+def _ensure_payment_accounts_table():
+    """Create payment_accounts table if it doesn't exist."""
+    try:
+        from core.db_adapter import get_db_cursor
+        with get_db_cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS payment_accounts (
+                    id SERIAL PRIMARY KEY,
+                    account_type VARCHAR(50) NOT NULL,
+                    account_name VARCHAR(255) NOT NULL DEFAULT '',
+                    account_id VARCHAR(255) NOT NULL DEFAULT '',
+                    credentials TEXT DEFAULT '{}',
+                    is_active BOOLEAN DEFAULT TRUE,
+                    is_primary BOOLEAN DEFAULT FALSE,
+                    priority INTEGER DEFAULT 0,
+                    currency VARCHAR(10) DEFAULT 'CNY',
+                    description TEXT DEFAULT '',
+                    created_at TIMESTAMP DEFAULT NOW(),
+                    updated_at TIMESTAMP DEFAULT NOW()
+                )
+            """)
+    except Exception as e:
+        logger.error(f"Failed to ensure payment_accounts table: {e}")
+
+
+@router.get("/accounts", response_model=dict)
+def list_payment_accounts(
+    account_type: Optional[str] = Query(None, description="Filter by account type"),
+    is_active: Optional[bool] = Query(None, description="Filter by active status"),
+    payment_service: PaymentService = Depends(get_payment_service),
+):
+    """
+    Admin: List payment accounts.
+    """
+    _ensure_payment_accounts_table()
+    try:
+        from .schemas import ALLOWED_ACCOUNT_TYPES
+        if account_type and account_type not in ALLOWED_ACCOUNT_TYPES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid account_type. Allowed: {', '.join(ALLOWED_ACCOUNT_TYPES)}"
+            )
+        results = payment_service.list_payment_accounts(
+            account_type=account_type,
+            is_active=is_active,
+        )
+        return {"success": True, "data": results}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"List payment accounts failed: {e}")
+        raise HTTPException(status_code=500, detail=f"List payment accounts failed: {str(e)}")
+
+
+@router.get("/orders", response_model=dict)
+def get_user_orders(
+    status: Optional[str] = Query(None, description="Filter by order status"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(20, ge=1, le=100, description="Items per page"),
+    payment_service: PaymentService = Depends(get_payment_service),
+):
+    """
+    Get user orders (paginated, filterable by status).
+    """
+    try:
+        user_id = 0  # Will be extracted from auth in production
+        result = payment_service.get_user_orders(
+            user_id=user_id,
+            status=status,
+            page=page,
+            page_size=page_size,
+        )
+        return {"success": True, "data": result}
+    except Exception as e:
+        logger.error(f"Get user orders failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Get user orders failed: {str(e)}")
+
+
+@router.get("/my-purchases", response_model=dict)
+def get_my_purchases(
+    content_type: Optional[str] = Query(None, description="Filter by content type"),
+    payment_service: PaymentService = Depends(get_payment_service),
+):
+    """
+    Get user's purchased/unlocked content.
+    Returns valid unlocks (not expired).
+    """
+    try:
+        user_id = 0  # Will be extracted from auth in production
+        results = payment_service.get_my_purchases(
+            user_id=user_id,
+            content_type=content_type,
+        )
+        return {"success": True, "data": results}
+    except Exception as e:
+        logger.error(f"Get my purchases failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Get my purchases failed: {str(e)}")
+
+
+@router.get("/submissions", response_model=dict)
+def get_my_submissions(
+    status: Optional[str] = Query(None, description="Filter by submission status"),
+    payment_service: PaymentService = Depends(get_payment_service),
+):
+    """
+    Get user's submissions.
+    """
+    try:
+        user_id = 0
+        results = payment_service.get_my_submissions(
+            user_id=user_id,
+            status=status,
+        )
+        return {"success": True, "data": results}
+    except Exception as e:
+        logger.error(f"Get my submissions failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Get my submissions failed: {str(e)}")
+
+
+# ============================================
+# Payment ID lookup (catch-all, defined after static routes)
+# ============================================
+
+
 @router.get("/{payment_id}", response_model=dict)
 async def get_payment_status(
-    payment_id: str,
+    payment_id: str = Path(..., description="支付记录ID"),
     payment_service: PaymentService = Depends(get_payment_service)
 ):
     """
@@ -179,16 +355,6 @@ async def get_payment_status(
 
     根据支付记录ID查询支付状态
     """
-    # Guard against known static route paths being misinterpreted as payment IDs
-    _known_paths = {
-        "create", "refund", "methods", "notify",
-        "orders", "my-purchases", "submissions",
-    }
-    if payment_id in _known_paths:
-        raise HTTPException(status_code=404, detail="Payment not found")
-    # Also guard against paths containing forward slash (multi-segment paths)
-    if "/" in payment_id:
-        raise HTTPException(status_code=404, detail="Payment not found")
 
     try:
         result = await payment_service.query_payment(payment_id=payment_id)
@@ -321,43 +487,6 @@ async def request_refund(
     except Exception as e:
         logger.error(f"申请退款失败: {e}")
         raise HTTPException(status_code=500, detail=f"申请退款失败: {str(e)}")
-
-
-@router.get("/methods", response_model=dict)
-async def get_payment_methods(
-    payment_service: PaymentService = Depends(get_payment_service)
-):
-    """
-    获取可用支付方式
-
-    返回支持的支付方式列表
-    """
-    try:
-        result = payment_service.get_available_payment_methods()
-
-        methods_data = []
-        for method in result.methods:
-            methods_data.append({
-                "method": method.method.value,
-                "name": method.name,
-                "icon": method.icon,
-                "description": method.description,
-                "channels": [ch.value for ch in method.channels],
-                "currencies": method.currencies,
-                "enabled": method.enabled
-            })
-
-        return {
-            "success": True,
-            "data": {
-                "methods": methods_data,
-                "default_currency": result.default_currency
-            }
-        }
-
-    except Exception as e:
-        logger.error(f"获取支付方式失败: {e}")
-        raise HTTPException(status_code=500, detail=f"获取支付方式失败: {str(e)}")
 
 
 # ============================================
@@ -548,56 +677,9 @@ def create_order(
         raise HTTPException(status_code=500, detail=f"Create order failed: {str(e)}")
 
 
-@router.get("/orders", response_model=dict)
-def get_user_orders(
-    status: Optional[str] = Query(None, description="Filter by order status"),
-    page: int = Query(1, ge=1, description="Page number"),
-    page_size: int = Query(20, ge=1, le=100, description="Items per page"),
-    current_user: dict = Depends(get_current_user_stub),
-    payment_service: PaymentService = Depends(get_payment_service),
-):
-    """
-    Get user orders (paginated, filterable by status).
-    """
-    try:
-        user_id = current_user["id"]
-        result = payment_service.get_user_orders(
-            user_id=user_id,
-            status=status,
-            page=page,
-            page_size=page_size,
-        )
-        return {"success": True, "data": result}
-    except Exception as e:
-        logger.error(f"Get user orders failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Get user orders failed: {str(e)}")
-
-
 # ============================================
 # Purchase Endpoints
 # ============================================
-
-@router.get("/my-purchases", response_model=dict)
-def get_my_purchases(
-    content_type: Optional[str] = Query(None, description="Filter by content type"),
-    current_user: dict = Depends(get_current_user_stub),
-    payment_service: PaymentService = Depends(get_payment_service),
-):
-    """
-    Get user's purchased/unlocked content.
-    Returns valid unlocks (not expired).
-    """
-    try:
-        user_id = current_user["id"]
-        results = payment_service.get_my_purchases(
-            user_id=user_id,
-            content_type=content_type,
-        )
-        return {"success": True, "data": results}
-    except Exception as e:
-        logger.error(f"Get my purchases failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Get my purchases failed: {str(e)}")
-
 
 # ============================================
 # Submission Endpoints (from old payment.py)
@@ -641,27 +723,6 @@ def create_submission(
     except Exception as e:
         logger.error(f"Create submission failed: {e}")
         raise HTTPException(status_code=500, detail=f"Create submission failed: {str(e)}")
-
-
-@router.get("/submissions", response_model=dict)
-def get_my_submissions(
-    status: Optional[str] = Query(None, description="Filter by submission status"),
-    current_user: dict = Depends(get_current_user_stub),
-    payment_service: PaymentService = Depends(get_payment_service),
-):
-    """
-    Get user's submissions.
-    """
-    try:
-        user_id = current_user["id"]
-        results = payment_service.get_my_submissions(
-            user_id=user_id,
-            status=status,
-        )
-        return {"success": True, "data": results}
-    except Exception as e:
-        logger.error(f"Get my submissions failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Get my submissions failed: {str(e)}")
 
 
 # ============================================
@@ -760,34 +821,6 @@ def get_revenue_stats(
 # Payment Account Management (Admin)
 # ============================================
 
-@router.get("/accounts", response_model=dict)
-def list_payment_accounts(
-    account_type: Optional[str] = Query(None, description="Filter by account type"),
-    is_active: Optional[bool] = Query(None, description="Filter by active status"),
-    current_admin: dict = Depends(get_current_admin_stub),
-    payment_service: PaymentService = Depends(get_payment_service),
-):
-    """
-    Admin: List payment accounts.
-    """
-    try:
-        if account_type and account_type not in ALLOWED_ACCOUNT_TYPES:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid account_type. Allowed: {', '.join(ALLOWED_ACCOUNT_TYPES)}"
-            )
-        results = payment_service.list_payment_accounts(
-            account_type=account_type,
-            is_active=is_active,
-        )
-        return {"success": True, "data": results}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"List payment accounts failed: {e}")
-        raise HTTPException(status_code=500, detail=f"List payment accounts failed: {str(e)}")
-
-
 @router.post("/accounts", response_model=dict)
 def create_payment_account(
     account: PaymentAccountCreate,
@@ -797,6 +830,7 @@ def create_payment_account(
     """
     Admin: Create a payment account.
     """
+    _ensure_payment_accounts_table()
     try:
         # Validate account type
         if account.account_type not in ALLOWED_ACCOUNT_TYPES:
