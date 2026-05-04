@@ -41,6 +41,12 @@
             </div>
             <h1><i class="fas fa-store"></i> {{ (openclaw.store_name if openclaw else '') or 'OpenClaw 商城' }}</h1>
             <p>{{ (openclaw.subtitle if openclaw else '') or '傻福虾U盘 - 官方授权线上销售渠道' }}</p>
+            {% if starting_price > 0 %}
+            <div class="oc-hero-price">
+                <span class="oc-hero-price-label">起售价</span>
+                <span class="oc-hero-price-value">¥{{ "%.0f"|format(starting_price / 100) }}</span>
+            </div>
+            {% endif %}
             <div class="oc-hero-actions">
                 <a href="#purchase-section" class="btn btn-primary btn-lg"><i class="fas fa-shopping-cart"></i> 立即选购</a>
                 <a href="#specs" class="btn btn-outline btn-lg"><i class="fas fa-info-circle"></i> 查看规格</a>
@@ -450,104 +456,6 @@
         </div>
     </section>
     {% endif %}
-
-    <!-- 规格选择 -->
-    <section class="oc-variants" id="variants">
-        <div class="oc-section-header">
-            <h2>选择规格</h2>
-            <p>多种容量，满足不同存储需求</p>
-        </div>
-        {% if variants and variants|length > 0 %}
-        <div class="oc-variants-grid">
-            {% for variant in variants %}
-            {% set img_src = '/static/img/sillyclaw/product-front-silver.png' %}
-            {% if variant.color and ('黑' in variant.color or '灰' in variant.color) %}
-                {% set img_src = '/static/img/sillyclaw/product-front-black.png' %}
-            {% endif %}
-            <div class="oc-variant-card{% if variant.featured %} oc-variant-featured{% endif %}">
-                <div class="oc-variant-image">
-                    <img src="{{ img_src }}" alt="{{ variant.capacity }}">
-                    {% if variant.badge %}
-                    <span class="oc-variant-badge">{{ variant.badge }}</span>
-                    {% endif %}
-                </div>
-                <div class="oc-variant-info">
-                    <div class="oc-variant-capacity">{{ variant.capacity }}</div>
-                    <div class="oc-variant-color">{{ variant.color }}</div>
-                    <div class="oc-variant-price">
-                        <span class="oc-variant-price-value">{{ variant.price }}</span>
-                    </div>
-                    {% if variant.tags %}
-                    <div class="oc-variant-tags">
-                        {% for tag in variant.tags %}
-                        <span class="oc-variant-tag">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    <button class="oc-btn-buy oc-btn-block" onclick="ocShowPurchase('{{ variant.capacity }}', '{{ variant.color }}')">
-                        <i class="fas fa-shopping-cart"></i> 立即购买
-                    </button>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div style="text-align:center;padding:60px 20px;color:var(--oc-text-light);">
-            <i class="fas fa-box-open" style="font-size:3rem;opacity:0.4;margin-bottom:16px;display:block;"></i>
-            <p>暂无规格信息</p>
-        </div>
-        {% endif %}
-    </section>
-
-    <!-- 购买渠道 -->
-    <section class="oc-channels" id="purchase">
-        <div class="oc-section-header">
-            <h2>购买渠道</h2>
-            <p>通过官方渠道购买，确保正品，享受完整质保服务</p>
-        </div>
-        {% if openclaw and openclaw.channels %}
-        <div class="oc-channels-content">
-            <div class="oc-channels-links">
-                {% for channel in openclaw.channels %}
-                {% set channel_key = channel.key or '' %}
-                {% set channel_url = '#' %}
-                {% if product and product.purchase_links %}
-                    {% if channel_key in product.purchase_links %}
-                        {% set channel_url = product.purchase_links[channel_key] %}
-                    {% endif %}
-                {% endif %}
-                <a href="{{ channel_url }}" target="_blank" class="oc-channel-card">
-                    <div class="oc-channel-icon"><i class="fab {{ channel.icon or 'fa-store' }}"></i></div>
-                    <div class="oc-channel-text">
-                        <div class="oc-channel-title">{{ channel.title or '' }}</div>
-                        <div class="oc-channel-desc">{{ channel.desc or '' }}</div>
-                    </div>
-                    <i class="fas fa-external-link-alt oc-channel-ext"></i>
-                </a>
-                {% endfor %}
-            </div>
-            {% if openclaw.qr_labels %}
-            <div class="oc-channels-qr">
-                <div class="oc-qr-grid">
-                    {% for label in openclaw.qr_labels %}
-                    <div class="oc-qr-item">
-                        <div class="oc-qr-placeholder">
-                            <i class="fas fa-qrcode"></i>
-                            <span class="oc-qr-label">{{ label }}</span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                <p class="oc-qr-note">扫码直达购买页面</p>
-            </div>
-            {% endif %}
-        </div>
-        {% endif %}
-        <div class="oc-channels-footer">
-            <i class="fas fa-info-circle"></i>
-            如需批量采购或定制，请联系客服
-        </div>
-    </section>
 
     <!-- 产品规格 -->
     {% if product %}

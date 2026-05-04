@@ -217,12 +217,20 @@ class SillyMDModule:
                 product, variants, openclaw_data, store_products = {}, [], {}, []
                 collection_id = 0
 
+            # Compute starting price from active store products
+            starting_price = 0
+            if store_products:
+                active_prices = [p["price"] for p in store_products if p.get("is_active")]
+                if active_prices:
+                    starting_price = min(active_prices)
+
             return render_template(request, "sillyfu/openclaw.html", {
                 "product": product,
                 "variants": variants,
                 "openclaw": openclaw_data,
                 "store_products": store_products,
                 "collection_id": collection_id,
+                "starting_price": starting_price,
             })
 
         @app.get("/openclaw", include_in_schema=False)
