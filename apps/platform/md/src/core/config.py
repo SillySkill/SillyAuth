@@ -118,3 +118,22 @@ def get_jwt_config() -> JWTConfig:
 def get_server_config() -> ServerConfig:
     """获取服务器配置"""
     return ServerConfig.from_env()
+
+
+@dataclass
+class Skill2Config:
+    """Skill2 自动审核与打包配置"""
+    tos_prefix: str
+    auto_package_on_publish: bool
+
+    @classmethod
+    def from_env(cls) -> 'Skill2Config':
+        return cls(
+            tos_prefix=os.getenv('SKILL2_TOS_PREFIX', 'skill2/'),
+            auto_package_on_publish=os.getenv('SKILL2_AUTO_PACKAGE', 'true').lower() in ('1', 'true', 'yes'),
+        )
+
+
+def get_skill2_config() -> Skill2Config:
+    """获取 Skill2 配置"""
+    return Skill2Config.from_env()

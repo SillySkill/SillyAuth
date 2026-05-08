@@ -1,0 +1,15 @@
+id: skill2
+name: Skill2 自动审核与打包模块
+version: 1.0.0
+description: Skill2 安全标准 — 敏感内容扫描、AES-256-GCM 加密、平台签名、.skill2 打包
+dependencies: [skills, storage]
+
+config:
+  autoscan_enabled: true
+  autopackage_enabled: true
+  max_content_size_mb: 10
+  scan_timeout_seconds: 30
+
+routes:
+  prefix: /api/v1/skill2
+  tags: [Skill2]

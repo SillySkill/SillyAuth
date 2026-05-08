@@ -347,6 +347,17 @@ async def publish_skill(
     if not skill:
         raise HTTPException(status_code=400, detail="发布失败或无权操作")
 
+    # 触发 skill2 后台扫描 + 打包
+    try:
+        from modules.skill2.services import skill2_service
+        from core.config import get_skill2_config
+        import asyncio
+        asyncio.create_task(skill2_service.scan_skill_content(skill_id))
+        if get_skill2_config().auto_package_on_publish:
+            asyncio.create_task(skill2_service.process_full_pipeline(skill_id))
+    except Exception:
+        pass
+
     return {
         "success": True,
         "message": "Skill 已提交审核",
@@ -511,6 +522,16 @@ async def approve_skill(
 
         if not skill:
             raise HTTPException(status_code=404, detail="Skill 不存在或不在审核状态")
+
+        # 触发 skill2 后台打包（如尚未完成）
+        try:
+            from modules.skill2.services import skill2_service
+            from core.config import get_skill2_config
+            import asyncio
+            if get_skill2_config().auto_package_on_publish:
+                asyncio.create_task(skill2_service.process_full_pipeline(skill_id))
+        except Exception:
+            pass
 
         return {
             "success": True,
