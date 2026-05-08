@@ -200,9 +200,16 @@ class SillyMDModule:
                                 "sold_count": r.get("sold_count", 0),
                                 "is_active": r.get("is_active", True),
                                 "sort_order": r.get("sort_order", 0),
+                                "is_admin_only": r.get("is_admin_only", False),
                             })
                         if rows:
                             collection_id = rows[0].get("collection_id", 0)
+
+                    # 若非 admin 用户，过滤掉 admin-only 产品
+                    user = getattr(request.state, 'user', None)
+                    is_admin = user is not None and user.get('role') == 'admin'
+                    if not is_admin:
+                        store_products = [p for p in store_products if not p.get('is_admin_only', False)]
 
                     if collection_id == 0:
                         with get_db_cursor() as cur:
