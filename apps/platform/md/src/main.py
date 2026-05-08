@@ -54,6 +54,9 @@ async def lifespan(app: FastAPI):
             f"Loaded {len(app.state.manager._modules)} modules successfully"
         )
 
+        # 触发所有模块的 on_startup（如 RSA 密钥生成、DB 表创建等）
+        app.state.manager.on_startup()
+
         # 在模块加载完成后安装开发桩（覆盖需要 DB 但 DB 不可用的真实路由）
         if os.getenv("APP_ENV", "production") != "production":
             try:
