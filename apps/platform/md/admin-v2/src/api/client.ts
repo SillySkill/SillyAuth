@@ -40,7 +40,7 @@ apiClient.interceptors.response.use(
       if (status === 401) {
         localStorage.removeItem('sillymd_admin_token');
         localStorage.removeItem('sillymd_admin_user');
-        window.location.href = '/login';
+        window.location.href = '/admin/login';
       }
     }
     return Promise.reject(error);
