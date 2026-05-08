@@ -83,7 +83,7 @@
       <!-- Skills Grid -->
       <div class="skills-grid">
         {% for skill in skills %}
-        <div class="skill-card" onclick="window.location.href='/skills/{{ skill.slug }}'">
+        <div class="skill-card" onclick="window.location.href='/skills/{{ skill.id }}'">
           <div class="skill-card-image" style="{% if skill.bg_gradient %}background: {{ skill.bg_gradient }};{% endif %}">
             {% if skill.emoji %}{{ skill.emoji }}{% endif %}
           </div>

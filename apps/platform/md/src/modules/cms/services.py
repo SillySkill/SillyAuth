@@ -769,7 +769,7 @@ class ArticleService:
         try:
             with get_db_cursor() as cur:
                 cur.execute("""
-                    SELECT a.title, a.slug, a.summary, a.cover_image, a.type,
+                    SELECT a.title, a.slug, a.excerpt, a.cover_image, a.type,
                            a.metadata,
                            u.username as author_username, u.avatar_url as author_avatar
                     FROM articles a
@@ -795,7 +795,7 @@ class ArticleService:
                         "poster": metadata.get("poster", ""),
                         "title": row["title"],
                         "title_parts": title_parts,
-                        "description": row.get("summary") or row["title"],
+                        "description": row.get("excerpt") or row["title"],
                         "badge": metadata.get("badge", "精选"),
                         "actions": metadata.get("actions", [
                             {
@@ -866,7 +866,7 @@ class ArticleService:
                     pass
 
             if skills_count > 0:
-                stats.append({"value": self._format_stat(skills_count), "label": "Skills 资产"})
+                stats.append({"value": self._format_stat(skills_count), "label": "Skills"})
             if vendors_count > 0:
                 stats.append({"value": self._format_stat(vendors_count), "label": "认证供应商"})
             if teams_count > 0:

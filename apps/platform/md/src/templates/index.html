@@ -2,10 +2,20 @@
 
 {% block title %}{{ _('home.title') }} - {{ _('site.name') }}{% endblock %}
 
+{% set index_hero = page_heroes.get('index', {}) %}
+
 {% block content %}
 <!-- ============================================
      Hero Carousel
      ============================================ -->
+{% set index_slides = index_hero.get('slides') %}
+{% if index_slides and index_slides|length > 0 or index_hero.get('title') %}
+  {# -- Carousel from page_heroes config (slides array or flat fields) -- #}
+  {% with hero = index_hero, slide_badge_icon = 'fas fa-star' %}
+    {% include "components/hero_carousel.html" %}
+  {% endwith %}
+{% elif hero_slides %}
+  {# -- Legacy carousel from featured articles -- #}
 <section class="hero-carousel" id="heroCarousel">
   {% for slide in hero_slides %}
   <div class="carousel-slide {% if loop.first %}active{% endif %}" data-type="{{ slide.type }}">
@@ -23,7 +33,6 @@
         {% if slide.title_parts %}
           {% for part in slide.title_parts %}
             {% if part.get("gradient") %}<span class="text-gradient">{{ part.text }}</span>{% else %}{{ part.text }}{% endif %}
-            {% if part.get("break") %}<br>{% endif %}
           {% endfor %}
         {% else %}
           <span class="text-gradient">{{ slide.title }}</span>
@@ -61,6 +70,7 @@
     {% endfor %}
   </div>
 </section>
+{% endif %}
 
 <!-- ============================================
      Stats Section
@@ -68,8 +78,14 @@
 <section class="stats-section">
   <div class="container">
     <div class="stats-grid">
+      {% set stat_gradients = [
+        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      ] %}
       {% for stat in stats %}
-      <div class="stat-card">
+      <div class="stat-card" style="background: {{ stat_gradients[loop.index0 % 4] }};">
         <div class="stat-value">{{ stat.value }}</div>
         <div class="stat-label">{{ stat.label }}</div>
       </div>
@@ -101,7 +117,7 @@
       <div class="skills-carousel" id="freeSkillsCarousel">
         {% for skill in featured_skills %}
         {% if skill.is_free %}
-        <a href="/skills/{{ skill.slug or skill.id }}" style="text-decoration:none;color:inherit;">
+        <a href="/skills/{{ skill.id }}" style="text-decoration:none;color:inherit;">
           <div class="skill-card">
             <div class="skill-image" style="{% if skill.bg_gradient %}background:{{ skill.bg_gradient }}{% else %}background:linear-gradient(135deg,#667eea,#764ba2){% endif %}">
               {{ skill.emoji or '📦' }}
@@ -159,7 +175,7 @@
       <div class="skills-carousel" id="commercialSkillsCarousel">
         {% for skill in featured_skills %}
         {% if not skill.is_free %}
-        <a href="/skills/{{ skill.slug or skill.id }}" style="text-decoration:none;color:inherit;">
+        <a href="/skills/{{ skill.id }}" style="text-decoration:none;color:inherit;">
           <div class="skill-card">
             <div class="skill-image" style="{% if skill.bg_gradient %}background:{{ skill.bg_gradient }}{% else %}background:linear-gradient(135deg,#f093fb,#f5576c){% endif %}">
               {{ skill.emoji or '💎' }}
@@ -336,6 +352,28 @@
 
 {% block extra_scripts %}
 <style>
+/* Stats section - gradient card backgrounds with white text */
+.stats-section {
+  text-align: center;
+}
+.stats-section .stats-grid {
+  justify-content: center;
+}
+.stats-section .stat-card {
+  border: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+.stats-section .stat-value {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: #fff !important;
+  color: #fff !important;
+}
+.stats-section .stat-label {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
 /* Doc category cards */
 .doc-category-card {
   display: block;
@@ -400,96 +438,6 @@
 
 <script>
 // ============================================
-// Hero Carousel
-// ============================================
-const carousel = {
-  slides: document.querySelectorAll('.carousel-slide'),
-  dots: document.querySelectorAll('.carousel-dot'),
-  indicators: document.querySelectorAll('.video-indicator'),
-  prevBtn: document.getElementById('carouselPrev'),
-  nextBtn: document.getElementById('carouselNext'),
-  muteBtn: document.getElementById('globalMuteBtn'),
-  currentSlide: 0,
-  interval: null,
-  videos: {},
-  globalMuted: true,
-
-  init() {
-    this.slides.forEach((slide, index) => {
-      const video = slide.querySelector('video');
-      if (video) {
-        this.videos[index] = video;
-        video.addEventListener('ended', () => this.next());
-      }
-    });
-
-    this.prevBtn.addEventListener('click', () => this.prev());
-    this.nextBtn.addEventListener('click', () => this.next());
-    this.dots.forEach((dot, index) => {
-      dot.addEventListener('click', () => this.goTo(index));
-    });
-    this.indicators.forEach((ind, index) => {
-      ind.addEventListener('click', () => this.goTo(index));
-    });
-
-    if (this.muteBtn) {
-      this.muteBtn.addEventListener('click', () => this.toggleMute());
-    }
-
-    // Keyboard nav
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') this.prev();
-      if (e.key === 'ArrowRight') this.next();
-    });
-
-    this.start();
-  },
-
-  toggleMute() {
-    this.globalMuted = !this.globalMuted;
-    Object.values(this.videos).forEach(v => { if (v) v.muted = this.globalMuted; });
-    if (this.muteBtn) {
-      this.muteBtn.classList.toggle('muted', this.globalMuted);
-      const mutedSvg = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
-      const unmutedSvg = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
-      this.muteBtn.innerHTML = this.globalMuted ? mutedSvg : unmutedSvg;
-      this.muteBtn.style.opacity = this.globalMuted ? '0.7' : '1';
-    }
-  },
-
-  goTo(index) {
-    const currentVideo = this.videos[this.currentSlide];
-    if (currentVideo) { currentVideo.pause(); currentVideo.currentTime = 0; }
-    this.slides[this.currentSlide].classList.remove('active');
-    this.dots[this.currentSlide].classList.remove('active');
-    this.indicators[this.currentSlide].classList.remove('active');
-    this.currentSlide = index;
-    this.slides[this.currentSlide].classList.add('active');
-    this.dots[this.currentSlide].classList.add('active');
-    this.indicators[this.currentSlide].classList.add('active');
-    const newVideo = this.videos[this.currentSlide];
-    if (newVideo) {
-      newVideo.muted = this.globalMuted;
-      newVideo.play().catch(() => {});
-    }
-    this.reset();
-  },
-
-  next() { this.goTo((this.currentSlide + 1) % this.slides.length); },
-  prev() { this.goTo((this.currentSlide - 1 + this.slides.length) % this.slides.length); },
-
-  start() {
-    if (this.slides[this.currentSlide]?.dataset?.type === 'video') return;
-    this.interval = setTimeout(() => this.next(), 5000);
-  },
-
-  reset() {
-    if (this.interval) clearTimeout(this.interval);
-    this.start();
-  }
-};
-
-// ============================================
 // Horizontal Carousel (Skills & Vendors)
 // ============================================
 class HorizontalCarousel {
@@ -548,7 +496,6 @@ if (mobileMenuBtn && mobileNav) {
 // ============================================
 // Init
 // ============================================
-try { carousel.init(); } catch (error) { console.error('Carousel init failed:', error); }
 try { new HorizontalCarousel('freeSkillsCarousel', 'freeSkillsPrev', 'freeSkillsNext'); } catch(e) {}
 try { new HorizontalCarousel('commercialSkillsCarousel', 'commercialSkillsPrev', 'commercialSkillsNext'); } catch(e) {}
 try { new HorizontalCarousel('vendorCarousel', 'vendorPrev', 'vendorNext', 324); } catch(e) {}

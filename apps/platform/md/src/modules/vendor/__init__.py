@@ -113,12 +113,13 @@ class VendorModule(BaseModule):
         self._config = self._load_config()
 
         # 注册路由
-        from .routes import router
+        from .routes import router, admin_vendor_router
         self._router = router
 
         # 将路由挂载到应用
         if hasattr(app, 'include_router'):
             app.include_router(router)
+            app.include_router(admin_vendor_router)
 
         # Page routes
         @app.get("/vendor-apply", response_class=HTMLResponse, include_in_schema=False)
@@ -179,6 +180,7 @@ class VendorModule(BaseModule):
                         vendor["total_skills"] = len(srows)
                         vendor["skills"] = [
                             {
+                                "id": s.get("id"),
                                 "name": s.get("name", ""),
                                 "slug": s.get("skill_id", ""),
                                 "description": (s.get("description") or "")[:100],

@@ -60,7 +60,7 @@ class ModuleInfo(BaseModel):
     name: str = "Skills 平台模块"
     version: str = "1.0.0"
     description: str = "提供 Skills 托管、发布、管理功能"
-    dependencies: list = ["auth", "storage"]
+    dependencies: list = ["auth", "storage", "skill2"]
 
 
 # ============================================================================
@@ -154,7 +154,7 @@ class SillyMDModule:
         # Include skills routes
         app.include_router(skills_router)
 
-        logger.info(f"Skills routes registered at {skills_router.prefix}")
+        logger.info(f"Skills routes registered at {skills_router.prefix} (v2)")
 
         # Page routes
         @app.get("/skills", response_class=HTMLResponse, include_in_schema=False)
@@ -187,6 +187,7 @@ class SillyMDModule:
                 for s in all_skills:
                     cat = s.get("category", "")
                     skills_list.append({
+                        "id": s.get("id"),
                         "is_free": s.get("type") == "free",
                         "bg_gradient": bg_map.get(cat, "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"),
                         "emoji": "⚡",
@@ -261,15 +262,6 @@ class SillyMDModule:
                         tags = [t.strip() for t in tags.split(",") if t.strip()]
                 elif not isinstance(tags, list):
                     tags = []
-                benefits = raw.get("license_types")
-                if isinstance(benefits, str):
-                    try:
-                        import json as _j2
-                        benefits = _j2.loads(benefits)
-                    except Exception:
-                        benefits = [benefits]
-                elif not isinstance(benefits, list):
-                    benefits = []
                 price_val = raw.get("price", 0) or 0
                 is_free = str(raw.get("type", "")).lower() == "free" or price_val == 0
                 skill = {
@@ -297,7 +289,7 @@ class SillyMDModule:
                     "changelog": [],
                     "price_display": "免费" if is_free else f"¥{price_val}",
                     "purchase_url": None,
-                    "benefits": benefits,
+                    "benefits": [],
                     "tags": tags,
                     "category": raw.get("category", ""),
                 }
@@ -305,6 +297,43 @@ class SillyMDModule:
                 logger.warning(f"Skill detail page failed for skill_id={skill_id}: {e}")
                 skill = {"skill_id": skill_id, "name": "Skill 未找到", "description": "该 Skill 不存在或已被删除"}
             return render_template(request, "skills/detail.html", {"skill": skill})
+
+        # --- Creation Hub Page Routes ---
+
+        @app.get("/creation/skill", response_class=HTMLResponse, include_in_schema=False)
+        async def skill_create_page(request: Request):
+            user = getattr(request.state, "user", None)
+            if not user:
+                from starlette.responses import RedirectResponse
+                return RedirectResponse(url="/login?redirect=/creation/skill")
+            return render_template(request, "skills/create.html", {"skill": {}, "edit_mode": False})
+
+        @app.get("/creation/skill/{skill_id}", response_class=HTMLResponse, include_in_schema=False)
+        async def skill_edit_page(request: Request, skill_id: int):
+            user = getattr(request.state, "user", None)
+            if not user:
+                from starlette.responses import RedirectResponse
+                return RedirectResponse(url=f"/login?redirect=/creation/skill/{skill_id}")
+            try:
+                raw = skill_service.get_skill_by_id(skill_id)
+                if raw is None or raw.get("author_id") != user.get("id"):
+                    raise ValueError("Skill not found or not owned by user")
+                tags = raw.get("tags")
+                if isinstance(tags, str):
+                    try:
+                        import json as _j
+                        tags = _j.loads(tags)
+                    except Exception:
+                        tags = [t.strip() for t in tags.split(",") if t.strip()]
+                elif not isinstance(tags, list):
+                    tags = []
+                skill = dict(raw)
+                skill["tags"] = tags
+            except Exception as e:
+                logger.warning(f"Skill edit page failed for skill_id={skill_id}: {e}")
+                from starlette.responses import RedirectResponse
+                return RedirectResponse(url="/creation")
+            return render_template(request, "skills/create.html", {"skill": skill, "edit_mode": True})
 
     def install(self, app: FastAPI) -> None:
         """Alias for register() - for PluginManager compatibility."""

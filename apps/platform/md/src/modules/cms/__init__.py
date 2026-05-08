@@ -253,6 +253,7 @@ class SillyMDModule:
                         "bg_gradient": bg_map.get(cat, "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"),
                         "emoji": emoji_map.get(cat, "🚀"),
                         "category": cat,
+                        "id": s.get("id"),
                         "rating": float(s.get("rating_avg", 0) or 0),
                         "name": s.get("display_name") or s.get("name", ""),
                         "slug": s.get("skill_id", ""),
@@ -384,7 +385,25 @@ class SillyMDModule:
 
         @app.get("/creation", response_class=HTMLResponse, include_in_schema=False)
         async def creation_page(request: Request):
-            return render_template(request, "user/creation.html")
+            # Get user from session (set by TemplateContextMiddleware)
+            user = getattr(request.state, "user", None)
+            user_id = user.get("id") if user else None
+
+            # Get user's skills
+            user_skills = []
+            skills_stats = {"total": 0, "published": 0, "reviewing": 0, "rejected": 0, "drafts": 0, "total_views": 0}
+            if user_id:
+                try:
+                    from modules.skills.services import skill_service as skills_svc
+                    user_skills, _ = skills_svc.list_user_skills(user_id)
+                    skills_stats = skills_svc.get_user_skill_stats(user_id)
+                except Exception as e:
+                    logger.warning(f"Failed to load user skills for creation page: {e}")
+
+            return render_template(request, "user/creation.html", {
+                "skills": user_skills,
+                "skills_stats": skills_stats,
+            })
 
         # --- Pricing Page ---
         @app.get("/pricing", response_class=HTMLResponse, include_in_schema=False)

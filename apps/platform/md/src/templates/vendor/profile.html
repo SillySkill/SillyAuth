@@ -88,7 +88,7 @@
     <!-- Skills Cards -->
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
       {% for skill in vendor.skills %}
-      <a href="/skills/{{ skill.slug or skill.name }}" style="text-decoration: none; color: inherit;">
+      <a href="/skills/{{ skill.id }}" style="text-decoration: none; color: inherit;">
         <div class="skill-card" style="height: 100%;"
              onmouseenter="this.style.transform='translateY(-4px)';this.style.borderColor='var(--primary-light)';this.style.boxShadow='var(--shadow-card)'"
              onmouseleave="this.style.transform='translateY(0)';this.style.borderColor='var(--border-light)';this.style.boxShadow='var(--shadow-sm)'">
