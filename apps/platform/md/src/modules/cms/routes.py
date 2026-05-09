@@ -750,6 +750,22 @@ class NavigationUpdateRequest(BaseModel):
     items: List[dict]
 
 
+def _migrate_nav_item(item: dict, index: int) -> dict:
+    """Transform old-format nav item to new admin-v2 format."""
+    if 'id' in item:
+        return item  # already new format
+    return {
+        "id": f"nav_{index}",
+        "label_zh": item.get('label_zh', item.get('label', '')),
+        "label_en": item.get('label_en', item.get('label', '')),
+        "url": item.get('url', ''),
+        "icon": item.get('icon', ''),
+        "sort_order": item.get('sort_order', index),
+        "is_visible": item.get('is_visible', True),
+        "children": item.get('children', []),
+    }
+
+
 @router.get("/navigation")
 async def get_navigation():
     """
@@ -757,6 +773,7 @@ async def get_navigation():
 
     Returns navbar items in admin-v2 NavigationEdit format:
     [{id, label_zh, label_en, url, icon, sort_order, is_visible, children}]
+    Auto-migrates old-format items (with just `label` and `url`) to new format.
     """
     try:
         with get_db_cursor() as cur:
@@ -770,6 +787,9 @@ async def get_navigation():
                 items = json.loads(raw) if isinstance(raw, str) else raw
             else:
                 items = []
+        if not isinstance(items, list):
+            items = []
+        items = [_migrate_nav_item(item, i) for i, item in enumerate(items)]
         return {"success": True, "items": items}
     except Exception as e:
         logger.error(f"Failed to load navigation: {e}")
