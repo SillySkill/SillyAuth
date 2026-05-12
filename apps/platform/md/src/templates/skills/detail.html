@@ -246,5 +246,51 @@ document.querySelectorAll('.tab-nav a').forEach(function(tab) {
     document.getElementById('tab-' + tabName).style.display = 'block';
   });
 });
+
+// Download button
+var downloadBtn = document.querySelector('.btn-primary.btn-lg');
+if (downloadBtn && downloadBtn.textContent.indexOf('{{ _("skills.download") }}') !== -1) {
+  downloadBtn.addEventListener('click', function() {
+    var skillId = {{ skill.skill_id }};
+    this.disabled = true;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 下载中...';
+    fetch('/api/v1/skills/' + skillId + '/download')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success && data.data && data.data.url) {
+          window.open(data.data.url, '_blank');
+        } else {
+          alert(data.data && data.data.message ? data.data.message : '下载链接不可用');
+        }
+      })
+      .catch(function() { alert('下载失败'); })
+      .finally(function() {
+        downloadBtn.disabled = false;
+        downloadBtn.innerHTML = '<i class="fas fa-download"></i> {{ _("skills.download") }}';
+      });
+  });
+}
+
+// Favorite button
+var favBtn = document.querySelector('.btn-secondary.btn-lg');
+if (favBtn) {
+  favBtn.addEventListener('click', function() {
+    var skillId = {{ skill.skill_id }};
+    fetch('/api/v1/skills/' + skillId + '/favorite', { method: 'POST' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success) {
+          if (data.data.favorited) {
+            favBtn.innerHTML = '<i class="fas fa-heart" style="color: #e74c3c;"></i> {{ _("skills.favorite") }}';
+          } else {
+            favBtn.innerHTML = '<i class="fas fa-heart"></i> {{ _("skills.favorite") }}';
+          }
+        } else {
+          alert(data.detail || '操作失败');
+        }
+      })
+      .catch(function() { alert('操作失败，请稍后重试'); });
+  });
+}
 </script>
 {% endblock %}

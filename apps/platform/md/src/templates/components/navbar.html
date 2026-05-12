@@ -7,10 +7,11 @@
 
         <ul class="nav-links">
             {% for item in nav_items %}
-            {% if item.is_visible %}
-            <li><a href="{{ item.url }}" class="nav-link {% if current_path.startswith(item.url) %}active{% endif %}">{{ item.label_zh if lang_short == 'zh' else item.label_en }}</a></li>
+            {% if item.get('is_visible', True) %}
+            <li><a href="{{ item.url }}" class="nav-link {% if current_path.startswith(item.url) %}active{% endif %}">{{ item.get('label_zh', item.get('label', '')) if lang_short == 'zh' else item.get('label_en', item.get('label', '')) }}</a></li>
             {% endif %}
             {% endfor %}
+            <li><a href="/llm/" class="nav-link {% if current_path.startswith('/llm/') %}active{% endif %}">LLM 代理</a></li>
         </ul>
 
         <div class="nav-actions">
@@ -30,10 +31,11 @@
     <div class="mobile-nav" id="mobileNav">
         <div class="nav-links">
             {% for item in nav_items %}
-            {% if item.is_visible %}
-            <a href="{{ item.url }}" class="nav-link">{{ item.label_zh if lang_short == 'zh' else item.label_en }}</a>
+            {% if item.get('is_visible', True) %}
+            <a href="{{ item.url }}" class="nav-link">{{ item.get('label_zh', item.get('label', '')) if lang_short == 'zh' else item.get('label_en', item.get('label', '')) }}</a>
             {% endif %}
             {% endfor %}
+            <a href="/llm/" class="nav-link">LLM 代理</a>
             {% if not user %}
             <a href="/login" class="nav-link">{{ _('auth.login') }}</a>
             <a href="/register" class="nav-link register-link">{{ _('auth.register') }}</a>

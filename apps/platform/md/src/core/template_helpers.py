@@ -5,7 +5,7 @@ All modules import `templates` from here to render page templates.
 from fastapi.templating import Jinja2Templates
 from fastapi import Request
 from starlette.responses import HTMLResponse
-from jinja2 import ChainableUndefined
+from jinja2 import ChainableUndefined, Environment, FileSystemLoader, select_autoescape
 import logging
 import os
 import json as _json
@@ -453,6 +453,11 @@ def _translate(key: str, default: str = None, **kwargs) -> str:
     """
     val = _TRANSLATIONS.get(key)
     if val is not None:
+        if kwargs:
+            try:
+                return val.format(**kwargs)
+            except KeyError:
+                pass
         return val
     if default is not None:
         return default
@@ -464,7 +469,12 @@ def _translate(key: str, default: str = None, **kwargs) -> str:
 # ---------------------------------------------------------------------------
 
 _templates_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates")
-templates = Jinja2Templates(directory=_templates_dir, undefined=SafeChainableUndefined)
+_jinja_env = Environment(
+    loader=FileSystemLoader(_templates_dir),
+    autoescape=select_autoescape(),
+    undefined=SafeChainableUndefined,
+)
+templates = Jinja2Templates(env=_jinja_env)
 templates.env.globals["_"] = _translate
 logger.info(f"Jinja2Templates initialized at {_templates_dir} with i18n support")
 
@@ -528,6 +538,7 @@ def get_template_context(request: Request, extra_context: dict = None) -> dict:
         "nav_items": nav_items,
         "footer_sections": footer_sections,
         "social_links": social_links,
+        "page_heroes": {},
         "current_year": 2026,
     }
     if extra_context:
@@ -541,7 +552,7 @@ def render_template(request: Request, template_name: str, extra_context: dict = 
     """
     try:
         context = get_template_context(request, extra_context)
-        return templates.TemplateResponse(template_name, context)
+        return templates.TemplateResponse(request, template_name, context)
     except Exception as e:
         import traceback
         logger.error(f"Template rendering error for {template_name}: {e}")

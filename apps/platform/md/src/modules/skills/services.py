@@ -781,6 +781,43 @@ class SkillService:
             logger.error(f"Failed to increment download count: {str(e)}")
             return False
 
+    def toggle_favorite(self, skill_id: int, user_id: int) -> dict:
+        """
+        Toggle favorite status for a skill. Returns {'favorited': bool, 'favorite_count': int}.
+        """
+        try:
+            with get_db_cursor() as cur:
+                # Check if already favorited
+                cur.execute(
+                    "SELECT id FROM skill_favorites WHERE user_id = %s AND skill_id = %s",
+                    (user_id, skill_id)
+                )
+                existing = cur.fetchone()
+                if existing:
+                    cur.execute(
+                        "DELETE FROM skill_favorites WHERE id = %s", (existing['id'],)
+                    )
+                    cur.execute(
+                        "UPDATE skills SET favorite_count = GREATEST(favorite_count - 1, 0) WHERE id = %s RETURNING favorite_count",
+                        (skill_id,)
+                    )
+                    new_count = cur.fetchone()['favorite_count']
+                    return {'favorited': False, 'favorite_count': new_count}
+                else:
+                    cur.execute(
+                        "INSERT INTO skill_favorites (user_id, skill_id) VALUES (%s, %s)",
+                        (user_id, skill_id)
+                    )
+                    cur.execute(
+                        "UPDATE skills SET favorite_count = favorite_count + 1 WHERE id = %s RETURNING favorite_count",
+                        (skill_id,)
+                    )
+                    new_count = cur.fetchone()['favorite_count']
+                    return {'favorited': True, 'favorite_count': new_count}
+        except Exception as e:
+            logger.error(f"Failed to toggle favorite: {str(e)}")
+            return {'favorited': False, 'favorite_count': 0}
+
     def get_skill_versions(self, skill_id: int) -> List[Dict[str, Any]]:
         """
         Get skill version history

@@ -243,6 +243,8 @@ class SillyMDModule:
                 "hot_tags": hot_tags,
                 "filter_groups": filter_groups,
                 "total_count": total_count,
+                "total_pages": (total_count + 19) // 20,
+                "current_page": page,
                 "current_sort": current_sort,
                 "skills": skills_list
             })

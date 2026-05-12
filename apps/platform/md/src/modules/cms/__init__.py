@@ -219,6 +219,29 @@ class SillyMDModule:
                 hero_slides = self.article_service.get_hero_slides(limit=5)
             except Exception:
                 hero_slides = []
+            if not hero_slides:
+                hero_slides = [{
+                    "type": "image",
+                    "src": "",
+                    "title": "SillyMD",
+                    "title_parts": [{"text": "SillyMD", "gradient": True, "break": False}],
+                    "description": "AI Skills 创作与分享平台",
+                    "badge": "AI 驱动",
+                    "actions": [
+                        {"url": "/skills", "style": "btn-primary btn-lg", "icon": "fas fa-compass", "label": "探索 Skills"},
+                        {"url": "/creation", "style": "btn-ghost btn-lg", "icon": "fas fa-plus-circle", "label": "开始创作"},
+                    ],
+                }, {
+                    "type": "image",
+                    "src": "",
+                    "title": "开放共创",
+                    "title_parts": [{"text": "开放共创", "gradient": True, "break": False}, {"text": " 释放 AI 创造力", "gradient": False, "break": False}],
+                    "description": "社区驱动的 AI Skills 生态，让每个人都能参与 AI 应用创新",
+                    "badge": "社区驱动",
+                    "actions": [
+                        {"url": "/register", "style": "btn-primary btn-lg", "icon": "fas fa-user-plus", "label": "立即加入"},
+                    ],
+                }]
 
             # Get aggregate stats
             try:
@@ -352,7 +375,7 @@ class SillyMDModule:
             except Exception:
                 features, pricing_plans = [], []
 
-            return render_template(request, "sillyclaw/features.html", {
+            return render_template(request, "sillyfu/features.html", {
                 "features": features,
                 "pricing_plans": pricing_plans,
             })

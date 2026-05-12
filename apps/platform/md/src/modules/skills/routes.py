@@ -670,7 +670,19 @@ async def download_skill(skill_id: int):
             }
         }
 
-    # 其次使用 source_path（本地文件）
+    # 其次使用 package_url（TOS 上传的打包文件）
+    if skill.get('package_url'):
+        return {
+            "success": True,
+            "data": {
+                "url": skill['package_url'],
+                "type": "package",
+                "skill_id": skill['skill_id'],
+                "name": skill['name']
+            }
+        }
+
+    # 再次使用 source_path（本地文件）
     if skill.get('source_path'):
         # 返回本地文件路径供前端处理
         return {
@@ -693,6 +705,30 @@ async def download_skill(skill_id: int):
             "name": skill['name'],
             "message": "此技能暂无下载链接"
         }
+    }
+
+
+@router.post("/{skill_id}/favorite", response_model=dict)
+async def toggle_favorite(
+    skill_id: int,
+    request: Request,
+    current_user: User = Depends(get_current_user) if HAS_AUTH else None
+):
+    """
+    Toggle favorite status for a skill.
+
+    Requires authentication. Adds or removes the skill from user's favorites.
+    """
+    if not current_user and HAS_AUTH:
+        raise HTTPException(status_code=401, detail="需要登录才能收藏")
+
+    user_id = getattr(current_user, 'id', 1)
+    result = skill_service.toggle_favorite(skill_id=skill_id, user_id=user_id)
+
+    return {
+        "success": True,
+        "data": result,
+        "message": "已收藏" if result['favorited'] else "已取消收藏"
     }
 
 
