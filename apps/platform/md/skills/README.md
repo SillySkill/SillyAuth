@@ -77,7 +77,7 @@
 | 项目 | 内容 |
 |------|------|
 | 网站域名 | sillymd.com（已完成备案） |
-| 服务器地址 | 47.96.133.238 |
+| 服务器地址 | pgm-bp17g13e3k5y08y1wo.pg.rds.aliyuncs.com |
 | SSH私钥路径 | .ignore/silly.pem |
 | 平台定位 | AI Skills 托管中心 + 多领域协作网络 + 商用授权市场 |
 
@@ -113,7 +113,7 @@ Skills 不仅限于编程代码，还可以是：
 | 缓存 | Redis 7.2 Cluster |
 | 消息队列 | Kafka |
 | 搜索 | Meilisearch |
-| 存储 | 阿里云 OSS |
+| 存储 | 火山引擎 TOS（resource.sillymd.com） |
 
 ## Skills 分类体系
 

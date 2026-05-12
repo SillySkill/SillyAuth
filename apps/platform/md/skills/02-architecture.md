@@ -16,8 +16,8 @@
 | 异步任务 | Celery + Redis | 后台任务处理 | 成熟方案 |
 | AI 审核 | DeepSeek / 智谱 /KIMI | 内容合规性审核 | 多模型备选 |
 | 搜索 | Meilisearch | 全文搜索引擎 | 毫秒级响应，中文友好 |
-| 存储 | 阿里云 OSS | Skills 文件存储 | - |
-| CDN | 阿里云 CDN / CloudFlare | 静态资源加速 | - |
+| 存储 | 火山引擎 TOS | Skills 文件存储 | 自定义域名 resource.sillymd.com |
+| CDN | 火山引擎 CDN | 静态资源加速 | TOS 集成 CDN |
 | 追踪 | OpenTelemetry + Jaeger | 分布式追踪 | 排查问题 |
 | 监控 | Prometheus + Grafana | 监控告警 | - |
 

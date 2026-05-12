@@ -162,7 +162,7 @@ npx http-server -p 8080
 
 ### 连接后端 API
 
-1. 确保后端已启动: `cd src && python main.py`
+1. 确保后端已启动: `cd src && python production.py`（开发模式: `uvicorn main:app --reload`）
 2. 修改 `js/config.js` 中的 API 地址
 3. 页面会自动通过 `/api/v1/` 前缀调用后端接口
 

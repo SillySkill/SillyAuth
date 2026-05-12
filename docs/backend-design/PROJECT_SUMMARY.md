@@ -189,9 +189,11 @@ nano .env
 chmod +x start.sh
 ./start.sh
 
-# 方式2: 手动启动
+# 方式2: 手动启动（开发）
 docker-compose up -d postgres redis meilisearch
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# 生产环境: cd src && python production.py
 ```
 
 访问：

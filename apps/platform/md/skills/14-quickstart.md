@@ -5,45 +5,44 @@
 ## 14.1 安装部署
 
 ```bash
-# 1. 克隆项目
-git clone https://github.com/sillymd/platform.git
-cd platform
-
-# 2. 后端环境
+# 1. 配置 Python 虚拟环境
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+
+# 2. 安装依赖
+pip install -r src/requirements.txt
 
 # 3. 配置环境变量
-cp .env.example .env
+cp src/.env.example src/.env
 # 编辑 .env 文件，填入必要配置
 
-# 4. 初始化数据库
-alembic upgrade head
+# 4. 启动后端服务（开发模式）
+cd src
+uvicorn main:app --reload --port 8000
 
-# 5. 启动后端服务
-uvicorn app.main:app --reload
-
-# 6. 前端环境
-cd frontend
-npm install
-npm run dev
-
-# 7. 访问平台
-open http://localhost:3000
+# 生产环境
+python production.py
 ```
 
-## 14.2 Docker 部署
+## 14.2 部署到生产服务器
 
 ```bash
-# 使用 Docker Compose 一键启动
-docker-compose up -d
+# 本地打包代码
+cd apps/platform/md
+tar czf sillymd-src.tar.gz --exclude='src/.env' --exclude='src/__pycache__' src/ examples/
+
+# 上传到服务器
+scp -i ~/.ssh/silly.pem sillymd-src.tar.gz root@47.96.133.238:/opt/sillymd-new/
+
+# 服务器端解压重启
+ssh -i ~/.ssh/silly.pem root@47.96.133.238
+cd /opt/sillymd-new
+rm -rf src/ examples/
+tar xzf sillymd-src.tar.gz
+systemctl restart sillymd-api
 
 # 查看日志
-docker-compose logs -f
-
-# 停止服务
-docker-compose down
+journalctl -u sillymd-api -f
 ```
 
 ## 14.3 SDK 使用

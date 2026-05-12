@@ -8,7 +8,7 @@
 - **认证方式**: JWT Bearer Token (HS256)
 - **响应格式**: JSON
 - **字符编码**: UTF-8
-- **入口**: `src/main.py` (PluginManager.load_all_modules)
+- **入口**: `src/production.py`（生产）/ `src/main.py`（开发，PluginManager.load_all_modules）
 
 ## 统一响应格式
 

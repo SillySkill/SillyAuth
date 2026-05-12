@@ -112,8 +112,8 @@ Skills 不仅限于编程代码，还可以是：
 | 异步任务 | Celery + Redis | 后台任务处理 | 成熟方案 |
 | AI 审核 | DeepSeek / 智谱 /KIMI | 内容合规性审核 | 多模型备选 |
 | 搜索 | Meilisearch | 全文搜索引擎 | 毫秒级响应，中文友好 |
-| 存储 | 阿里云 OSS | Skills 文件存储 | - |
-| CDN | 阿里云 CDN / CloudFlare | 静态资源加速 | - |
+| 存储 | 火山引擎 TOS | Skills 文件存储 | 自定义域名 resource.sillymd.com |
+| CDN | 火山引擎 CDN | 静态资源加速 | TOS 集成 CDN |
 | 追踪 | OpenTelemetry + Jaeger | 分布式追踪 | 排查问题 |
 | 监控 | Prometheus + Grafana | 监控告警 | - |
 
@@ -2041,9 +2041,9 @@ Skills 数据分析
 ├── 数据库备份
 │   ├── 每日全量备份（保留 30 天）
 │   ├── 每小时增量备份（保留 7 天）
-│   └── 异地灾备（阿里云 OSS）
+│   └── 异地灾备（火山引擎 TOS）
 ├── 文件备份
-│   └── OSS 开启版本控制
+│   └── TOS 开启版本控制
 └── 恢复演练
     └── 每月进行恢复演练
 ```
@@ -2052,10 +2052,12 @@ Skills 数据分析
 
 ## 十三、基础设施与部署
 
-### 13.1 容器化部署
+### 13.1 容器化部署（仅本地开发参考）
+
+> **生产环境说明**: 实际部署使用 systemd 服务，非容器化。参见下方"实际部署方式"。
 
 ```dockerfile
-# Dockerfile
+# Dockerfile (本地开发用)
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -2071,8 +2073,10 @@ COPY . .
 EXPOSE 8000
 
 # 启动命令
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
+
+> **注**: 生产环境通过 `production.py` 启动，使用多进程模式：`python production.py`
 
 ```yaml
 # docker-compose.yml
@@ -2210,7 +2214,7 @@ archive_command = 'cp %p /backup/wal/%f'
 restore_command = 'cp /backup/wal/%f %p'
 
 # 使用 rclone 同步到 OSS
-rclone sync /var/data sillymd-oss:backup \
+rclone sync /var/data sillymd-tos:backup \
     --backup-dir sillymd-oss:backup-archive/$(date +%Y%m%d) \
     --max-age 30d
 ```
@@ -2238,8 +2242,11 @@ cp .env.example .env
 # 4. 初始化数据库
 alembic upgrade head
 
-# 5. 启动后端服务
-uvicorn app.main:app --reload
+# 5. 启动后端服务 (开发模式)
+uvicorn main:app --reload --port 8000
+
+# 生产环境
+python production.py
 
 # 6. 前端环境
 cd frontend
@@ -2250,10 +2257,10 @@ npm run dev
 open http://localhost:3000
 ```
 
-### 14.2 Docker 部署
+### 14.2 Docker 部署（仅本地开发）
 
 ```bash
-# 使用 Docker Compose 一键启动
+# 使用 Docker Compose 一键启动（含 PostgreSQL、Redis 等）
 docker-compose up -d
 
 # 查看日志

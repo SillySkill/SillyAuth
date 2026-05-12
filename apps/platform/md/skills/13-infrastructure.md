@@ -2,7 +2,9 @@
 
 > 本文档描述 SillyMD 平台的容器化部署和运维配置。
 
-## 13.1 容器化部署
+> **生产环境说明**: 实际部署使用 systemd 服务（sillymd-api），非容器化。详情见项目 CLAUDE.md 部署章节。
+
+## 13.1 容器化部署（本地开发参考）
 
 ```dockerfile
 # Dockerfile
@@ -21,7 +23,9 @@ COPY . .
 EXPOSE 8000
 
 # 启动命令
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+> **生产环境入口**: `production.py`（多进程 uvicorn），通过 systemctl restart sillymd-api 管理
 ```
 
 ```yaml
@@ -144,8 +148,8 @@ skills_published = Gauge(
 ```
 静态资源加速：
 ├── 前端资源 → CDN 加速
-├── Skills 文件 → OSS + CDN
-└── 图片资源 → OSS + CDN
+├── Skills 文件 → TOS + CDN
+└── 图片资源 → TOS + CDN
 ```
 
 ## 13.5 备份与恢复
@@ -160,7 +164,7 @@ archive_command = 'cp %p /backup/wal/%f'
 restore_command = 'cp /backup/wal/%f %p'
 
 # 使用 rclone 同步到 OSS
-rclone sync /var/data sillymd-oss:backup \
-    --backup-dir sillymd-oss:backup-archive/$(date +%Y%m%d) \
+rclone sync /var/data sillymd-tos:backup \
+    --backup-dir sillymd-tos:backup-archive/$(date +%Y%m%d) \
     --max-age 30d
 ```
