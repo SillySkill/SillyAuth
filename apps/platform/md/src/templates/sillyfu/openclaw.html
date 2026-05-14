@@ -150,7 +150,7 @@
             <div class="oc-spec-label">选择规格：</div>
             <div class="oc-spec-options">
                 {% for sp in store_products %}
-                <button class="oc-spec-option{% if loop.first %} oc-spec-option-active{% endif %}" onclick="selectVariant({{ sp.id }}, {{ sp.price }}, '{{ sp.name_zh|e }}', {{ sp.original_price | default('null') }}, '{{ sp.image_url or '' }}')" id="variant-{{ sp.id }}">
+                <button class="oc-spec-option{% if loop.first %} oc-spec-option-active{% endif %}" onclick="selectVariant({{ sp.id }}, {{ sp.price }}, '{{ sp.name_zh|e }}', {% if sp.original_price and sp.original_price > 0 %}{{ sp.original_price }}{% else %}null{% endif %}, '{{ sp.image_url or '' }}')" id="variant-{{ sp.id }}">
                     <span class="oc-spec-option-name">{{ sp.name_zh }}</span>
                     <span class="oc-spec-option-price">¥{{ "%.2f"|format(sp.price / 100) }}</span>
                 </button>
@@ -289,8 +289,8 @@
             </div>
         </div>
         {% endif %}
-        {% if product.agents.hermens %}
-        {% set b = product.agents.hermens %}
+        {% if product.agents.hermes %}
+        {% set b = product.agents.hermes %}
         <div class="oc-card oc-card-cyan">
             <div class="oc-agent-header">
                 <div class="oc-icon-circle" style="background:{{ b.color_hex }};">
