@@ -300,42 +300,7 @@ class SillyMDModule:
                 skill = {"skill_id": skill_id, "name": "Skill 未找到", "description": "该 Skill 不存在或已被删除"}
             return render_template(request, "skills/detail.html", {"skill": skill})
 
-        # --- Creation Hub Page Routes ---
-
-        @app.get("/creation/skill", response_class=HTMLResponse, include_in_schema=False)
-        async def skill_create_page(request: Request):
-            user = getattr(request.state, "user", None)
-            if not user:
-                from starlette.responses import RedirectResponse
-                return RedirectResponse(url="/login?redirect=/creation/skill")
-            return render_template(request, "skills/create.html", {"skill": {}, "edit_mode": False})
-
-        @app.get("/creation/skill/{skill_id}", response_class=HTMLResponse, include_in_schema=False)
-        async def skill_edit_page(request: Request, skill_id: int):
-            user = getattr(request.state, "user", None)
-            if not user:
-                from starlette.responses import RedirectResponse
-                return RedirectResponse(url=f"/login?redirect=/creation/skill/{skill_id}")
-            try:
-                raw = skill_service.get_skill_by_id(skill_id)
-                if raw is None or raw.get("author_id") != user.get("id"):
-                    raise ValueError("Skill not found or not owned by user")
-                tags = raw.get("tags")
-                if isinstance(tags, str):
-                    try:
-                        import json as _j
-                        tags = _j.loads(tags)
-                    except Exception:
-                        tags = [t.strip() for t in tags.split(",") if t.strip()]
-                elif not isinstance(tags, list):
-                    tags = []
-                skill = dict(raw)
-                skill["tags"] = tags
-            except Exception as e:
-                logger.warning(f"Skill edit page failed for skill_id={skill_id}: {e}")
-                from starlette.responses import RedirectResponse
-                return RedirectResponse(url="/creation")
-            return render_template(request, "skills/create.html", {"skill": skill, "edit_mode": True})
+        # --- Creation Hub Page Routes (removed - 精选好文 replaces creation center) ---
 
     def install(self, app: FastAPI) -> None:
         """Alias for register() - for PluginManager compatibility."""

@@ -197,7 +197,7 @@ _TRANSLATIONS = {
     "user.center": "用户中心",
     "user.settings": "设置",
     "user.projects": "我的项目",
-    "user.creation": "创作中心",
+    "user.creation": "精选好文",
     "user.messages": "我的消息",
     "nav.home": "首页",
     "nav.skills": "探索 Skills",

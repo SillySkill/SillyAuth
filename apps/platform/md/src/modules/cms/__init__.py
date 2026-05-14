@@ -229,7 +229,7 @@ class SillyMDModule:
                     "badge": "AI 驱动",
                     "actions": [
                         {"url": "/skills", "style": "btn-primary btn-lg", "icon": "fas fa-compass", "label": "探索 Skills"},
-                        {"url": "/creation", "style": "btn-ghost btn-lg", "icon": "fas fa-plus-circle", "label": "开始创作"},
+                        {"url": "/creation", "style": "btn-ghost btn-lg", "icon": "fas fa-newspaper", "label": "精选好文"},
                     ],
                 }, {
                     "type": "image",
@@ -407,25 +407,34 @@ class SillyMDModule:
             return render_template(request, "user/projects.html")
 
         @app.get("/creation", response_class=HTMLResponse, include_in_schema=False)
-        async def creation_page(request: Request):
-            # Get user from session (set by TemplateContextMiddleware)
-            user = getattr(request.state, "user", None)
-            user_id = user.get("id") if user else None
-
-            # Get user's skills
-            user_skills = []
-            skills_stats = {"total": 0, "published": 0, "reviewing": 0, "rejected": 0, "drafts": 0, "total_views": 0}
-            if user_id:
-                try:
-                    from modules.skills.services import skill_service as skills_svc
-                    user_skills, _ = skills_svc.list_user_skills(user_id)
-                    skills_stats = skills_svc.get_user_skill_stats(user_id)
-                except Exception as e:
-                    logger.warning(f"Failed to load user skills for creation page: {e}")
+        async def featured_articles_page(request: Request):
+            """精选好文页面 - 展示管理员后台发布的已发布文章"""
+            articles = []
+            try:
+                result = self.article_service.list_articles(
+                    article_type="article", status="published", limit=20
+                )
+                if isinstance(result, tuple):
+                    result = result[0]
+                for a in (result if isinstance(result, list) else []):
+                    articles.append({
+                        "id": a.get("id", 0),
+                        "title": a.get("title", ""),
+                        "slug": a.get("slug", ""),
+                        "summary": a.get("summary", "") or a.get("description", ""),
+                        "content": a.get("content", ""),
+                        "category_name": a.get("category_name", ""),
+                        "author_username": a.get("author_username", ""),
+                        "created_at": str(a.get("created_at", ""))[:10],
+                        "view_count": a.get("view_count", 0),
+                        "tags": a.get("tags", []),
+                        "featured_image": a.get("featured_image", ""),
+                    })
+            except Exception as e:
+                logger.warning(f"Failed to load featured articles: {e}")
 
             return render_template(request, "user/creation.html", {
-                "skills": user_skills,
-                "skills_stats": skills_stats,
+                "articles": articles,
             })
 
         # --- Pricing Page ---
