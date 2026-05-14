@@ -8,6 +8,60 @@
 <meta property="og:description" content="{{ product.description if product else '' }}">
 <meta property="og:image" content="/static/img/sillyclaw/product-front-silver.png">
 <link rel="stylesheet" href="/static/css/openclaw.css">
+<style>
+/* 主商品卡片 */
+.oc-main-product {
+  max-width: 1100px; margin: 0 auto 32px; text-align: center;
+}
+.oc-main-product-image {
+  width: 280px; height: 280px; margin: 0 auto 20px; position: relative;
+  background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
+  border-radius: 20px; display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.oc-main-product-image img {
+  width: 100%; height: 100%; object-fit: contain; padding: 20px;
+}
+.oc-main-product-name {
+  font-size: 1.6rem; font-weight: 700; color: #1A1A2E; margin-bottom: 6px;
+}
+.oc-main-product-desc {
+  font-size: 0.95rem; color: #8A8AA8; margin-bottom: 10px;
+}
+.oc-main-product-price {
+  margin-bottom: 8px;
+}
+
+/* 规格选择器 */
+.oc-spec-selector {
+  max-width: 1100px; margin: 0 auto 32px; text-align: center;
+}
+.oc-spec-label {
+  font-size: 0.9rem; color: #8A8AA8; margin-bottom: 12px;
+}
+.oc-spec-options {
+  display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
+}
+.oc-spec-option {
+  padding: 12px 20px; border: 1px solid rgba(79,110,247,0.15);
+  border-radius: 12px; background: #fff; cursor: pointer;
+  transition: all 0.2s; display: flex; flex-direction: column;
+  align-items: center; gap: 2px; font-family: inherit;
+}
+.oc-spec-option:hover {
+  border-color: var(--oc-primary); box-shadow: 0 2px 8px rgba(79,110,247,0.1);
+}
+.oc-spec-option-name {
+  font-size: 0.9rem; font-weight: 600; color: #1A1A2E;
+}
+.oc-spec-option-price {
+  font-size: 0.85rem; color: var(--oc-primary);
+}
+.oc-spec-option-active {
+  border-color: var(--oc-primary); background: rgba(79,110,247,0.06);
+  box-shadow: 0 0 0 2px rgba(79,110,247,0.2);
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -56,55 +110,60 @@
 
     <!-- 规格选择 + 在线购买（Store API 驱动） -->
     {% if store_products and store_products|length > 0 %}
+    {% set main_product = store_products[0] %}
     <section class="oc-purchase-section" id="purchase-section">
-        <div class="oc-section-header">
+        <div class="oc-section-header" style="text-align: center;">
             <h2><i class="fas fa-shopping-cart"></i> 选择规格购买</h2>
             <p>官方在线下单，支持微信/支付宝支付</p>
         </div>
-        <div class="oc-variants-grid">
-            {% for sp in store_products %}
-            <div class="oc-variant-card{% if loop.first %} oc-variant-featured{% endif %}" onclick="selectVariant({{ sp.id }}, {{ sp.price }}, '{{ sp.name_zh|e }}', '{{ sp.image_url or '' }}')" id="variant-{{ sp.id }}">
-                <div class="oc-variant-image">
-                    {% if sp.image_url %}
-                    <img src="{{ sp.image_url }}" alt="{{ sp.name_zh }}">
-                    {% else %}
-                    <div class="oc-variant-image-placeholder">
-                        <i class="fas fa-box" style="font-size: 3rem; opacity: 0.3;"></i>
-                    </div>
-                    {% endif %}
-                    {% if sp.original_price and sp.original_price > sp.price %}
-                    <span class="oc-variant-badge">优惠</span>
-                    {% endif %}
+
+        <!-- 主商品卡片 -->
+        <div class="oc-main-product">
+            <div class="oc-main-product-image">
+                {% if main_product.image_url %}
+                <img src="{{ main_product.image_url }}" alt="{{ main_product.name_zh }}" id="mainProductImg">
+                {% else %}
+                <div class="oc-variant-image-placeholder">
+                    <i class="fas fa-box" style="font-size: 5rem; opacity: 0.3;"></i>
                 </div>
-                <div class="oc-variant-info">
-                    <div class="oc-variant-capacity">{{ sp.name_zh }}</div>
-                    {% if sp.description_zh %}
-                    <div class="oc-variant-color">{{ sp.description_zh }}</div>
-                    {% endif %}
-                    <div class="oc-variant-price">
-                        <span class="oc-variant-price-value">¥{{ "%.2f"|format(sp.price / 100) }}</span>
-                        {% if sp.original_price and sp.original_price > sp.price %}
-                        <span class="oc-variant-price-original">¥{{ "%.2f"|format(sp.original_price / 100) }}</span>
-                        {% endif %}
-                    </div>
-                    {% if sp.stock_count == -1 %}
-                    <div class="oc-variant-stock oc-variant-stock-unlimited">货源充足</div>
-                    {% elif sp.stock_count > 0 %}
-                    <div class="oc-variant-stock oc-variant-stock-ok">库存 {{ sp.stock_count }} 件</div>
-                    {% else %}
-                    <div class="oc-variant-stock oc-variant-stock-zero">暂时缺货</div>
+                {% endif %}
+                {% if main_product.original_price and main_product.original_price > main_product.price %}
+                <span class="oc-variant-badge">优惠</span>
+                {% endif %}
+            </div>
+            <div class="oc-main-product-info">
+                <div class="oc-main-product-name" id="mainProductName">{{ main_product.name_zh }}</div>
+                {% if main_product.description_zh %}
+                <div class="oc-main-product-desc">{{ main_product.description_zh }}</div>
+                {% endif %}
+                <div class="oc-main-product-price">
+                    <span class="oc-variant-price-value" id="mainProductPrice">¥{{ "%.2f"|format(main_product.price / 100) }}</span>
+                    {% if main_product.original_price and main_product.original_price > main_product.price %}
+                    <span class="oc-variant-price-original" id="mainProductOrigPrice">¥{{ "%.2f"|format(main_product.original_price / 100) }}</span>
                     {% endif %}
                 </div>
             </div>
-            {% endfor %}
         </div>
 
-        <div class="oc-purchase-form">
+        <!-- 所有规格选择 -->
+        <div class="oc-spec-selector">
+            <div class="oc-spec-label">选择规格：</div>
+            <div class="oc-spec-options">
+                {% for sp in store_products %}
+                <button class="oc-spec-option{% if loop.first %} oc-spec-option-active{% endif %}" onclick="selectVariant({{ sp.id }}, {{ sp.price }}, '{{ sp.name_zh|e }}', {{ sp.original_price | default('null') }}, '{{ sp.image_url or '' }}')" id="variant-{{ sp.id }}">
+                    <span class="oc-spec-option-name">{{ sp.name_zh }}</span>
+                    <span class="oc-spec-option-price">¥{{ "%.2f"|format(sp.price / 100) }}</span>
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="oc-purchase-form" style="text-align: center;">
             <div class="oc-purchase-selected-info" id="selectedVariantInfo" style="display:none;">
                 <strong>已选：</strong><span id="selectedVariantName"></span>
                 <span class="oc-purchase-selected-price" id="selectedVariantPrice"></span>
             </div>
-            <div class="oc-purchase-actions">
+            <div class="oc-purchase-actions" style="justify-content: center;">
                 <div class="oc-quantity-control">
                     <label>数量：</label>
                     <button class="oc-qty-btn" onclick="changeQty(-1)">&#8722;</button>
@@ -561,19 +620,36 @@ var selectedProductId = null;
 var selectedProductPrice = 0;
 var collectionId = {{ collection_id or 0 }};
 
-function selectVariant(productId, price, name, imageUrl) {
+function selectVariant(productId, price, name, originalPrice, imageUrl) {
     selectedProductId = productId;
     selectedProductPrice = price;
 
-    // Highlight selected card
-    document.querySelectorAll('.oc-variant-card').forEach(function(c) {
-        c.classList.remove('oc-variant-featured');
+    // Highlight selected spec option
+    document.querySelectorAll('.oc-spec-option').forEach(function(c) {
+        c.classList.remove('oc-spec-option-active');
     });
-    var card = document.getElementById('variant-' + productId);
-    if (card) card.classList.add('oc-variant-featured');
+    var btn = document.getElementById('variant-' + productId);
+    if (btn) btn.classList.add('oc-spec-option-active');
+
+    // Update main product display
+    var mainImg = document.getElementById('mainProductImg');
+    if (mainImg && imageUrl) mainImg.src = imageUrl;
+    var mainName = document.getElementById('mainProductName');
+    if (mainName) mainName.textContent = name;
+    var mainPrice = document.getElementById('mainProductPrice');
+    var priceDisplayed = (price / 100).toFixed(2);
+    if (mainPrice) mainPrice.textContent = '\u00a5' + priceDisplayed;
+    var mainOrigPrice = document.getElementById('mainProductOrigPrice');
+    if (mainOrigPrice) {
+        if (originalPrice && originalPrice > price) {
+            mainOrigPrice.textContent = '\u00a5' + (originalPrice / 100).toFixed(2);
+            mainOrigPrice.style.display = 'inline';
+        } else {
+            mainOrigPrice.style.display = 'none';
+        }
+    }
 
     // Update info display
-    var priceDisplayed = (price / 100).toFixed(2);
     var info = document.getElementById('selectedVariantInfo');
     if (info) info.style.display = 'block';
     var nameEl = document.getElementById('selectedVariantName');
@@ -716,6 +792,16 @@ function switchGallery(src, el) {
             });
         }, { threshold: 0 });
         observer.observe(purchaseSection);
+    }
+})();
+
+// ============================================================
+// Auto-select first product on page load
+// ============================================================
+(function() {
+    var firstOption = document.querySelector('.oc-spec-option');
+    if (firstOption) {
+        firstOption.click();
     }
 })();
 </script>
