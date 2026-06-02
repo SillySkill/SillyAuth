@@ -4,7 +4,6 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="/static/css/auth.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 {% endblock %}
 
 {% block auth_content %}
@@ -20,18 +19,18 @@
 
 <!-- Login tab switcher -->
 <div class="login-tabs">
-    <button type="button" class="login-tab active" data-tab="password">
+    <button type="button" class="login-tab" data-tab="password">
         <i class="fas fa-key"></i>
         <span>{{ _("login.passwordTab") }}</span>
     </button>
-    <button type="button" class="login-tab" data-tab="qrcode">
+    <button type="button" class="login-tab active" data-tab="qrcode">
         <i class="fas fa-qrcode"></i>
         <span>{{ _("login.qrcodeTab") }}</span>
     </button>
 </div>
 
 <!-- Password login form -->
-<form class="auth-form" id="passwordForm" method="POST" action="/api/v1/auth/login">
+<form class="auth-form hidden" id="passwordForm" method="POST" action="/api/v1/auth/login">
     {{ csrf_input }}
     <div class="form-group">
         <label for="email">{{ _("form.email") }}</label>
@@ -69,17 +68,19 @@
     </button>
 </form>
 
-<!-- QR code login section -->
-<div class="qr-login-section hidden" id="qrcodeSection">
+<!-- WeChat QR login section -->
+<div class="qr-login-section" id="qrcodeSection">
     <div class="qr-container">
         <div class="qr-code-box" id="qrCodeBox">
             <div class="qr-loading" id="qrLoading">
                 <i class="fas fa-spinner fa-spin"></i>
                 <span>{{ _("login.qrGenerating") }}</span>
             </div>
-            <div class="qr-code-display hidden" id="qrCodeDisplay">
-                <!-- QR code will be inserted here by JavaScript -->
-            </div>
+            <iframe id="qrIframe" class="hidden"
+                sandbox="allow-scripts allow-forms allow-popups allow-same-origin allow-top-navigation"
+                referrerpolicy="no-referrer"
+                style="width:100%;height:100%;border:none;border-radius:8px;">
+            </iframe>
         </div>
         <div class="qr-status" id="qrStatus">
             <span class="status-dot"></span>
@@ -93,23 +94,6 @@
     </div>
 </div>
 
-<!-- Social login divider -->
-<div class="auth-divider" id="passwordDivider">
-    <span>{{ _("auth.orContinueWith") }}</span>
-</div>
-
-<!-- Social login buttons -->
-<div class="social-login" id="socialLogin">
-    <button class="social-btn google" onclick="window.location.href='/api/v1/auth/google'">
-        <i class="fab fa-google"></i>
-        <span>Google</span>
-    </button>
-    <button class="social-btn github" onclick="window.location.href='/api/v1/auth/github'">
-        <i class="fab fa-github"></i>
-        <span>GitHub</span>
-    </button>
-</div>
-
 <!-- Auth footer -->
 <div class="auth-footer">
     <p>{{ _("login.noAccount") }}</p>
@@ -121,6 +105,10 @@
 <script src="/static/js/auth.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    let currentTicket = null;
+    let qrPollingInterval = null;
+    let qrExpireTimer = null;
+
     // Password visibility toggle
     const togglePassword = document.getElementById('togglePassword');
     if (togglePassword) {
@@ -141,10 +129,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('.login-tab');
     const passwordForm = document.getElementById('passwordForm');
     const qrcodeSection = document.getElementById('qrcodeSection');
-    const passwordDivider = document.getElementById('passwordDivider');
-    const socialLogin = document.getElementById('socialLogin');
-    let qrPollingInterval = null;
-    let currentQRCode = null;
+
+    // Default to QR tab
+    generateQRCode();
 
     tabs.forEach(function(tab) {
         tab.addEventListener('click', function() {
@@ -155,73 +142,66 @@ document.addEventListener('DOMContentLoaded', function() {
             if (tabName === 'password') {
                 passwordForm.classList.remove('hidden');
                 qrcodeSection.classList.add('hidden');
-                passwordDivider.style.display = '';
-                socialLogin.style.display = '';
                 stopQRPolling();
             } else {
                 passwordForm.classList.add('hidden');
                 qrcodeSection.classList.remove('hidden');
-                passwordDivider.style.display = 'none';
-                socialLogin.style.display = 'none';
                 generateQRCode();
             }
         });
     });
 
-    function initQRCodeLogin() {
-        var refreshBtn = document.getElementById('refreshQR');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', function() {
-                stopQRPolling();
-                generateQRCode();
-            });
-        }
+    // Refresh button
+    const refreshBtn = document.getElementById('refreshQR');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            stopQRPolling();
+            generateQRCode();
+        });
     }
 
     async function generateQRCode() {
         var qrLoading = document.getElementById('qrLoading');
-        var qrDisplay = document.getElementById('qrCodeDisplay');
+        var qrIframe = document.getElementById('qrIframe');
         var qrStatus = document.getElementById('qrStatus');
 
         qrLoading.classList.remove('hidden');
-        qrDisplay.classList.add('hidden');
+        qrIframe.classList.add('hidden');
         qrStatus.className = 'qr-status';
         qrStatus.querySelector('.status-text').textContent = '{{ _("login.qrWaiting") }}';
 
         try {
-            var response = await fetch('/api/v1/auth/qrcode/generate', {
-                method: 'POST'
-            });
+            var response = await fetch('/api/v1/auth/wechat/qrcode', { method: 'POST' });
             var data = await response.json();
 
             if (data.success) {
-                currentQRCode = data.data.code;
+                currentTicket = data.data.ticket;
+                var oauthUrl = data.data.url;
 
                 qrLoading.classList.add('hidden');
-                qrDisplay.classList.remove('hidden');
-
-                var qrData = JSON.stringify({
-                    code: currentQRCode,
-                    app: 'SillyMD',
-                    version: '1.0'
-                });
-
-                try {
-                    var qr = qrcode(0, 'M');
-                    qr.addData(qrData);
-                    qr.make();
-                    var qrImageUrl = qr.createDataURL(8, 4);
-                    qrDisplay.innerHTML = '<img src="' + qrImageUrl + '" alt="Login QR Code" style="width: 180px; height: 180px;">';
-                } catch (e) {
-                    qrDisplay.innerHTML = '<div class="qr-placeholder-pattern"><i class="fas fa-qrcode"></i></div><div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #94A3B8;">' + currentQRCode.substring(0, 8) + '...</div>';
-                }
+                qrIframe.classList.remove('hidden');
+                qrIframe.src = oauthUrl;
 
                 startQRPolling();
+
+                // Auto-expire after 5 minutes
+                if (qrExpireTimer) clearTimeout(qrExpireTimer);
+                qrExpireTimer = setTimeout(function() {
+                    if (currentTicket) {
+                        stopQRPolling();
+                        qrIframe.classList.add('hidden');
+                        qrLoading.classList.remove('hidden');
+                        qrLoading.innerHTML = '<i class="fas fa-clock"></i><span>{{ _("login.qrExpired") }}</span>';
+                        var st = document.getElementById('qrStatus');
+                        st.classList.add('expired');
+                        st.querySelector('.status-text').textContent = '{{ _("login.qrExpired") }}';
+                    }
+                }, 5 * 60 * 1000);
             } else {
-                qrLoading.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--error-color);"></i><span>{{ _("login.qrError") }}</span>';
+                qrLoading.innerHTML = '<i class="fas fa-exclamation-triangle" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;"></i><span>{{ _("login.qrError") }}</span>';
             }
         } catch (error) {
-            qrLoading.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--error-color);"></i><span>{{ _("login.networkError") }}</span>';
+            qrLoading.innerHTML = '<i class="fas fa-exclamation-triangle" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;"></i><span>{{ _("login.networkError") }}</span>';
         }
     }
 
@@ -229,10 +209,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (qrPollingInterval) return;
 
         qrPollingInterval = setInterval(async function() {
-            if (!currentQRCode) return;
+            if (!currentTicket) return;
 
             try {
-                var response = await fetch('/api/v1/auth/qrcode/' + currentQRCode + '/status');
+                var response = await fetch('/api/v1/auth/wechat/qrcode/' + currentTicket + '/status');
                 var data = await response.json();
 
                 if (data.success) {
@@ -249,7 +229,11 @@ document.addEventListener('DOMContentLoaded', function() {
             clearInterval(qrPollingInterval);
             qrPollingInterval = null;
         }
-        currentQRCode = null;
+        if (qrExpireTimer) {
+            clearTimeout(qrExpireTimer);
+            qrExpireTimer = null;
+        }
+        currentTicket = null;
     }
 
     function updateQRStatus(status) {
@@ -259,17 +243,14 @@ document.addEventListener('DOMContentLoaded', function() {
         qrStatus.classList.remove('scanned', 'confirmed', 'expired');
 
         switch (status.status) {
-            case 'SCANNED':
-                qrStatus.classList.add('scanned');
-                statusText.textContent = '{{ _("login.qrScanned") }}';
-                break;
             case 'CONFIRMED':
                 qrStatus.classList.add('confirmed');
                 statusText.textContent = '{{ _("login.qrConfirmed") }}';
                 stopQRPolling();
 
-                if (status.token) {
-                    localStorage.setItem('token', status.token);
+                if (status.access_token) {
+                    localStorage.setItem('access_token', status.access_token);
+                    localStorage.setItem('refresh_token', status.refresh_token || '');
                     setTimeout(function() {
                         var params = new URLSearchParams(window.location.search);
                         var redirect = params.get('redirect') || '/';
@@ -282,17 +263,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 statusText.textContent = '{{ _("login.qrExpired") }}';
                 stopQRPolling();
                 break;
-            case 'CANCELLED':
-                qrStatus.classList.add('expired');
-                statusText.textContent = '{{ _("login.qrCancelled") }}';
-                stopQRPolling();
-                break;
             default:
                 statusText.textContent = '{{ _("login.qrWaiting") }}';
         }
     }
-
-    initQRCodeLogin();
 });
 </script>
 {% endblock %}
