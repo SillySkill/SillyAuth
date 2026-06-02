@@ -383,20 +383,20 @@ class SillyMDModule:
         @app.get("/user-center", response_class=HTMLResponse, include_in_schema=False)
         async def user_center_page(request: Request):
             user = getattr(request.state, "user", None)
-            user_profile = {}
+            profile = dict(user) if user else {}
             if user and user.get("id"):
                 try:
                     from core.db_adapter import get_db_cursor
                     with get_db_cursor() as cur:
                         cur.execute("SELECT COUNT(*) as cnt FROM skills WHERE author_id = %s AND is_deleted = FALSE", (user["id"],))
-                        user_profile["skills_count"] = cur.fetchone()["cnt"]
+                        profile["skills_count"] = cur.fetchone()["cnt"]
                         cur.execute("SELECT COUNT(*) as cnt FROM orders WHERE user_id = %s", (user["id"],))
-                        user_profile["orders_count"] = cur.fetchone()["cnt"]
+                        profile["orders_count"] = cur.fetchone()["cnt"]
                         cur.execute("SELECT COALESCE(SUM(amount), 0) as total FROM user_points WHERE user_id = %s AND amount > 0", (user["id"],))
-                        user_profile["points"] = cur.fetchone()["total"]
+                        profile["points"] = cur.fetchone()["total"]
                 except Exception:
                     pass
-            return render_template(request, "user/center.html", {"user_profile": user_profile})
+            return render_template(request, "user/center.html", {"profile": profile})
 
         @app.get("/settings", response_class=HTMLResponse, include_in_schema=False)
         async def settings_page(request: Request):
