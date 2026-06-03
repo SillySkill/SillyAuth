@@ -1,0 +1,399 @@
+/* ==================== sjzs Interactive Map ==================== */
+
+/* ── Toggle Button (bottom-right, fixed) ── */
+.sjzs-toggle-btn {
+  position: fixed;
+  right: 24px;
+  bottom: 32px;
+  z-index: 9998;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  background: var(--primary, #07C160);
+  color: #fff;
+  border: none;
+  border-radius: 40px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(7, 193, 96, 0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.sjzs-toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(7, 193, 96, 0.45);
+}
+.sjzs-toggle-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Fullscreen Overlay ── */
+.sjzs-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+.sjzs-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ── Map Wrapper ── */
+.sjzs-map-wrap {
+  position: relative;
+  width: 92vw;
+  max-width: 1000px;
+  height: 88vh;
+  background: #fff;
+  border-radius: var(--radius-lg, 20px);
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+.sjzs-map-wrap .sjzs-map-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Map Container (must have explicit height for canvas height:100% to work) ── */
+#sjzs-map-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Map Area (transform target) ── */
+.sjzs-map-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  cursor: grab;
+}
+.sjzs-map-area.dragging {
+  cursor: grabbing;
+}
+.sjzs-map-area img {
+  display: block;
+  max-width: none;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ── Markers Wrapper (inside map-area so it transforms with zoom/pan) ── */
+.sjzs-markers-wrapper {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.sjzs-marker {
+  pointer-events: auto;
+}
+
+/* ── Markers ── */
+.sjzs-marker {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  cursor: pointer;
+  z-index: 10;
+  transition: z-index 0s;
+}
+.sjzs-marker:hover {
+  z-index: 20;
+}
+.sjzs-marker.draggable {
+  cursor: move;
+}
+.sjzs-marker.dragging {
+  z-index: 30;
+  opacity: 0.85;
+}
+
+.sjzs-marker svg {
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  transition: transform 0.2s;
+}
+.sjzs-marker:hover svg {
+  transform: scale(1.15);
+}
+
+.sjzs-marker .sjzs-marker-label {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  margin-top: 2px;
+  padding: 2px 6px;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* ── Popup ── */
+.sjzs-popup {
+  position: absolute;
+  z-index: 50;
+  min-width: 240px;
+  max-width: 300px;
+  background: #fff;
+  border-radius: var(--radius-md, 12px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  overflow: hidden;
+  animation: sjzs-popup-in 0.2s ease-out;
+}
+@keyframes sjzs-popup-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.sjzs-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  background: var(--primary, #07C160);
+  color: #fff;
+}
+.sjzs-popup-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.sjzs-popup-close {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.sjzs-popup-close:hover {
+  background: rgba(255,255,255,0.35);
+}
+.sjzs-popup-body {
+  padding: 12px 16px 16px;
+}
+.sjzs-popup-body .sjzs-popup-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+}
+.sjzs-popup-body .sjzs-popup-row:last-child {
+  margin-bottom: 0;
+}
+.sjzs-popup-body .sjzs-popup-row i {
+  flex-shrink: 0;
+  width: 16px;
+  margin-top: 2px;
+  color: var(--primary, #07C160);
+}
+.sjzs-popup-body .sjzs-popup-label {
+  font-weight: 600;
+  color: #333;
+}
+
+/* ── Toolbar ── */
+.sjzs-toolbar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sjzs-toolbar button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.95);
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: background 0.2s, transform 0.15s;
+}
+.sjzs-toolbar button:hover {
+  background: #fff;
+  transform: scale(1.05);
+}
+.sjzs-toolbar button:active {
+  transform: scale(0.95);
+}
+
+.sjzs-toolbar .sjzs-edit-btn {
+  color: var(--primary, #07C160);
+}
+.sjzs-toolbar .sjzs-edit-btn.active {
+  background: var(--primary, #07C160);
+  color: #fff;
+}
+
+.sjzs-toolbar .sjzs-save-btn,
+.sjzs-toolbar .sjzs-reset-btn {
+  display: none;
+  color: #333;
+}
+.sjzs-toolbar.editing .sjzs-save-btn,
+.sjzs-toolbar.editing .sjzs-reset-btn {
+  display: flex;
+}
+.sjzs-toolbar.editing .sjzs-zoom-in,
+.sjzs-toolbar.editing .sjzs-zoom-out,
+.sjzs-toolbar.editing .sjzs-edit-btn {
+  display: none;
+}
+
+/* ── Overlay Close ── */
+.sjzs-overlay-close {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 45;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.95);
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  color: #333;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: background 0.2s;
+}
+.sjzs-overlay-close:hover {
+  background: #fff;
+}
+
+/* ── Loading / Error ── */
+.sjzs-loading,
+.sjzs-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(26, 26, 46, 0.95);
+  color: #fff;
+  z-index: 60;
+}
+.sjzs-loading .sjzs-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255,255,255,0.15);
+  border-top-color: var(--primary, #07C160);
+  border-radius: 50%;
+  animation: sjzs-spin 0.7s linear infinite;
+}
+@keyframes sjzs-spin {
+  to { transform: rotate(360deg); }
+}
+.sjzs-loading span {
+  font-size: 14px;
+  opacity: 0.7;
+}
+.sjzs-error {
+  color: #ff6b6b;
+}
+.sjzs-error i {
+  font-size: 36px;
+}
+.sjzs-error button {
+  margin-top: 8px;
+  padding: 8px 20px;
+  background: var(--primary, #07C160);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ── Toast ── */
+.sjzs-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  animation: sjzs-toast-in 0.3s ease-out;
+  pointer-events: none;
+}
+.sjzs-toast.success {
+  background: var(--primary, #07C160);
+}
+.sjzs-toast.error {
+  background: #ef4444;
+}
+@keyframes sjzs-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .sjzs-map-wrap {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+  .sjzs-toggle-btn {
+    right: 16px;
+    bottom: 20px;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  .sjzs-popup {
+    min-width: 200px;
+    max-width: 260px;
+  }
+  .sjzs-toolbar {
+    top: 12px;
+    right: 12px;
+  }
+  .sjzs-toolbar button {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+}
