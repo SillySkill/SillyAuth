@@ -92,6 +92,7 @@ var UC = {
   _get: function (path) { return this._api('GET', path); },
   _put: function (path, body) { return this._api('PUT', path, body); },
   _post: function (path, body) { return this._api('POST', path, body); },
+  _delete: function (path) { return this._api('DELETE', path); },
 
   /* ---- Tabs ---- */
   bindTabs: function () {
@@ -417,6 +418,254 @@ var UC = {
     });
   },
 
+  /* ============== WeChat Official Account Mgmt ============== */
+  loadWechatAccounts: function () {
+    var self = this;
+    var listEl = document.getElementById('wechatAccountList');
+    if (!listEl) return;
+    listEl.innerHTML = '<div class="wechat-loading"><span class="spinner-inline"></span><p style="margin-top:8px; color:#bbb;">加载中...</p></div>';
+    this._get('/wechat-official/accounts').then(function (accounts) {
+      if (!accounts || accounts.length === 0) {
+        listEl.innerHTML = '<div class="wechat-empty">' +
+          '<div class="empty-icon"><i class="ri-wechat-2-line"></i></div>' +
+          '<p>暂无关联公众号</p>' +
+          '<div class="sub">绑定后即可在技能配置中使用你的微信公众号</div>' +
+          '<button class="btn-add-empty" onclick="UC.showWechatAddForm()"><i class="ri-add-line"></i> 添加公众号</button></div>';
+        return;
+      }
+      listEl.innerHTML = accounts.map(function (acc) {
+        var dateStr = '';
+        if (acc.created_at) {
+          dateStr = acc.created_at.substring(0, 10);
+        }
+        var badgeHtml = acc.has_appsecret
+          ? '<span class="card-badge active"><i class="ri-checkbox-circle-fill"></i> 已配置</span>'
+          : '<span class="card-badge inactive"><i class="ri-close-circle-fill"></i> 未配置</span>';
+
+        var apiKeyHtml = acc.api_key
+          ? '<div class="config-field">' +
+              '<div class="field-row">' +
+                '<span class="field-label">API Key</span>' +
+                '<div class="field-code">' +
+                  '<span>' + self._escapeHtml(acc.api_key.replace(/-/g, '')) + '</span>' +
+                  '<button class="copy-btn" onclick="UC._copyText(\'' + acc.api_key.replace(/-/g, '') + '\', this)" title="复制"><i class="ri-file-copy-line"></i></button>' +
+                '</div>' +
+              '</div>' +
+            '</div>'
+          : '';
+
+        var useridHtml = acc.userid
+          ? '<div class="config-field">' +
+              '<div class="field-row">' +
+                '<span class="field-label">UserID</span>' +
+                '<div class="field-code">' +
+                  '<span>' + self._escapeHtml(acc.userid) + '</span>' +
+                  '<button class="copy-btn" onclick="UC._copyText(\'' + acc.userid + '\', this)" title="复制"><i class="ri-file-copy-line"></i></button>' +
+                '</div>' +
+              '</div>' +
+            '</div>'
+          : '';
+
+        return '<div class="wechat-card">' +
+          '<div class="card-header">' +
+            '<div class="card-info">' +
+              '<div class="card-icon"><i class="ri-wechat-2-line"></i></div>' +
+              '<div>' +
+                '<div class="card-name">' + self._escapeHtml(acc.name || acc.appid) + '</div>' +
+                '<div class="card-appid">AppID: ' + self._escapeHtml(acc.appid) + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="card-top-actions">' +
+              badgeHtml +
+            '</div>' +
+          '</div>' +
+          '<div class="config-section">' +
+            '<div class="config-label">配置文件信息</div>' +
+            apiKeyHtml +
+            useridHtml +
+          '</div>' +
+          '<div class="card-footer">' +
+            '<div class="footer-info">' +
+              (dateStr ? '<i class="ri-calendar-line"></i> 绑定于 ' + dateStr : '') +
+            '</div>' +
+            '<div class="footer-actions">' +
+              '<button class="btn-text" onclick="UC.editWechatAccount(\'' + acc.appid + '\')"><i class="ri-edit-line"></i> 编辑</button>' +
+              '<button class="btn-text" onclick="UC.regenerateWechatKey(\'' + acc.appid + '\')"><i class="ri-refresh-line"></i> 重新生成 API Key</button>' +
+              '<button class="btn-text danger" onclick="UC.deleteWechatAccount(\'' + acc.appid + '\')"><i class="ri-delete-bin-6-line"></i> 解除绑定</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }).catch(function (e) {
+      listEl.innerHTML = '<div class="wechat-empty">' +
+        '<div class="empty-icon"><i class="ri-error-warning-line"></i></div>' +
+        '<p>加载失败</p>' +
+        '<div class="sub">' + self._escapeHtml(e.message || '网络错误，请稍后重试') + '</div>' +
+        '<button class="btn-add-empty" onclick="UC.loadWechatAccounts()"><i class="ri-refresh-line"></i> 重新加载</button></div>';
+    });
+  },
+
+  showWechatAddForm: function () {
+    var form = document.getElementById('wechatAddForm');
+    if (form) { form.style.display = 'block'; form.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  },
+
+  hideWechatAddForm: function () {
+    this.resetWechatForm();
+    var form = document.getElementById('wechatAddForm');
+    if (form) form.style.display = 'none';
+  },
+
+  _wechatMsg: function (type, msg) {
+    var el = document.getElementById('wechatMsg');
+    if (!el) return;
+    el.className = 'wechat-msg ' + type;
+    el.innerHTML = (type === 'success' ? '<i class="ri-checkbox-circle-fill"></i>' : '<i class="ri-error-warning-fill"></i>') + ' ' + msg;
+  },
+  _wechatClearMsg: function () {
+    var el = document.getElementById('wechatMsg');
+    if (el) { el.className = 'wechat-msg'; el.innerHTML = ''; }
+  },
+
+  saveWechatAccount: function () {
+    var self = this;
+    var name = document.getElementById('wechatName').value.trim();
+    var appid = document.getElementById('wechatAppid').value.trim();
+    var appsecret = document.getElementById('wechatAppsecret').value.trim();
+    var editAppid = document.getElementById('wechatEditAppid').value.trim();
+
+    self._wechatClearMsg();
+    var isEdit = editAppid.length > 0;
+
+    if (isEdit) {
+      // 编辑模式
+      var body = {};
+      if (name) body.name = name;
+      if (appid) body.appid = appid;
+      if (appsecret) body.appsecret = appsecret;
+
+      if (Object.keys(body).length === 0) {
+        self._wechatMsg('error', '请填写要修改的字段');
+        return;
+      }
+
+      this._put('/wechat-official/accounts/' + encodeURIComponent(editAppid), body).then(function () {
+        document.getElementById('wechatName').value = '';
+        document.getElementById('wechatAppid').value = '';
+        document.getElementById('wechatAppsecret').value = '';
+        self.resetWechatForm();
+        self.hideWechatAddForm();
+        self._wechatMsg('success', '修改成功');
+        self.loadWechatAccounts();
+      }).catch(function (e) {
+        self._wechatMsg('error', '修改失败: ' + (e.message || '请稍后重试'));
+      });
+    } else {
+      // 添加模式
+      if (!name || !appid || !appsecret) {
+        self._wechatMsg('error', '请填写所有字段');
+        return;
+      }
+      this._post('/wechat-official/accounts', { name: name, appid: appid, appsecret: appsecret }).then(function () {
+        document.getElementById('wechatName').value = '';
+        document.getElementById('wechatAppid').value = '';
+        document.getElementById('wechatAppsecret').value = '';
+        self.hideWechatAddForm();
+        self._wechatMsg('success', '添加成功');
+        self.loadWechatAccounts();
+      }).catch(function (e) {
+        self._wechatMsg('error', '添加失败: ' + (e.message || '请稍后重试'));
+      });
+    }
+  },
+
+  deleteWechatAccount: function (appid) {
+    var self = this;
+    if (!confirm('确定解除绑定公众号 ' + appid + ' ？解除后相关技能将无法调用该公众号')) return;
+    this._delete('/wechat-official/accounts/' + encodeURIComponent(appid)).then(function () {
+      self._wechatMsg('success', '已解除绑定');
+      self.loadWechatAccounts();
+    }).catch(function (e) {
+      self._wechatMsg('error', '解除绑定失败: ' + (e.message || '请稍后重试'));
+    });
+  },
+
+  editWechatAccount: function (appid) {
+    var self = this;
+    self._wechatClearMsg();
+    // 从列表中获取当前账户数据
+    this._get('/wechat-official/accounts').then(function (accounts) {
+      var acc = null;
+      for (var i = 0; i < accounts.length; i++) {
+        if (accounts[i].appid === appid) { acc = accounts[i]; break; }
+      }
+      if (!acc) {
+        self._wechatMsg('error', '未找到该公众号');
+        return;
+      }
+      // 预填表单
+      document.getElementById('wechatName').value = acc.name || '';
+      document.getElementById('wechatAppid').value = acc.appid;
+      document.getElementById('wechatAppsecret').value = '';
+      document.getElementById('wechatAppsecret').placeholder = '留空则不修改';
+      document.getElementById('wechatEditAppid').value = appid;
+
+      // 切换标题
+      document.getElementById('wechatFormTitle').style.display = 'none';
+      document.getElementById('wechatFormTitleEdit').style.display = '';
+      document.getElementById('wechatCancelEditBtn').style.display = '';
+
+      // 显示表单
+      self.showWechatAddForm();
+    }).catch(function (e) {
+      self._wechatMsg('error', '获取账户信息失败: ' + (e.message || '请稍后重试'));
+    });
+  },
+
+  regenerateWechatKey: function (appid) {
+    var self = this;
+    if (!confirm('确定重新生成 API Key？重新生成后，使用旧 Key 的技能将无法调用该公众号')) return;
+    self._wechatClearMsg();
+    this._post('/wechat-official/accounts/' + encodeURIComponent(appid) + '/regenerate-key', {}).then(function (data) {
+      self._wechatMsg('success', 'API Key 已重新生成');
+      // 显示新的 API Key
+      alert('新的 API Key: ' + data.api_key + '\n\n请立即保存，刷新页面后不再显示');
+      self.loadWechatAccounts();
+    }).catch(function (e) {
+      self._wechatMsg('error', '重新生成失败: ' + (e.message || '请稍后重试'));
+    });
+  },
+
+  resetWechatForm: function () {
+    document.getElementById('wechatEditAppid').value = '';
+    document.getElementById('wechatName').value = '';
+    document.getElementById('wechatAppid').value = '';
+    document.getElementById('wechatAppsecret').value = '';
+    document.getElementById('wechatAppsecret').placeholder = '32 位字母数字组合';
+    document.getElementById('wechatFormTitle').style.display = '';
+    var titleEdit = document.getElementById('wechatFormTitleEdit');
+    if (titleEdit) titleEdit.style.display = 'none';
+    var cancelEdit = document.getElementById('wechatCancelEditBtn');
+    if (cancelEdit) cancelEdit.style.display = 'none';
+  },
+
+  _escapeHtml: function (str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  },
+
+  _copyText: function (text, btn) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        var orig = btn.innerHTML;
+        btn.innerHTML = '<i class="ri-check-line"></i>';
+        btn.classList.add('copied');
+        setTimeout(function () { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+      }).catch(function () {});
+    }
+  },
+
   /* ============== Logout ============== */
   logout: function () {
     if (!confirm('确定退出当前账号？')) return;
@@ -446,5 +695,26 @@ var UC = {
     if (el) { el.className = 'uc-msg'; el.textContent = ''; }
   }
 };
+
+/* ---- Global switchTab for user center ---- */
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(function (el) {
+    el.classList.remove('active');
+  });
+  var tab = document.getElementById(name + 'Tab');
+  if (tab) tab.classList.add('active');
+
+  // Update sidebar active state
+  document.querySelectorAll('.uc-sidebar-item').forEach(function (el) {
+    el.classList.remove('active');
+  });
+  var sidebarItem = document.querySelector('.uc-sidebar-item[data-tab="' + name + '"]');
+  if (sidebarItem) sidebarItem.classList.add('active');
+
+  // Lazy load data on first switch
+  if (name === 'wechat' && UC && UC.loadWechatAccounts) UC.loadWechatAccounts();
+  if (name === 'orders' && UC && UC.loadOrders) UC.loadOrders();
+  if (name === 'points' && UC && UC.loadPoints) UC.loadPoints();
+}
 
 document.addEventListener('DOMContentLoaded', function () { UC.init(); });
