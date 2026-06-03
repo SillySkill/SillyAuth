@@ -35,3 +35,17 @@ FROM (VALUES
     ('方东',    '方东公共法律服务工作（站）室',         '57834858', '迎宾路2号',                        '待定',     '',            '')
 ) AS v(name, station_name, phone, address, lawyer, lawyer_phone, hours)
 WHERE config_data.category = 'public_law_service' AND config_data.name = v.name;
+
+-- Restore governance center data (gold pins)
+UPDATE config_data SET data = jsonb_build_object(
+    'type', 'governance_center',
+    'address', v.address
+), updated_at = NOW()
+FROM (VALUES
+    ('街道综治中心', '茸梅路229号'),
+    ('府城综治中心', '方塔北路338号'),
+    ('工业区综治中心', '施园路299弄28号楼'),
+    ('商务区综治中心', '黄渡浜街260号'),
+    ('功能区综治中心', '茸树路500弄12号')
+) AS v(name, address)
+WHERE config_data.category = 'public_law_service' AND config_data.name = v.name;
