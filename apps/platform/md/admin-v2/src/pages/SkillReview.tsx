@@ -12,6 +12,7 @@ import {
   Select,
   Descriptions,
   Tooltip,
+  InputNumber,
 } from 'antd';
 import {
   CheckCircleOutlined,
@@ -26,6 +27,7 @@ import {
   approveSkill,
   rejectSkill,
   getSkill2Status,
+  updateInitialDownloads,
   type ReviewSkill,
   type Skill2Status,
 } from '../api/skillReview';
@@ -63,6 +65,8 @@ const SkillReview: React.FC = () => {
   const [rejectReason, setRejectReason] = useState('');
   const [rejectingSkillId, setRejectingSkillId] = useState<number | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [editingInitialDownloads, setEditingInitialDownloads] = useState(false);
+  const [initialDownloadsValue, setInitialDownloadsValue] = useState<number>(0);
 
   const fetchSkills = useCallback(async () => {
     setLoading(true);
@@ -143,6 +147,8 @@ const SkillReview: React.FC = () => {
 
   const showDetail = (skill: ReviewSkill) => {
     setSelectedSkill(skill);
+    setInitialDownloadsValue(skill.initial_downloads);
+    setEditingInitialDownloads(false);
     setDetailModalVisible(true);
   };
 
@@ -409,7 +415,51 @@ const SkillReview: React.FC = () => {
             <Descriptions.Item label="浏览量">
               {selectedSkill.view_count}
             </Descriptions.Item>
-            <Descriptions.Item label="下载量">
+            <Descriptions.Item label="初始下载量">
+              {editingInitialDownloads ? (
+                <InputNumber
+                  min={0}
+                  value={initialDownloadsValue}
+                  onChange={(val) => setInitialDownloadsValue(val ?? 0)}
+                  onPressEnter={async () => {
+                    try {
+                      await updateInitialDownloads(selectedSkill.id, initialDownloadsValue);
+                      message.success('初始下载量已更新');
+                      setEditingInitialDownloads(false);
+                      setSelectedSkill({ ...selectedSkill, initial_downloads: initialDownloadsValue });
+                    } catch {
+                      message.error('更新失败');
+                    }
+                  }}
+                  onBlur={async () => {
+                    if (initialDownloadsValue !== selectedSkill.initial_downloads) {
+                      try {
+                        await updateInitialDownloads(selectedSkill.id, initialDownloadsValue);
+                        message.success('初始下载量已更新');
+                        setSelectedSkill({ ...selectedSkill, initial_downloads: initialDownloadsValue });
+                      } catch {
+                        message.error('更新失败');
+                      }
+                    }
+                    setEditingInitialDownloads(false);
+                  }}
+                  autoFocus
+                  style={{ width: 120 }}
+                />
+              ) : (
+                <Tooltip title="点击编辑">
+                  <a
+                    onClick={() => {
+                      setInitialDownloadsValue(selectedSkill.initial_downloads);
+                      setEditingInitialDownloads(true);
+                    }}
+                  >
+                    {selectedSkill.initial_downloads}
+                  </a>
+                </Tooltip>
+              )}
+            </Descriptions.Item>
+            <Descriptions.Item label="实际下载量">
               {selectedSkill.download_count}
             </Descriptions.Item>
             <Descriptions.Item label="创建时间">

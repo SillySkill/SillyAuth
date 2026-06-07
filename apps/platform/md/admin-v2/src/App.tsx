@@ -26,6 +26,10 @@ import OrdersManagement from '@/pages/OrdersManagement';
 import InventoryManagement from '@/pages/InventoryManagement';
 import StoreStats from '@/pages/StoreStats';
 import TasksManagement from '@/pages/TasksManagement';
+import PageManagement from '@/pages/PageManagement';
+import YicuiyuanDocumentManagement from '@/pages/YicuiyuanDocumentManagement';
+import YicuiyuanFeedbackManagement from '@/pages/YicuiyuanFeedbackManagement';
+import YicuiyuanEventManagement from '@/pages/YicuiyuanEventManagement';
 
 // Protected route wrapper – redirects to /login if not authenticated
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -95,6 +99,7 @@ const App: React.FC = () => {
         <Route path="commission" element={<CommissionManagement />} />
         <Route path="points" element={<PointsManagement />} />
         <Route path="navigation" element={<NavigationEdit />} />
+        <Route path="pages" element={<PageManagement />} />
         <Route path="seo" element={<SEOSettings />} />
         <Route path="i18n" element={<I18nManagement />} />
         <Route path="modules" element={<ModuleManagement />} />
@@ -104,6 +109,9 @@ const App: React.FC = () => {
         <Route path="store/inventory" element={<InventoryManagement />} />
         <Route path="store/stats" element={<StoreStats />} />
         <Route path="tasks" element={<TasksManagement />} />
+        <Route path="yicuiyuan/documents" element={<YicuiyuanDocumentManagement />} />
+        <Route path="yicuiyuan/feedback" element={<YicuiyuanFeedbackManagement />} />
+        <Route path="yicuiyuan/events" element={<YicuiyuanEventManagement />} />
       </Route>
 
       {/* Catch-all: redirect unknown paths to dashboard */}

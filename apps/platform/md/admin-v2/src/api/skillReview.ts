@@ -23,6 +23,7 @@ export interface ReviewSkill {
   package_url: string | null;
   view_count: number;
   download_count: number;
+  initial_downloads: number;
   is_featured: boolean;
   published_at: string | null;
   created_at: string;
@@ -93,6 +94,18 @@ export const getSkill2Status = async (
   skillId: number
 ): Promise<{ success: boolean; data: Skill2Status }> => {
   const response = await apiClient.get(`/skill2/status/${skillId}`);
+  return response.data;
+};
+
+/** Update initial download count for a skill */
+export const updateInitialDownloads = async (
+  skillId: number,
+  initialDownloads: number
+): Promise<ApiResponse<null>> => {
+  const response = await apiClient.put<ApiResponse<null>>(
+    `/skills/${skillId}/initial-downloads`,
+    { initial_downloads: initialDownloads }
+  );
   return response.data;
 };
 

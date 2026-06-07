@@ -25,6 +25,9 @@ import {
   DatabaseOutlined,
   ShoppingCartOutlined,
   CheckSquareOutlined,
+  HomeOutlined,
+  MessageOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -92,6 +95,11 @@ const menuItems: MenuProps['items'] = [
     label: '导航管理',
   },
   {
+    key: '/pages',
+    icon: <FileTextOutlined />,
+    label: '页面管理',
+  },
+  {
     key: '/seo',
     icon: <SearchOutlined />,
     label: 'SEO设置',
@@ -138,6 +146,16 @@ const menuItems: MenuProps['items'] = [
     key: '/tasks',
     icon: <CheckSquareOutlined />,
     label: '任务管理',
+  },
+  {
+    key: 'yicuiyuan',
+    icon: <HomeOutlined />,
+    label: '依翠园社区',
+    children: [
+      { key: '/yicuiyuan/documents', label: '文档管理' },
+      { key: '/yicuiyuan/feedback', label: '意见反馈' },
+      { key: '/yicuiyuan/events', label: '活动管理' },
+    ],
   },
 ];
 
