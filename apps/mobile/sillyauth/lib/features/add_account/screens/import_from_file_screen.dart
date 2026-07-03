@@ -5,7 +5,7 @@ import 'dart:io';
 
 import '../../../core/utils/otpauth_parser.dart';
 import '../../../data/models/auth_account.dart';
-import '../../../data/repositories/account_repository.dart';
+import '../../../features/home/providers/account_provider.dart';
 import '../../../l10n/app_localizations.dart';
 
 /// Import from File Screen
@@ -73,8 +73,8 @@ class _ImportFromFileScreenState extends State<ImportFromFileScreen> {
 
       // Get existing secrets for duplicate checking
       if (!mounted) return;
-      final repository = context.read<AccountRepository>();
-      final existingAccounts = await repository.getAllAccounts();
+      final provider = context.read<AccountProvider>();
+      final existingAccounts = provider.accounts;
       final existingSecrets =
           existingAccounts.map((a) => a.secret.toUpperCase()).toSet();
 
@@ -113,7 +113,7 @@ class _ImportFromFileScreenState extends State<ImportFromFileScreen> {
           digits: accountData['digits'] as int? ?? 6,
           period: accountData['period'] as int? ?? 30,
         );
-        await repository.addAccount(account);
+        await provider.addAccount(account);
         importedCount++;
       }
 

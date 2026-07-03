@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/utils/base32.dart';
 import '../../../data/models/auth_account.dart';
-import '../../../data/repositories/account_repository.dart';
+import '../../../features/home/providers/account_provider.dart';
 import '../../../l10n/app_localizations.dart';
 
 /// Manual Input Screen
@@ -95,8 +95,8 @@ class _ManualInputScreenState extends State<ManualInputScreen> {
       );
 
       // Save to repository
-      final repository = context.read<AccountRepository>();
-      await repository.addAccount(account);
+      final provider = context.read<AccountProvider>();
+      await provider.addAccount(account);
 
       // Show success message
       if (mounted) {

@@ -104,13 +104,14 @@ class AppRoutes {
 
   /// Navigation helper to push a route and get a result.
   static Future<T?> navigateForResult<T>(BuildContext context, String route) {
+    final locale = Localizations.localeOf(context);
     return Navigator.push<T>(context, MaterialPageRoute(
-      builder: (context) => _getRouteWidget(route),
+      builder: (context) => _getRouteWidget(route, locale),
     ));
   }
 
   /// Gets the appropriate widget for a route.
-  static Widget _getRouteWidget(String route) {
+  static Widget _getRouteWidget(String route, Locale locale) {
     Widget widget;
     switch (route) {
       case addAccount:
@@ -128,7 +129,7 @@ class AppRoutes {
     }
     // Wrap with localization to ensure l10n is available
     return Localizations(
-      locale: const Locale('zh'),
+      locale: locale,
       delegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
