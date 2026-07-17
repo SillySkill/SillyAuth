@@ -1,0 +1,10 @@
+{
+  "_comment": "SAMPLE FILE — Replace with your actual Tencent TTS credentials.",
+  "offline_online_secret_id": "YOUR_SECRET_ID_HERE",
+  "offline_online_secret_key": "YOUR_SECRET_KEY_HERE",
+  "offline_online_lic_key": "YOUR_LICENSE_KEY_HERE",
+  "offline_online_lic_pk": "YOUR_LICENSE_PK_HERE",
+  "offline_lic": "YOUR_OFFLINE_LICENSE_HERE",
+  "offline_lic_sign": "YOUR_OFFLINE_LICENSE_SIGN_HERE",
+  "offline_lic_pk": "YOUR_OFFLINE_LICENSE_PK_HERE"
+}

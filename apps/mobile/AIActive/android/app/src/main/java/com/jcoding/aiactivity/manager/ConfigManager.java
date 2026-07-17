@@ -1689,7 +1689,7 @@ public class ConfigManager {
 
     /**
      * 获取大模型API_KEY
-     * 默认值：REDACTED_LLM_API_KEY
+     * 仅从加密配置或用户设置读取，不使用硬编码默认值
      */
     public String getLlmApiKey() {
         // 优先从解密配置中获取
@@ -1698,7 +1698,7 @@ public class ConfigManager {
             return apiKey;
         }
         // 向后兼容：从 SharedPreferences 读取
-        return PreferenceUtils.getString(context, "llm_api_key", "REDACTED_LLM_API_KEY");
+        return PreferenceUtils.getString(context, "llm_api_key", "");
     }
 
     /**
@@ -2277,12 +2277,15 @@ public class ConfigManager {
 
     /**
      * 获取TOS配置信息
+     * 从加密配置中读取火山引擎凭据，避免硬编码
      * @return TOS配置JSON对象
      */
     public JsonObject getTosConfig() {
         JsonObject config = new JsonObject();
-        config.addProperty("access_key_id", "REDACTED_TOS_ACCESS_KEY");
-        config.addProperty("secret_access_key", "REDACTED_TOS_SECRET_KEY");
+        String accessKey = getDecryptedApiKey("volcengine", "access_key");
+        String secretKey = getDecryptedApiKey("volcengine", "secret_key");
+        config.addProperty("access_key_id", accessKey != null ? accessKey : "");
+        config.addProperty("secret_access_key", secretKey != null ? secretKey : "");
         config.addProperty("region", "cn-shanghai");
         config.addProperty("endpoint", "tos-cn-shanghai.volces.com");
         config.addProperty("bucket", "ykb-image-store");
@@ -2292,12 +2295,15 @@ public class ConfigManager {
 
     /**
      * 获取OSS配置信息
+     * 从加密配置中读取阿里云OSS凭据，避免硬编码
      * @return OSS配置JSON对象
      */
     public JsonObject getOssConfig() {
         JsonObject config = new JsonObject();
-        config.addProperty("access_key_id", "REDACTED_ALIYUN_ACCESS_KEY");
-        config.addProperty("secret_access_key", "REDACTED_ALIYUN_SECRET_KEY");
+        String accessKey = getDecryptedApiKey("aliyun_oss", "access_key");
+        String secretKey = getDecryptedApiKey("aliyun_oss", "access_secret");
+        config.addProperty("access_key_id", accessKey != null ? accessKey : "");
+        config.addProperty("secret_access_key", secretKey != null ? secretKey : "");
         config.addProperty("region", "cn-shanghai");
         config.addProperty("endpoint", "oss-cn-shanghai.aliyuncs.com");
         config.addProperty("bucket", "jc-st");

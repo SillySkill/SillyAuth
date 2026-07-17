@@ -1,0 +1,54 @@
+{
+  "_meta": {
+    "version": "v0.0.0",
+    "version_code": 0,
+    "format_version": "1.0",
+    "released_at": "1970-01-01T00:00:00Z",
+    "min_compatible_version": "v0.0.0",
+    "description": "SAMPLE FILE — replace with real encrypted config. Use ConfigCrypto.encrypt() to encrypt your credentials with your own version number."
+  },
+  "app": {
+    "name": "AI活动秀",
+    "debug": false,
+    "log_level": "info"
+  },
+  "features": {},
+  "_encrypted": {
+    "api_keys": {
+      "tencent_tts": {
+        "secret_id": "BASE64_ENCRYPTED_VALUE_HERE",
+        "secret_key": "BASE64_ENCRYPTED_VALUE_HERE",
+        "license_key": "BASE64_ENCRYPTED_VALUE_HERE",
+        "license_pk": "BASE64_ENCRYPTED_VALUE_HERE"
+      },
+      "tencent_asr": {
+        "secret_id": "BASE64_ENCRYPTED_VALUE_HERE",
+        "secret_key": "BASE64_ENCRYPTED_VALUE_HERE"
+      },
+      "minimax": {
+        "api_key": "BASE64_ENCRYPTED_VALUE_HERE",
+        "group_id": "BASE64_ENCRYPTED_VALUE_HERE"
+      },
+      "volcengine": {
+        "access_key": "BASE64_ENCRYPTED_VALUE_HERE",
+        "secret_key": "BASE64_ENCRYPTED_VALUE_HERE"
+      },
+      "aliyun_oss": {
+        "access_key": "BASE64_ENCRYPTED_VALUE_HERE",
+        "access_secret": "BASE64_ENCRYPTED_VALUE_HERE"
+      }
+    },
+    "admin": {
+      "password": "BASE64_ENCRYPTED_VALUE_HERE"
+    },
+    "llm": {
+      "api_key": "BASE64_ENCRYPTED_VALUE_HERE",
+      "model_id": "BASE64_ENCRYPTED_VALUE_HERE"
+    }
+  },
+  "services": {
+    "api_base": "https://www.sillymd.com/application/com.jcoding.aiactivity/api",
+    "upload_proxy": "https://www.sillymd.com/upload/api",
+    "config_sync_interval": 86400
+  }
+}

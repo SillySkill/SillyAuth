@@ -1,0 +1,22 @@
+# Android signing keystores
+android/app/*.keystore
+android/app/*.jks
+
+# Credential config files (contain real API keys / access secrets)
+android/app/src/main/assets/config.json
+android/app/src/main/assets/config/default_config.json
+
+# Third-party API credential files (sample files like *.sample.* are NOT ignored)
+android/app/src/main/assets/minimax/api.txt
+android/app/src/main/assets/minimax/group.txt
+android/app/src/main/assets/tts/SDK_Key.json
+android/app/src/main/assets/tts/license_id.txt
+android/app/src/main/assets/tts/license_key.txt
+android/app/src/main/assets/tts/license_pk.txt
+
+# Claude AI settings (contains local API keys)
+.claude/
+
+# Build artifacts
+android/app/build/
+build/
